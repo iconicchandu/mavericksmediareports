@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes float-up {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes golden-shine {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(0deg);
+    filter: brightness(1) drop-shadow(0 0 5px gold);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1.2) rotate(90deg);
+    filter: brightness(1.5) drop-shadow(0 0 15px gold);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+    filter: brightness(2) drop-shadow(0 0 25px gold);
+  }
+  75% {
+    opacity: 1;
+    transform: scale(1.3) rotate(270deg);
+    filter: brightness(1.5) drop-shadow(0 0 15px gold);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8) rotate(360deg);
+    filter: brightness(1) drop-shadow(0 0 5px gold);
+  }
+}
+
+@keyframes popper-explosion-left {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--vx), var(--vy)) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes popper-explosion-right {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--vx), var(--vy)) rotate(720deg);
+    opacity: 0;
+  }
+}
+.animate-float-up {
+  animation: float-up 4s ease-out forwards;
+}
+
+.animate-confetti-fall {
+  animation: confetti-fall 3s ease-in forwards;
+}
+
+.animate-sparkle {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.animate-golden-shine {
+  animation: golden-shine 3s ease-in-out infinite;
+}
+
+.animate-popper-explosion-left {
+  animation: popper-explosion-left 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-popper-explosion-right {
+  animation: popper-explosion-right 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
