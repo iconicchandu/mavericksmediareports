@@ -20,20 +20,20 @@ interface DashboardProps {
 // ET Stack and Team Member mapping
 const etStackInfo: Record<string, { stack: string; member: string; advertiser?: string }> = {
   'JSG 29': { stack: 'STACK 7', member: 'KESHAV' },
-  'JSG 24 MC': { stack: 'STACK 1', member: 'ABHAY', advertiser: 'COMCAST' },
+  'JSG 24 MC': { stack: 'STACK 1', member: 'ABHAY' },
   'JSG 26': { stack: 'STACK 7', member: 'NIKHIL' },
   'JSG 30PM': { stack: 'STACK 7', member: 'ADITYA SRIVASTAVA' },
   'JSG 20': { stack: 'STACK 11', member: 'HARSH' },
   'JSG 32': { stack: 'STACK 11', member: 'KAIF' },
-  'C18': { stack: 'STACK 10', member: 'ADITYA SRIVASTAVA', advertiser: 'COMCAST' },
+  'C18': { stack: 'STACK 10', member: 'ADITYA SRIVASTAVA' },
   'JSG 34': { stack: 'STACK 4', member: 'SATYAM' },
   'JSG 22 MB': { stack: 'STACK 10', member: 'KESHAV' },
   'JSG 22': { stack: 'STACK 10', member: 'KAIF' },
   'JSG 18': { stack: 'STACK 10', member: 'ADITYA SRIVASTAVA' },
-  'C22': { stack: 'STACK 10', member: 'KAIF', advertiser: 'COMCAST' },
+  'C22': { stack: 'STACK 10', member: 'KAIF' },
   'JSG 21': { stack: 'STACK 1', member: 'ADITYA GUPTA' },
-  'JSG 21 MC': { stack: 'STACK 1', member: 'ADITYA GUPTA', advertiser: 'COMCAST' },
-  'G22C': { stack: 'STACK 10', member: 'KAIF KHAN', advertiser: 'COMCAST' }
+  'JSG 21 MC': { stack: 'STACK 1', member: 'ADITYA GUPTA' },
+  'G22C': { stack: 'STACK 10', member: 'KAIF KHAN' }
 };
 
 const Dashboard: React.FC<DashboardProps> = ({ 
