@@ -721,6 +721,19 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                 <Activity className="h-4 w-4 text-gray-400 group-hover:text-orange-500 transition-colors" />
               </div>
               
+              {/* Stack and Team Member Info */}
+              {(et.name === 'JSG29' || et.name === 'JSG26' || et.name === 'JSG30PM') && (
+                <div className={`mb-3 p-2 rounded-md text-xs ${
+                  isDarkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-50 text-blue-700'
+                }`}>
+                  <div className="font-medium">
+                    {et.name === 'JSG29' && 'S7 KESHAV'}
+                    {et.name === 'JSG26' && 'S7 NIKHIL'}
+                    {et.name === 'JSG30PM' && 'S7 ADITYA S.'}
+                  </div>
+                </div>
+              )}
+
               <div className="mb-4">
                 <p className="text-2xl font-bold text-orange-500 mb-1">
                 ${et.revenue.toLocaleString()}
