@@ -1282,7 +1282,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   <div className={`p-3 rounded-xl ${
                     isDarkMode ? 'bg-blue-900/30' : 'bg-blue-100'
                   }`}>
-                    <Target className="h-8 w-8 text-blue-500" />
+                    <div className="flex items-center justify-between mb-4">
                   </div>
                   <div className="ml-4">
                     <h2 className="text-3xl font-bold">{campaignPopup.campaign.name}</h2>
@@ -1358,17 +1358,16 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                       <div className="flex items-center space-x-6">
                         <div className="flex items-center">
                           <DollarSign className="h-5 w-5 text-green-500 mr-1" />
+                      {(etName === 'JSG29' || etName === 'JSG26' || etName === 'JSG30PM') && (
+                        <div className={`text-sm px-2 py-1 rounded ${
+                          isDarkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-50 text-blue-600'
+                        }`}>
+                          {etName === 'JSG29' && 'S7 KESHAV'}
+                          {etName === 'JSG26' && 'S7 NIKHIL'}
+                          {etName === 'JSG30PM' && 'S7 ADITYA S.'}
+                        </div>
+                      )}
                           <span className="text-xl font-bold text-green-500">
-                            ${campaignPopup.campaign.creatives[0].revenue.toLocaleString()}
-                          </span>
-                        </div>
-                        <div className="flex items-center">
-                          <Hash className="h-5 w-5 text-blue-500 mr-1" />
-                          <span className="font-semibold text-blue-500">
-                            {campaignPopup.campaign.creatives[0].frequency} occurrences
-                          </span>
-                        </div>
-                      </div>
                     </div>
                     <div className="mt-4 md:mt-0">
                       <p className={`text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
