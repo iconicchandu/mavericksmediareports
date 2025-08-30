@@ -730,7 +730,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     {et.name === 'JSG29' && 'S7 KESHAV'}
                     {et.name === 'JSG26' && 'S7 NIKHIL'}
                     {et.name === 'JSG30PM' && 'S7 ADITYA S.'}
-                     {et.name === 'JSG20' && 'S11 HARSH'}
+                     {et.name === 'JSG20' && 'STACK 11 HARSH'}
                   </div>
                 </div>
               )}
