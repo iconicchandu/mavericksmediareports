@@ -722,7 +722,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
               </div>
               
               {/* Stack and Team Member Info */}
-              {(et.name === 'JSG29' || et.name === 'JSG26' || et.name === 'JSG30PM') && (
+              {(et.name === 'JSG29' || et.name === 'JSG26' || et.name === 'JSG30PM' || et.name === 'JSG20') && (
                 <div className={`mb-3 p-2 rounded-md text-xs ${
                   isDarkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-50 text-blue-700'
                 }`}>
@@ -730,6 +730,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     {et.name === 'JSG29' && 'S7 KESHAV'}
                     {et.name === 'JSG26' && 'S7 NIKHIL'}
                     {et.name === 'JSG30PM' && 'S7 ADITYA S.'}
+                     {et.name === 'JSG20' && 'S11 HARSH'}
                   </div>
                 </div>
               )}
