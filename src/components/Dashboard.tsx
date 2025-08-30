@@ -439,7 +439,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   }`}
               >
                 <div className="flex items-center mb-4">
-                  <Layers className="h-5 w-5 mr-2 text-purple-500" />
+                  <Layers className="h-5 w-5 mr-2 text-red-500" />
                   <h4 className="font-bold text-lg">{result.creative}</h4>
                 </div>
 
@@ -528,7 +528,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
           }`}>
           <div className="flex items-center">
-            <Users className="h-8 w-8 text-purple-500" />
+            <Users className="h-8 w-8 text-red-500" />
             <div className="ml-4">
               <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                 ETs
@@ -556,7 +556,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
         }`}>
         <div className="flex items-center mb-6">
-          <Building2 className="h-6 w-6 mr-3 text-purple-500" />
+          <Building2 className="h-6 w-6 mr-3 text-red-500" />
           <h3 className="text-xl font-bold">Advertiser-Wise Revenue</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -572,7 +572,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   {advertiser.name === 'GZ' && <Zap className="h-4 w-4 mr-2 text-blue-500" />}
                   {advertiser.name === 'ES' && <Globe className="h-4 w-4 mr-2 text-green-500" />}
                   {advertiser.name === 'Comcast' && <Wifi className="h-4 w-4 mr-2 text-red-500" />}
-                  {advertiser.name === 'RGR' && <Target className="h-4 w-4 mr-2 text-purple-500" />}
+                  {advertiser.name === 'RGR' && <Target className="h-4 w-4 mr-2 text-red-500" />}
                   <h4 className="font-semibold">{advertiser.name}</h4>
                 </div>
 
@@ -642,7 +642,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center">
-                    <Layers className="h-4 w-4 mr-1 text-purple-500" />
+                    <Layers className="h-4 w-4 mr-1 text-red-500" />
                     <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                       {campaign.creatives.length}
                     </span>
@@ -792,7 +792,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center">
-                    <Layers className="h-4 w-4 mr-1 text-purple-500" />
+                    <Layers className="h-4 w-4 mr-1 text-red-500" />
                     <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                       {et.creatives.length}
                     </span>
@@ -1101,11 +1101,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
             {/* Top Performing Creative for ET */}
             {selectedETData.creatives.length > 0 && (
-              <div className={`mb-6 p-4 rounded-lg ${isDarkMode ? 'bg-purple-900/20 border border-purple-800' : 'bg-purple-50 border border-purple-200'
+              <div className={`mb-6 p-4 rounded-lg ${isDarkMode ? 'bg-red-900/20 border border-red-800' : 'bg-red-50 border border-red-200'
                 }`}>
                 <div className="flex items-center mb-2">
                   <Award className="h-5 w-5 mr-2 text-yellow-500" />
-                  <h4 className="font-semibold text-purple-600">Top Performing Creative</h4>
+                  <h4 className="font-semibold text-red-600">Top Performing Creative</h4>
                 </div>
                 <div className="flex justify-between items-center">
                   <div>
@@ -1337,13 +1337,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   </p>
                 </div>
 
-                <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-800' : 'bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200'
+                <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gradient-to-br from-red-900/20 to-red-800/10 border-red-800' : 'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
                   }`}>
                   <div className="flex items-center mb-3">
-                    <Layers className="h-6 w-6 text-purple-500 mr-2" />
-                    <h3 className="font-semibold text-purple-600">Total Creatives</h3>
+                    <Layers className="h-6 w-6 text-red-500 mr-2" />
+                    <h3 className="font-semibold text-red-600">Total Creatives</h3>
                   </div>
-                  <p className="text-3xl font-bold text-purple-500">
+                  <p className="text-3xl font-bold text-red-500">
                     {campaignPopup.campaign.creatives.length}
                   </p>
                 </div>
