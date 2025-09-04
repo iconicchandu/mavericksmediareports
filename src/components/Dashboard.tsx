@@ -696,12 +696,17 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   </h4>
                   {/* Stack and Team Member Info */}
                   {(et.name === 'JSG29'
+                    || et.name === 'CM29'
                     || et.name === '24MC'
                     || et.name === 'JSG24'
                     || et.name === 'JSG26'
+                    || et.name === 'CM26'
                     || et.name === 'JSG30PM'
+                    || et.name === 'CM30'
                     || et.name === 'JSG20'
+                    || et.name === 'CM20'
                     || et.name === 'JSG32'
+                    || et.name === 'CM32'
                     || et.name === 'C18'
                     || et.name === 'JSG34'
                     || et.name === '22MB'
@@ -718,24 +723,28 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                       <div className={`mx-3 text-[12px] text-orange-500 p-1 rounded-lg ${isDarkMode ? 'bg-orange-900/30' : 'bg-orange-100'
                         }`}>
                         <div className="font-bold">
-                          {et.name === 'JSG29' && 'S7 KESHAV T.'}
-                          {et.name === '24MC' && 'S1 ABHAY S.'}
-                          {et.name === 'JSG24' && 'S1 ABHAY S.'}
-                          {et.name === 'JSG26' && 'S7 NIKHIL T.'}
-                          {et.name === 'JSG30PM' && 'S7 ADITYA S.'}
-                          {et.name === 'JSG20' && 'S11 HARSH G.'}
-                          {et.name === 'JSG32' && 'S11 KAIF K.'}
-                          {et.name === 'C18' && 'S10 ADITYA S.'}
-                          {et.name === 'JSG34' && 'S4 SATYAM S.'}
+                          {et.name === '21MC' && 'S1 ADITYA G.'}
                           {et.name === '22MB' && 'S10 KESHAV T.'}
                           {et.name === '22mb' && 'S10 KESHAV T.'}
-                          {et.name === 'JSG22' && 'S10 KAIF K.'}
-                          {et.name === 'JSG18' && 'S10 ADITYA S.'}
+                          {et.name === '24MC' && 'S1 ABHAY S.'}
+                          {et.name === 'C18' && 'S10 ADITYA S.'}
                           {et.name === 'C22' && 'S10 KAIF'}
-                          {et.name === 'JSG21' && 'S1 ADITYA G.'}
-                          {et.name === '21MC' && 'S1 ADITYA G.'}
                           {et.name === 'G22C' && 'S10 KAIF K.'}
-
+                          {et.name === 'JSG18' && 'S10 ADITYA S.'}
+                          {et.name === 'JSG20' && 'S11 HARSH G.'}
+                          {et.name === 'CM20' && 'S11 HARSH G.'}
+                          {et.name === 'JSG21' && 'S1 ADITYA G.'}
+                          {et.name === 'JSG22' && 'S10 KAIF K.'}
+                          {et.name === 'JSG24' && 'S1 ABHAY S.'}
+                          {et.name === 'JSG26' && 'S7 NIKHIL T.'}
+                          {et.name === 'CM26' && 'S7 NIKHIL T.'}
+                          {et.name === 'JSG29' && 'S7 KESHAV T.'}
+                          {et.name === 'CM29' && 'S7 KESHAV T.'}
+                          {et.name === 'JSG30PM' && 'S7 ADITYA S.'}
+                          {et.name === 'CM30' && 'S7 ADITYA S.'}
+                          {et.name === 'JSG32' && 'S11 KAIF K.'}
+                          {et.name === 'CM32' && 'S11 KAIF K.'}
+                          {et.name === 'JSG34' && 'S4 SATYAM S.'}
                         </div>
                       </div>
                     )}
@@ -751,7 +760,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   )
                     &&
                     (
-                      <div className={`mx-0 text-[10px] text-gray-600 p-1 rounded-lg ${isDarkMode ? 'bg-green-900/30 text-gray-200' : 'bg-green-300'
+                      <div className={`mx-0 text-[10px] text-gray-600 p-1 rounded-lg ${isDarkMode ? 'bg-green-900/30 text-gray-100' : 'bg-green-300'
                         }`}>
                         <div className="font-bold">
                           {et.name === '24MC' && 'COM'}
