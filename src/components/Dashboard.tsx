@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Download, FileText, TrendingUp, Users, Target, DollarSign, RefreshCw, Building2, Zap, Globe, Wifi, Award, BarChart3, Search, X, Star, Activity, Layers, Eye, Hash, Calendar, AtSign } from 'lucide-react';
+import { Download, FileText, TrendingUp, Users, Target, DollarSign, RefreshCw, Building2, Zap, Globe, Wifi, Award, BarChart3, Search, X, Star, Activity, Layers, Eye, Hash, Calendar, AtSign, ChevronUp, ChevronDown } from 'lucide-react';
 import { ProcessedData, DataRecord, CreativeStats, CampaignStats, ETStats, AdvertiserStats } from '../types';
 
 interface UploadedFile {
@@ -28,6 +28,21 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
     isOpen: boolean;
     campaign: CampaignStats | null;
   }>({ isOpen: false, campaign: null });
+
+  // Expanded ET state for advertiser breakdown
+  const [expandedETs, setExpandedETs] = useState<Set<string>>(new Set());
+
+  const toggleET = (etName: string) => {
+    setExpandedETs(prev => {
+      const next = new Set(prev);
+      if (next.has(etName)) {
+        next.delete(etName);
+      } else {
+        next.add(etName);
+      }
+      return next;
+    });
+  };
 
   const analytics = useMemo(() => {
     const totalRevenue = data.records.reduce((sum, record) => sum + record.revenue, 0);
@@ -104,7 +119,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           name: record.et,
           revenue: 0,
           creatives: [],
-          campaigns: []
+          campaigns: [],
+          advertisers: new Map<string, number>(), // 👈 track advertisers
         });
       }
       const et = etStats.get(record.et)!;
@@ -112,6 +128,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       if (!et.campaigns.includes(record.campaign)) {
         et.campaigns.push(record.campaign);
       }
+
+      // Track advertiser revenue inside ET
+      if (!et.advertisers.has(record.advertiser)) {
+        et.advertisers.set(record.advertiser, 0);
+      }
+      et.advertisers.set(record.advertiser, et.advertisers.get(record.advertiser)! + record.revenue);
 
       // Creatives by campaign
       if (!creativesByCampaign.has(record.campaign)) {
@@ -165,7 +187,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       const creatives = Array.from(creativesByET.get(etName)?.values() || [])
         .sort((a, b) => b.frequency - a.frequency);
       et.creatives = creatives;
+
+      // Convert advertisers Map → array for rendering
+      et.advertisersArray = Array.from(et.advertisers.entries())
+        .map(([name, revenue]) => ({ name, revenue }))
+        .sort((a, b) => b.revenue - a.revenue);
     });
+
 
     // For Pie and Bar chart
     return {
@@ -681,7 +709,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                 ? 'bg-gradient-to-br from-gray-700 to-gray-800 border-gray-600 hover:from-gray-600 hover:to-gray-700 hover:border-orange-500'
                 : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:from-orange-50 hover:to-white hover:border-orange-300'
                 } group`}>
-               <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
                   <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-orange-900/30' : 'bg-orange-100'
                     } group-hover:scale-110 transition-transform duration-200`}>
@@ -809,6 +837,47 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     </span>
                   </div>
                 </div>
+              </div>
+              {/* Toggle button */}
+              <button
+                onClick={() => toggleET(et.name)}
+                className={`mt-3 flex items-center gap-1 text-sm font-medium ${isDarkMode ? 'text-orange-400' : 'text-orange-600'
+                  } hover:underline`}
+              >
+                {expandedETs.has(et.name) ? (
+                  <>
+                    <ChevronUp className="w-4 h-4" />
+                    Hide Advertiser Revenue
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="w-4 h-4" />
+                    View Advertiser Revenue
+                  </>
+                )}
+              </button>
+
+              {/* Advertiser Breakdown with Transition */}
+              <div
+                className={`overflow-hidden transition-all duration-300 rounded-xl text-sm font-medium 
+                ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-[#ffedd5] text-gray-600'}
+                ${expandedETs.has(et.name) ? 'max-h-96 p-2 opacity-100 mt-2' : 'max-h-0 p-0 opacity-0'}`}>
+                <ul className="text-xs space-y-1">
+                  {et.advertisersArray?.map(ad => (
+                    <li
+                      key={ad.name}
+                      className="flex justify-between border-b border-dashed border-gray-300 dark:border-gray-600 pb-1"
+                    >
+                      <span className="font-medium">{ad.name}</span>
+                      <span
+                        className={`text-xs font-medium ${isDarkMode ? 'text-green-400' : 'text-green-600'
+                          }`}
+                      >
+                        ${ad.revenue.toFixed(2)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           ))}

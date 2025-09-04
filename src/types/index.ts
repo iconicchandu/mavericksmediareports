@@ -41,4 +41,6 @@ export interface ETStats {
   revenue: number;
   creatives: CreativeStats[];
   campaigns: string[];
+  advertisers: Map<string, number>; // 👈 add this
+  advertisersArray?: { name: string; revenue: number }[]; // 👈 optional, for UI
 }
