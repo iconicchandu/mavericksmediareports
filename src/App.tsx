@@ -60,7 +60,7 @@ function App() {
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "bg-gray-950 text-white" : "bg-slate-50 text-slate-900"
+      className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "bg-gray-950 text-white" : "bg-gradient-to-br from-orange-50 to-fuchsia-100 text-slate-900"
         }`}
     >
       <header className={`relative z-10 backdrop-blur-md border-b transition-colors duration-300 ${isDarkMode

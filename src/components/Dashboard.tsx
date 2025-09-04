@@ -389,7 +389,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       </div>
 
       {/* Search Box */}
-      <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+      <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gradient-to-r from-violet-200 to-pink-200 border-gray-200'
         }`}>
         <div className="flex items-center mb-4">
           <Search className="h-6 w-6 mr-3 text-blue-500" />
@@ -444,7 +444,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                 </div>
 
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-cente">
                     <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                       Total Revenue:
                     </span>
@@ -499,7 +499,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-[#d2f7e0] border-[#22c55e]'
           }`}>
           <div className="flex items-center">
             <DollarSign className="h-8 w-8 text-green-500" />
@@ -512,7 +512,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           </div>
         </div>
 
-        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-[#ccdefd] border-[#3c83f6]'
           }`}>
           <div className="flex items-center">
             <Target className="h-8 w-8 text-blue-500" />
@@ -525,7 +525,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           </div>
         </div>
 
-        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-[#fbcdcd] border-[#ef4646]'
           }`}>
           <div className="flex items-center">
             <Users className="h-8 w-8 text-red-500" />
@@ -538,7 +538,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           </div>
         </div>
 
-        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-[#fedfca] border-[#f97316]'
           }`}>
           <div className="flex items-center">
             <Activity className="h-8 w-8 text-orange-500" />
@@ -677,7 +677,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {analytics.etStats.slice(0, 16).map((et, index) => (
+          {analytics.etStats.slice(0, 50).map((et, index) => (
             <div
               key={et.name}
               className={`p-4 rounded-xl border transition-all duration-300 hover:shadow-xl cursor-pointer transform hover:scale-105 ${isDarkMode
