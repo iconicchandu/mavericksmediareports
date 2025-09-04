@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Download, FileText, TrendingUp, Users, Target, DollarSign, RefreshCw, Building2, Zap, Globe, Wifi, Award, BarChart3, Search, X, Star, Activity, Layers, Eye, Hash, Calendar } from 'lucide-react';
+import { Download, FileText, TrendingUp, Users, Target, DollarSign, RefreshCw, Building2, Zap, Globe, Wifi, Award, BarChart3, Search, X, Star, Activity, Layers, Eye, Hash, Calendar, AtSign } from 'lucide-react';
 import { ProcessedData, DataRecord, CreativeStats, CampaignStats, ETStats, AdvertiserStats } from '../types';
 
 interface UploadedFile {
@@ -32,6 +32,25 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
     // Advertiser stats
     const advertiserStats = new Map<string, AdvertiserStats>();
+
+    // Custom CM Gmail aggregation
+    let cmRevenue = 0;
+    let cmCampaigns: Set<string> = new Set();
+
+    data.records.forEach(record => {
+      if (record.subid && record.subid.includes("CM")) {
+        cmRevenue += record.revenue;
+        cmCampaigns.add(record.campaign);
+      }
+    });
+
+    if (cmRevenue > 0) {
+      advertiserStats.set("CM Gmail", {
+        name: "CM Gmail",
+        revenue: cmRevenue,
+        campaigns: Array.from(cmCampaigns) as string[],
+      });
+    }
 
     // Campaign stats
     const campaignStats = new Map<string, CampaignStats>();
@@ -570,9 +589,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                 <div className="flex items-center">
                   {advertiser.name === 'Branded' && <Award className="h-4 w-4 mr-2 text-yellow-500" />}
                   {advertiser.name === 'GZ' && <Zap className="h-4 w-4 mr-2 text-blue-500" />}
+                  {advertiser.name === 'XC' && <Zap className="h-4 w-4 mr-2 text-blue-500" />}
                   {advertiser.name === 'ES' && <Globe className="h-4 w-4 mr-2 text-green-500" />}
                   {advertiser.name === 'Comcast' && <Wifi className="h-4 w-4 mr-2 text-red-500" />}
                   {advertiser.name === 'RGR' && <Target className="h-4 w-4 mr-2 text-red-500" />}
+                  {advertiser.name === 'CM Gmail' && <AtSign className="h-4 w-4 mr-2 text-red-500" />}
                   <h4 className="font-semibold">{advertiser.name}</h4>
                 </div>
 
@@ -594,75 +615,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         </div>
       </div>
 
-      {/* Campaign Revenue Breakdown */}
-      <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        }`}>
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center">
-            <Target className="h-6 w-6 mr-3 text-blue-500" />
-            <h3 className="text-xl font-bold">Campaign-Wise Revenue</h3>
-          </div>
-          <div className={`text-sm px-3 py-1 rounded-full ${isDarkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'
-            }`}>
-            Click any campaign for detailed view
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {analytics.campaignStats.slice(0, 12).map((campaign, index) => (
-            <div
-              key={campaign.name}
-              onClick={() => openCampaignPopup(campaign)}
-              className={`p-6 rounded-xl border transition-all duration-300 hover:shadow-xl cursor-pointer transform hover:scale-105 ${isDarkMode
-                ? 'bg-gradient-to-br from-gray-700 to-gray-800 border-gray-600 hover:from-gray-600 hover:to-gray-700 hover:border-blue-500'
-                : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:from-blue-50 hover:to-white hover:border-blue-300'
-                } group`}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-100'
-                    } group-hover:scale-110 transition-transform duration-200`}>
-                    <Target className="h-5 w-5 text-blue-500" />
-                  </div>
-                  <h4 className="font-bold text-lg ml-3 group-hover:text-blue-600 transition-colors">
-                    {campaign.name}
-                  </h4>
-                </div>
-                <Eye className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-              </div>
-
-              <div className="mb-4">
-                <p className="text-2xl font-bold text-green-500 mb-1">
-                  ${campaign.revenue.toLocaleString()}
-                </p>
-                <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Total Revenue
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center">
-                    <Layers className="h-4 w-4 mr-1 text-red-500" />
-                    <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                      {campaign.creatives.length}
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <Users className="h-4 w-4 mr-1 text-orange-500" />
-                    <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                      {campaign.ets.length}
-                    </span>
-                  </div>
-                </div>
-                <div className={`text-xs px-2 py-1 rounded-full ${isDarkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-200 text-gray-600'
-                  } group-hover:bg-blue-500 group-hover:text-white transition-colors`}>
-                  View Details
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
       {/* ET Revenue Breakdown */}
       <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
         }`}>
@@ -818,6 +770,77 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           ))}
         </div>
       </div>
+
+      {/* Campaign Revenue Breakdown */}
+      <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+        }`}>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center">
+            <Target className="h-6 w-6 mr-3 text-blue-500" />
+            <h3 className="text-xl font-bold">Campaign-Wise Revenue</h3>
+          </div>
+          <div className={`text-sm px-3 py-1 rounded-full ${isDarkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'
+            }`}>
+            Click any campaign for detailed view
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {analytics.campaignStats.slice(0, 12).map((campaign, index) => (
+            <div
+              key={campaign.name}
+              onClick={() => openCampaignPopup(campaign)}
+              className={`p-6 rounded-xl border transition-all duration-300 hover:shadow-xl cursor-pointer transform hover:scale-105 ${isDarkMode
+                ? 'bg-gradient-to-br from-gray-700 to-gray-800 border-gray-600 hover:from-gray-600 hover:to-gray-700 hover:border-blue-500'
+                : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:from-blue-50 hover:to-white hover:border-blue-300'
+                } group`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center">
+                  <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-100'
+                    } group-hover:scale-110 transition-transform duration-200`}>
+                    <Target className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <h4 className="font-bold text-lg ml-3 group-hover:text-blue-600 transition-colors">
+                    {campaign.name}
+                  </h4>
+                </div>
+                <Eye className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+              </div>
+
+              <div className="mb-4">
+                <p className="text-2xl font-bold text-green-500 mb-1">
+                  ${campaign.revenue.toLocaleString()}
+                </p>
+                <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  Total Revenue
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center">
+                    <Layers className="h-4 w-4 mr-1 text-red-500" />
+                    <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      {campaign.creatives.length}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <Users className="h-4 w-4 mr-1 text-orange-500" />
+                    <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      {campaign.ets.length}
+                    </span>
+                  </div>
+                </div>
+                <div className={`text-xs px-2 py-1 rounded-full ${isDarkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-200 text-gray-600'
+                  } group-hover:bg-blue-500 group-hover:text-white transition-colors`}>
+                  View Details
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      
 
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
