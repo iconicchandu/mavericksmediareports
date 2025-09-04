@@ -18,6 +18,8 @@ interface DashboardProps {
 }
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'];
+const TOP_ET_COLOR = "#10B981";
+const OTHER_ET_COLOR = "#3B82F6";
 
 const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, searchQuery, onSearchChange, onReset }) => {
   const [selectedCampaign, setSelectedCampaign] = useState('');
@@ -51,6 +53,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         campaigns: Array.from(cmCampaigns) as string[],
       });
     }
+
+    // 
 
     // Campaign stats
     const campaignStats = new Map<string, CampaignStats>();
@@ -163,11 +167,18 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       et.creatives = creatives;
     });
 
+    // For Pie and Bar chart
     return {
       totalRevenue,
       advertiserStats: Array.from(advertiserStats.values()).sort((a, b) => b.revenue - a.revenue),
       campaignStats: Array.from(campaignStats.values()).sort((a, b) => b.revenue - a.revenue),
-      etStats: Array.from(etStats.values()).sort((a, b) => b.revenue - a.revenue)
+      etStats: Array.from(etStats.values()).sort((a, b) => b.revenue - a.revenue),
+      etChartData: Array.from(etStats.values())
+        .map(et => ({
+          name: et.name,
+          value: et.revenue,
+        }))
+        .sort((a, b) => b.value - a.value), // 👈 sorts descending by revenue
     };
   }, [data]);
 
@@ -236,6 +247,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
     link.click();
     window.URL.revokeObjectURL(url);
   };
+
 
   const exportFilteredData = () => {
     let filteredRecords = data.records;
@@ -615,6 +627,39 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         </div>
       </div>
 
+      {/* ET Revenue Charts */}
+      <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+        }`}>
+        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 text-blue-500" />
+          ET Revenue Charts
+        </h2>
+
+        <div className="W-[100%]">
+          {/* Bar Chart */}
+          <div className="h-80">
+            <ResponsiveContainer>
+              <BarChart data={analytics.etChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" className='text-[10px]' />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                  {analytics.etChartData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={index < 3 ? TOP_ET_COLOR : OTHER_ET_COLOR}
+                    />
+                  ))}
+                </Bar>
+
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+
       {/* ET Revenue Breakdown */}
       <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
         }`}>
@@ -635,9 +680,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
               className={`p-4 rounded-xl border transition-all duration-300 hover:shadow-xl cursor-pointer transform hover:scale-105 ${isDarkMode
                 ? 'bg-gradient-to-br from-gray-700 to-gray-800 border-gray-600 hover:from-gray-600 hover:to-gray-700 hover:border-orange-500'
                 : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:from-orange-50 hover:to-white hover:border-orange-300'
-                } group`}
-            >
-              <div className="flex items-center justify-between mb-4">
+                } group`}>
+               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
                   <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-orange-900/30' : 'bg-orange-100'
                     } group-hover:scale-110 transition-transform duration-200`}>
@@ -840,7 +884,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           ))}
         </div>
       </div>
-      
+
 
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
@@ -1286,42 +1330,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
       </div>
 
-      {/* Revenue Chart */}
-      {!selectedCampaign && !selectedET && (
-        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          }`}>
-          <div className="flex items-center mb-6">
-            <BarChart3 className="h-6 w-6 mr-3 text-blue-500" />
-            <h3 className="text-xl font-bold">Revenue by Campaign</h3>
-          </div>
-          <div className="h-96">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={analytics.campaignStats.slice(0, 10)}>
-                <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#E5E7EB'} />
-                <XAxis
-                  dataKey="name"
-                  stroke={isDarkMode ? '#9CA3AF' : '#6B7280'}
-                  fontSize={12}
-                />
-                <YAxis
-                  stroke={isDarkMode ? '#9CA3AF' : '#6B7280'}
-                  fontSize={12}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
-                    border: `1px solid ${isDarkMode ? '#374151' : '#E5E7EB'}`,
-                    borderRadius: '8px',
-                    color: isDarkMode ? '#FFFFFF' : '#000000'
-                  }}
-                  formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']}
-                />
-                <Bar dataKey="revenue" fill="#3B82F6" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
 
       {/* Campaign Details Popup */}
       {campaignPopup.isOpen && campaignPopup.campaign && (
