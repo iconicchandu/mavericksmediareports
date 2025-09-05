@@ -740,6 +740,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     || et.name === 'C22'
                     || et.name === 'JSG21'
                     || et.name === '21MC'
+                    || et.name === '21NC'
                     || et.name === 'G22C'
                   )
                     &&
@@ -758,6 +759,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                           {et.name === 'JSG20' && 'S11 HARSH G.'}
                           {et.name === 'CM20' && 'S11 HARSH G.'}
                           {et.name === 'JSG21' && 'S1 ADITYA G.'}
+                          {et.name === '21NC' && 'S1 ADITYA G.'}
                           {et.name === 'JSG22' && 'S10 KAIF K.'}
                           {et.name === 'JSG24' && 'S1 ABHAY S.'}
                           {et.name === 'JSG26' && 'S7 NIKHIL T.'}
@@ -781,6 +783,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     || et.name === 'C22'
                     || et.name === '21MC'
                     || et.name === 'G22C'
+                    || et.name === '21NC'
                   )
                     &&
                     (
@@ -794,6 +797,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                           {et.name === 'C22' && 'COM'}
                           {et.name === '21MC' && 'COM'}
                           {et.name === 'G22C' && 'COM'}
+                          {et.name === '21NC' && 'N-C'}
 
                         </div>
                       </div>
