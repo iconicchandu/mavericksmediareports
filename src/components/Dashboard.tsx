@@ -721,8 +721,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   {/* Stack and Team Member Info */}
                   {(et.name === 'JSG29'
                     || et.name === 'CM29'
+                    || et.name === '29MC'
                     || et.name === '24MC'
                     || et.name === 'JSG24'
+                    || et.name === 'P24'
                     || et.name === 'JSG26'
                     || et.name === 'CM26'
                     || et.name === 'JSG30PM'
@@ -762,10 +764,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                           {et.name === '21NC' && 'S1 ADITYA G.'}
                           {et.name === 'JSG22' && 'S10 KAIF K.'}
                           {et.name === 'JSG24' && 'S1 ABHAY S.'}
+                          {et.name === 'P24' && 'S1 ABHAY S.'}
                           {et.name === 'JSG26' && 'S7 NIKHIL T.'}
                           {et.name === 'CM26' && 'S7 NIKHIL T.'}
                           {et.name === 'JSG29' && 'S7 KESHAV T.'}
                           {et.name === 'CM29' && 'S7 KESHAV T.'}
+                          {et.name === '29MC' && 'S7 KESHAV T.'}
                           {et.name === 'JSG30PM' && 'S7 ADITYA S.'}
                           {et.name === 'CM30' && 'S7 ADITYA S.'}
                           {et.name === 'JSG32' && 'S11 KAIF K.'}
