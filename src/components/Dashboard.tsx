@@ -512,7 +512,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center bg-gray-200 px-3 py-1 rounded-lg">
                     <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                       Frequency:
                     </span>
@@ -521,27 +521,27 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     </span>
                   </div>
 
-                  <div className="pt-3 border-t border-gray-200 dark:border-gray-600">
+                  <div className="pt-3">
                     <div className="mb-2">
-                      <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                        Campaigns ({result.campaigns.size}):
-                      </span>
-                      <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <span className={`text-sm font-bold ${isDarkMode ? 'text-gray-400' : 'text-gray-800'}`}>
+                        Campaign ({result.campaigns.size}):
+                      </span><br />
+                      <div className={`text-center inline-block mt-3 bg-blue-100 border border-blue-400 px-2 py-1 rounded-lg text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                         {Array.from(result.campaigns).join(', ')}
-                      </p>
+                      </div>
                     </div>
 
                     <div className="mb-2">
-                      <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      <span className={`text-sm font-bold ${isDarkMode ? 'text-gray-400' : 'text-gray-800'}`}>
                         ETs ({result.ets.size}):
-                      </span>
-                      <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      </span><br />
+                      <div className={`text-center inline-block mt-3 bg-orange-100 border border-orange-400 px-2 py-1 rounded-lg text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                         {Array.from(result.ets).join(', ')}
-                      </p>
+                      </div>
                     </div>
 
                     <div>
-                      <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      <span className={`text-sm font-bold ${isDarkMode ? 'text-gray-400' : 'text-gray-800'}`}>
                         Advertisers ({result.advertisers.size}):
                       </span>
                       <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -735,6 +735,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     || et.name === 'CM32'
                     || et.name === 'C18'
                     || et.name === 'JSG34'
+                    || et.name === '34MC'
+                    || et.name === 'JSG36'
                     || et.name === '22MB'
                     || et.name === '22mb'
                     || et.name === 'JSG22'
@@ -773,6 +775,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                           {et.name === 'JSG30PM' && 'S7 ADITYA S.'}
                           {et.name === 'CM30' && 'S7 ADITYA S.'}
                           {et.name === 'JSG32' && 'S11 KAIF K.'}
+                          {et.name === 'JSG36' && 'S6 NIKHIL T.'}
+                          {et.name === '34MC' && 'S4 SATYAM S.'}
                           {et.name === 'CM32' && 'S11 KAIF K.'}
                           {et.name === 'JSG34' && 'S4 SATYAM S.'}
                         </div>
@@ -788,6 +792,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     || et.name === '21MC'
                     || et.name === 'G22C'
                     || et.name === '21NC'
+                    || et.name === '34MC'
                   )
                     &&
                     (
@@ -801,6 +806,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                           {et.name === 'C22' && 'COM'}
                           {et.name === '21MC' && 'COM'}
                           {et.name === 'G22C' && 'COM'}
+                          {et.name === '34MC' && 'COM'}
                           {et.name === '21NC' && 'N-C'}
 
                         </div>
