@@ -21,6 +21,7 @@ const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'
 const TOP_ET_COLOR = "#10B981";
 const OTHER_ET_COLOR = "#3B82F6";
 
+
 const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, searchQuery, onSearchChange, onReset }) => {
   const [selectedCampaign, setSelectedCampaign] = useState('');
   const [selectedET, setSelectedET] = useState('');
@@ -276,6 +277,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
     window.URL.revokeObjectURL(url);
   };
 
+  // Total revenue of search result.
+
+  const searchResultsTotalRevenue = useMemo(() => {
+    if (!searchResults) return 0;
+    return searchResults.reduce((sum, result) => sum + result.totalRevenue, 0);
+  }, [searchResults]);
+
+
 
   const exportFilteredData = () => {
     let filteredRecords = data.records;
@@ -485,10 +494,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           }`}>
           <div className="flex items-center mb-6">
             <Star className="h-6 w-6 mr-3 text-yellow-500" />
-            <h3 className="text-xl font-bold">
-              Search Results for "{searchQuery}" ({searchResults.length} creative{searchResults.length > 1 ? 's' : ''} found)
+            <h3 className="text-md font-bold">
+              Search Results for <span className='text-blue-600 text-lg'>{searchQuery}</span> ({searchResults.length} creative{searchResults.length > 1 ? 's' : ''} found •
+              Total Revenue: <span className='text-lg text-green-500'>${searchResultsTotalRevenue.toLocaleString()}</span>)
             </h3>
           </div>
+
 
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {searchResults.map((result, index) => (
