@@ -56,7 +56,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
     let cmCampaigns: Set<string> = new Set();
 
     data.records.forEach(record => {
-      if (record.subid && record.subid.includes("CM")) {
+      if (
+        record.subid?.includes("CM") || record.subid?.includes("JSG36")|| record.subid?.includes("JSG38")) {
         cmRevenue += record.revenue;
         cmCampaigns.add(record.campaign);
       }
@@ -743,6 +744,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     || et.name === 'JSG20'
                     || et.name === 'CM20'
                     || et.name === 'JSG32'
+                    || et.name === 'JSG38'
+                    || et.name === 'JSG36'
                     || et.name === 'CM32'
                     || et.name === 'C18'
                     || et.name === 'JSG34'
@@ -757,6 +760,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     || et.name === '21MC'
                     || et.name === '21NC'
                     || et.name === 'G22C'
+                    || et.name === 'C36'
                   )
                     &&
                     (
@@ -784,9 +788,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                           {et.name === 'CM29' && 'S7 KESHAV T.'}
                           {et.name === '29MC' && 'S7 KESHAV T.'}
                           {et.name === 'JSG30PM' && 'S7 ADITYA S.'}
+                          {et.name === 'JSG36' && 'S6 NIKHIL T.'}
+                          {et.name === 'JSG38' && 'S12 KAIF K.'}
                           {et.name === 'CM30' && 'S7 ADITYA S.'}
                           {et.name === 'JSG32' && 'S11 KAIF K.'}
-                          {et.name === 'JSG36' && 'S6 NIKHIL T.'}
+                          {et.name === 'C36' && 'S6 NIKHIL T.'}
                           {et.name === '34MC' && 'S4 SATYAM S.'}
                           {et.name === 'CM32' && 'S11 KAIF K.'}
                           {et.name === 'JSG34' && 'S4 SATYAM S.'}
