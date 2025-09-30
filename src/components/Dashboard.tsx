@@ -57,7 +57,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
     data.records.forEach(record => {
       if (
-        record.subid?.includes("CM") || record.subid?.includes("JSG36")|| record.subid?.includes("JSG38")) {
+        record.subid?.includes("CM") || record.subid?.includes("JSG36")) {
         cmRevenue += record.revenue;
         cmCampaigns.add(record.campaign);
       }
