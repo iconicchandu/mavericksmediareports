@@ -547,9 +547,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                       <span className={`text-sm font-bold ${isDarkMode ? 'text-gray-400' : 'text-gray-800'}`}>
                         ETs ({result.ets.size}):
                       </span><br />
-                      <div className={`text-center inline-block mt-3 bg-orange-100 border border-orange-400 px-2 py-1 rounded-lg text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <span className={`text-center inline-block mt-3 bg-orange-100 border border-orange-400 px-2 py-1 rounded-lg text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                         {Array.from(result.ets).join(', ')}
-                      </div>
+                      </span>
+                      
                     </div>
 
                     <div>
