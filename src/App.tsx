@@ -234,7 +234,7 @@ function App() {
               Made with <Heart className="h-4 w-4 mx-1 text-rose-500 animate-pulse" fill="currentColor" aria-hidden="true" /> by <b className="ml-1 bg-gradient-to-r from-blue-600 to-red-600 bg-clip-text text-transparent">Chandu</b>
             </p>
             <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-              © 2024 MM Media Analytics Platform. All rights reserved.
+              © 2025 MM Media Analytics Platform. All rights reserved.
             </div>
           </div>
         </div>
