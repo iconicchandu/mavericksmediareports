@@ -60,43 +60,49 @@ function App() {
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "bg-gray-950 text-white" : "bg-gradient-to-br from-orange-50 to-fuchsia-100 text-slate-900"
+      className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "bg-gray-950 text-white" : "bg-url('.assets/winterbackground4.jpg')"
         }`}
+        style={{
+          backgroundImage: "url('./assets/winterbackground4.jpg')",
+          backgroundSize: "100%",
+          backgroundPosition: "top center",
+          backgroundRepeat: "repeat",
+        }}
     >
-      <header className={`relative z-10 backdrop-blur-md border-b transition-colors duration-300 ${isDarkMode
-                    ? 'bg-gray-900/80 border-gray-800/50'
-                    : 'bg-white/80 border-gray-200/50'
-                }`}>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        <div className="flex items-center space-x-3">
-                            <div className="relative">
-                                <div className="w-10 pl-1 h-10 bg-gradient-to-br from-blue-600 to-red-600 rounded-lg flex items-center justify-center shadow-lg">
-                                   <img src="https://image.s10.sfmc-content.com/lib/fe2b1171706405797d1375/m/1/2fb6e6f2-244e-41a0-b20a-9049947429c9.png" width={30}></img>
-                                </div>
-                            </div>
-                            <div>
-                                <h1 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                                    MM Media
-                                </h1>
-                                <p className={`text-sm -mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                    Report & Campaign Management
-                                </p>
-                            </div>
-                        </div>
-
-                        <nav className="hidden md:flex items-center space-x-8">
-                            <button
-                                onClick={toggleTheme}
-                                className={`p-2 rounded-lg transition-colors bg-gray-200 ${isDarkMode ? 'bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                                    }`}
-                            >
-                                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                            </button>
-                        </nav>
-                    </div>
+      <header className={`relative z-10 backdrop-blur-[5px] border-b transition-colors duration-300 ${isDarkMode
+        ? 'bg-gray-900/80 border-gray-800/50'
+        : 'bg-white/0 border-gray-200/50'
+        }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <div className="w-10 pl-1 h-10 bg-gradient-to-br from-blue-600 to-red-600 rounded-lg flex items-center justify-center shadow-lg">
+                  <img src="https://image.s10.sfmc-content.com/lib/fe2b1171706405797d1375/m/1/2fb6e6f2-244e-41a0-b20a-9049947429c9.png" width={30}></img>
                 </div>
-            </header>
+              </div>
+              <div>
+                <h1 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  MM Media
+                </h1>
+                <p className={`text-sm -mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Report & Campaign Management
+                </p>
+              </div>
+            </div>
+
+            {/* <nav className="hidden md:flex items-center space-x-8">
+              <button
+                onClick={toggleTheme}
+                className={`p-2 rounded-lg transition-colors bg-gray-200 ${isDarkMode ? 'bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+              >
+                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+            </nav> */}
+          </div>
+        </div>
+      </header>
 
       <main className="relative">
         {!combinedData && (
@@ -120,15 +126,7 @@ function App() {
               <section
                 className={` ${isDarkMode ? "" : ""} p-4 sm:p-8 text-center`}
               >
-                <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium mb-8 ${isDarkMode
-                  ? 'bg-blue-900/30 text-blue-300 border border-blue-700/50'
-                  : 'bg-blue-100 text-blue-800'
-                  }`}>
-                  <Zap className="w-4 h-4 mr-2" />
-                  Advanced Campaign Analytics
-                </div>
-
-                <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-balance">
+                <h1 className="mt-0 text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-balance">
                   Upload Campaign{" "}
                   <span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
                     Reports
@@ -139,8 +137,7 @@ function App() {
                   className={`mt-5 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed ${isDarkMode ? "text-gray-400" : "text-slate-600"
                     }`}
                 >
-                  Upload multiple CSV files containing SUBID and REV columns to generate comprehensive campaign
-                  analytics with real‑time insights and performance metrics.
+                  Upload multiple CSV files containing SUBID and REV columns.
                 </p>
 
                 {/* Feature points */}
@@ -187,7 +184,7 @@ function App() {
 
       <CelebrationEffect isActive={showCelebration} onComplete={() => setShowCelebration(false)} />
 
-      <footer className={`mt-16 border-t ${isDarkMode ? "bg-gray-900 border-gray-800" : "bg-white border-slate-200"}`}>
+      <footer className={`mt-16`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <p
             className={`text-center text-sm flex items-center justify-center ${isDarkMode ? "text-gray-400" : "text-slate-600"
