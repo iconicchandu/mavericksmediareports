@@ -60,10 +60,10 @@ function App() {
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "bg-gray-950 text-white" : "bg-url('.assets/winterbackground4.jpg')"
+      className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "bg-gray-950 text-white" : "bg-url('https://image.s7.sfmc-content.com/lib/fe2a11717d640474741277/m/1/17568be6-1b27-4f9f-92d8-8248b1c3992c.jpg')"
         }`}
         style={{
-          backgroundImage: "url('./assets/winterbackground4.jpg')",
+          backgroundImage: "url('https://image.s7.sfmc-content.com/lib/fe2a11717d640474741277/m/1/17568be6-1b27-4f9f-92d8-8248b1c3992c.jpg')",
           backgroundSize: "100%",
           backgroundPosition: "top center",
           backgroundRepeat: "repeat",
