@@ -764,10 +764,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     || et.name === 'C36'
                     || et.name === 'JSG40'
                     || et.name === 'JSG41'
+                    || et.name === 'JSG43'
                   )
                     &&
                     (
-                      <div className={`mx-3 text-[12px] text-orange-500 p-1 rounded-lg ${isDarkMode ? 'bg-orange-900/30' : 'bg-orange-100'
+                      <div className={`mx-3 text-[10px] text-orange-500 p-1 rounded-[12px] ${isDarkMode ? 'bg-orange-900/30' : 'bg-[#eaeaff]'
                         }`}>
                         <div className="font-bold">
                           {et.name === '21MC' && 'S1 ADITYA G.'}
@@ -801,6 +802,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                           {et.name === 'JSG34' && 'S4 SATYAM S.'}
                           {et.name === 'JSG40' && 'S12 KESHAV T.'}
                           {et.name === 'JSG41' && 'S1 ADITYA G.'}
+                          {et.name === 'JSG43' && 'S13 ADITYA S.'}
                         </div>
                       </div>
                     )}
@@ -895,14 +897,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
               {/* Advertiser Breakdown with Transition */}
               <div
-                className={`overflow-hidden transition-all duration-300 rounded-xl text-sm font-medium 
-                ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-[#ffedd5] text-gray-600'}
-                ${expandedETs.has(et.name) ? 'max-h-96 p-2 opacity-100 mt-2' : 'max-h-0 p-0 opacity-0'}`}>
-                <ul className="text-xs space-y-1">
+                className={`overflow-hidden transition-all duration-300 rounded-xl text-sm font-medium '}
+                ${expandedETs.has(et.name) ? 'max-h-96 p-0 opacity-100 mt-2' : 'max-h-0 p-0 opacity-0'}`}>
+                <ul className="text-xs space-y-1 flex flex-wrap gap-2 justify-center items-center p-0">
                   {et.advertisersArray?.map(ad => (
                     <li
                       key={ad.name}
-                      className="flex justify-between border-b border-dashed border-gray-300 dark:border-gray-600 pb-1"
+                      className="flex flex-col justify-center items-center gap-2 bg-orange-500/10 p-1 rounded-[12px] p-2 w-[30%]"
                     >
                       <span className="font-medium">{ad.name}</span>
                       <span
