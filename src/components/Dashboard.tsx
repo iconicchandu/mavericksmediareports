@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Download, FileText, TrendingUp, Users, Target, DollarSign, RefreshCw, Building2, Zap, Globe, Wifi, Award, BarChart3, Search, X, Star, Activity, Layers, Eye, Hash, Calendar, AtSign, ChevronUp, ChevronDown } from 'lucide-react';
 import { ProcessedData, DataRecord, CreativeStats, CampaignStats, ETStats, AdvertiserStats } from '../types';
@@ -22,6 +22,7 @@ const TOP_ET_COLOR = "#10B981";
 const OTHER_ET_COLOR = "#3B82F6";
 
 
+
 const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, searchQuery, onSearchChange, onReset }) => {
   const [selectedCampaign, setSelectedCampaign] = useState('');
   const [selectedET, setSelectedET] = useState('');
@@ -32,6 +33,117 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
   // Expanded ET state for advertiser breakdown
   const [expandedETs, setExpandedETs] = useState<Set<string>>(new Set());
+
+  // 🕒 Live Date State
+  const [currentDate, setCurrentDate] = useState<string>("");
+
+  useEffect(() => {
+    const updateDate = () => {
+      const now = new Date();
+      const formatted = now.toLocaleDateString("en-IN", {
+        month: "long",
+        day: "numeric",
+      });
+      setCurrentDate(formatted);
+    };
+
+    updateDate(); // run immediately
+    const interval = setInterval(updateDate, 1000 * 60); // update every minute
+    return () => clearInterval(interval);
+  }, []);
+  // END 🕒 Live Date State
+
+  // 🎯 Target revenue map (keys stored normalized)
+  const rawTargetRevenueMap: Record<string, string> = {
+    "JSG21": "$1800",
+    "24MC": "P24",
+    "P24": "$1800",
+    "JSG41": "$1800",
+    "CM41": "JSG41",
+    "JSG34": "$1100",
+    "JSG36": "$1100",
+    "C36": "JSG36",
+    "JSG26": "$1800",
+    "JSG29": "$1800",
+    "JSG30PM": "$1800",
+    "C18": "$500",
+    "22MB": "0",
+    "22mb": "0",
+    "JSG22": "0",
+    "JSG32": "$1100",
+    "EX32": "JSG32",
+    "JSG20": "$1800",
+    "JSG38": "$1800",
+    "JSG40": "$1800",
+    "JSG43": "$500",
+  };
+
+
+  // ✅ Build normalized map (uppercased + trimmed keys)
+  const targetRevenueMap: Record<string, string> = Object.keys(rawTargetRevenueMap).reduce(
+    (acc, k) => {
+      acc[k.trim().toUpperCase()] = rawTargetRevenueMap[k];
+      return acc;
+    },
+    {} as Record<string, string>
+  );
+
+  // ✅ Safe helper to get target revenue for an ET name
+  const getTargetRevenue = (etName?: string): string => {
+    if (!etName) return "0"; // return string instead of number for consistency
+    const key = etName.trim().toUpperCase();
+    return targetRevenueMap[key] ?? "0";
+  };
+
+  // ------------------ET Info Stack,Manager-----
+
+  // 👥 ET Information Map (Stack, Manager, and optional Type)
+  const etInfoMap: Record<
+    string,
+    { stack: string; manager: string; type?: string }
+  > = {
+    // S1
+    "JSG21": { stack: "S1", manager: "Aditya G." },
+    "24MC": { stack: "S1", manager: "Abhay S.", type: "COM" },
+    "P24": { stack: "S1", manager: "Abhay S." },
+    "JSG41": { stack: "S1", manager: "Aditya G." },
+    "CM41": { stack: "S1", manager: "Aditya G." },
+
+    // S4
+    "JSG34": { stack: "S4", manager: "Satyam S." },
+
+    // S6
+    "JSG36": { stack: "S6", manager: "Nikhil T." },
+    "C36": { stack: "S6", manager: "Nikhil T." },
+
+    // S7
+    "JSG26": { stack: "S7", manager: "Nikhil T." },
+    "JSG29": { stack: "S7", manager: "Keshav T." },
+    "JSG30PM": { stack: "S7", manager: "Aditya S." },
+
+    // S10
+    "C18": { stack: "S10", manager: "Aditya S.", type: "COM" },
+    "22MB": { stack: "S10", manager: "Keshav T.", type: "N-C" },
+    "22mb": { stack: "S10", manager: "Keshav T.", type: "N-C" },
+    "JSG22": { stack: "S10", manager: "Kaif K." },
+
+    // S11
+    "JSG32": { stack: "S11", manager: "Kaif K." },
+    "EX32": { stack: "S11", manager: "Kaif K." },
+    "JSG20": { stack: "S11", manager: "Harsh G." },
+
+    // S12
+    "JSG38": { stack: "S12", manager: "Kaif K." },
+    "JSG40": { stack: "S12", manager: "Keshav T." },
+
+    // S13
+    "JSG43": { stack: "S13", manager: "Aditya S." },
+  };
+
+  // 🔍 Get ET Info (safe helper)
+  const getETInfo = (etName: string) => etInfoMap[etName] || null;
+
+  // --------------------------------------
 
   const toggleET = (etName: string) => {
     setExpandedETs(prev => {
@@ -70,8 +182,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         campaigns: Array.from(cmCampaigns) as string[],
       });
     }
-
-    // 
 
     // Campaign stats
     const campaignStats = new Map<string, CampaignStats>();
@@ -268,6 +378,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
     return analytics.etStats.find(e => e.name === selectedET);
   }, [selectedET, analytics]);
 
+
+
   const downloadCSV = (filename: string, csvContent: string) => {
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -425,6 +537,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
     setCampaignPopup({ isOpen: false, campaign: null });
   };
 
+
+
   return (
     <div className="space-y-8 relative">
       {/* Header */}
@@ -547,10 +661,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                       <span className={`text-sm font-bold ${isDarkMode ? 'text-gray-400' : 'text-gray-800'}`}>
                         ETs ({result.ets.size}):
                       </span><br />
-                      <span className={`text-center inline-block mt-3 bg-orange-100 border border-orange-400 px-2 py-1 rounded-lg text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <span className={`text-center inline-block mt-3 bg-blue-100 border border-blue-400 px-2 py-1 rounded-lg text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                         {Array.from(result.ets).join(', ')}
                       </span>
-                      
+
                     </div>
 
                     <div>
@@ -570,7 +684,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       )}
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-[#d2f7e0] border-[#22c55e]'
           }`}>
           <div className="flex items-center">
@@ -580,6 +694,19 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                 Total Revenue
               </p>
               <p className="text-2xl font-bold">${analytics.totalRevenue.toLocaleString()}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-blue-900 border-blue-500'
+          }`}>
+          <div className="flex items-center">
+            <DollarSign className="h-8 w-8 text-green-500" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-white">
+                Daily Revenue Target
+              </p>
+              <p className="text-2xl font-bold text-green-500">$18,200</p>
             </div>
           </div>
         </div>
@@ -613,7 +740,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-[#fedfca] border-[#f97316]'
           }`}>
           <div className="flex items-center">
-            <Activity className="h-8 w-8 text-orange-500" />
+            <Activity className="h-8 w-8 text-blue-500" />
             <div className="ml-4">
               <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                 Creatives
@@ -706,10 +833,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         }`}>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
-            <Users className="h-6 w-6 mr-3 text-orange-500" />
+            <Users className="h-6 w-6 mr-3 text-blue-500" />
             <h3 className="text-xl font-bold">ET-Wise Revenue</h3>
           </div>
-          <div className={`text-sm px-3 py-1 rounded-full ${isDarkMode ? 'bg-orange-900/30 text-orange-300' : 'bg-orange-100 text-orange-700'
+          <div className={`text-sm px-3 py-1 rounded-full ${isDarkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-800'
             }`}>
             Top performing ETs by revenue
           </div>
@@ -718,149 +845,76 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           {analytics.etStats.slice(0, 50).map((et, index) => (
             <div
               key={et.name}
-              className={`p-4 rounded-xl border transition-all duration-300 hover:shadow-xl cursor-pointer transform hover:scale-105 ${isDarkMode
-                ? 'bg-gradient-to-br from-gray-700 to-gray-800 border-gray-600 hover:from-gray-600 hover:to-gray-700 hover:border-orange-500'
-                : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:from-orange-50 hover:to-white hover:border-orange-300'
+              className={`pb-4 rounded-xl border transition-all duration-300 hover:shadow-xl cursor-pointer ${isDarkMode
+                ? 'bg-gradient-to-br from-gray-700 to-gray-800 border-gray-600 hover:from-gray-600 hover:to-gray-700 hover:border-blue-500'
+                : 'bg-gradient-to-br from-blue-50 to-white border-blue-300'
                 } group`}>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-orange-900/30' : 'bg-orange-100'
-                    } group-hover:scale-110 transition-transform duration-200`}>
-                    <Users className="h-5 w-5 text-orange-500" />
+              <div className="w-full flex items-center mb-4">
+                <div className="w-full flex items-center justify-between bg-blue-900 px-4 py-1 rounded-xl rounded-br-none rounded-bl-none">
+                  <div className="flex justify-start items-center">
+                    <Users className="h-6 w-6 text-blue-300 bg-blue-800 p-1 rounded-md" />
+                    <h4 className="font-bold text-lg ml-3 text-white">
+                      {et.name}
+                    </h4>
                   </div>
-                  <h4 className="font-bold text-lg ml-3 group-hover:text-orange-600 transition-colors">
-                    {et.name}
-                  </h4>
-                  {/* Stack and Team Member Info */}
-                  {(et.name === 'JSG29'
-                    || et.name === 'CM29'
-                    || et.name === '29MC'
-                    || et.name === '24MC'
-                    || et.name === 'JSG24'
-                    || et.name === 'P24'
-                    || et.name === 'JSG26'
-                    || et.name === 'CM26'
-                    || et.name === 'JSG30PM'
-                    || et.name === 'CM30'
-                    || et.name === 'JSG20'
-                    || et.name === 'CM20'
-                    || et.name === 'JSG32'
-                    || et.name === 'JSG38'
-                    || et.name === 'JSG36'
-                    || et.name === 'CM32'
-                    || et.name === 'C18'
-                    || et.name === 'JSG34'
-                    || et.name === '34MC'
-                    || et.name === 'JSG36'
-                    || et.name === '22MB'
-                    || et.name === '22mb'
-                    || et.name === 'JSG22'
-                    || et.name === 'JSG18'
-                    || et.name === 'C22'
-                    || et.name === 'JSG21'
-                    || et.name === '21MC'
-                    || et.name === '21NC'
-                    || et.name === 'G22C'
-                    || et.name === 'C36'
-                    || et.name === 'JSG40'
-                    || et.name === 'JSG41'
-                    || et.name === 'JSG43'
-                  )
-                    &&
-                    (
-                      <div className={`mx-3 text-[10px] text-orange-500 p-1 rounded-[12px] ${isDarkMode ? 'bg-orange-900/30' : 'bg-[#eaeaff]'
-                        }`}>
-                        <div className="font-bold">
-                          {et.name === '21MC' && 'S1 ADITYA G.'}
-                          {et.name === '22MB' && 'S10 KESHAV T.'}
-                          {et.name === '22mb' && 'S10 KESHAV T.'}
-                          {et.name === '24MC' && 'S1 ABHAY S.'}
-                          {et.name === 'C18' && 'S10 ADITYA S.'}
-                          {et.name === 'C22' && 'S10 KAIF'}
-                          {et.name === 'G22C' && 'S10 KAIF K.'}
-                          {et.name === 'JSG18' && 'S10 ADITYA S.'}
-                          {et.name === 'JSG20' && 'S11 HARSH G.'}
-                          {et.name === 'CM20' && 'S11 HARSH G.'}
-                          {et.name === 'JSG21' && 'S1 ADITYA G.'}
-                          {et.name === '21NC' && 'S1 ADITYA G.'}
-                          {et.name === 'JSG22' && 'S10 KAIF K.'}
-                          {et.name === 'JSG24' && 'S1 ABHAY S.'}
-                          {et.name === 'P24' && 'S1 ABHAY S.'}
-                          {et.name === 'JSG26' && 'S7 NIKHIL T.'}
-                          {et.name === 'CM26' && 'S7 NIKHIL T.'}
-                          {et.name === 'JSG29' && 'S7 KESHAV T.'}
-                          {et.name === 'CM29' && 'S7 KESHAV T.'}
-                          {et.name === '29MC' && 'S7 KESHAV T.'}
-                          {et.name === 'JSG30PM' && 'S7 ADITYA S.'}
-                          {et.name === 'JSG36' && 'S6 NIKHIL T.'}
-                          {et.name === 'JSG38' && 'S12 KAIF K.'}
-                          {et.name === 'CM30' && 'S7 ADITYA S.'}
-                          {et.name === 'JSG32' && 'S11 KAIF K.'}
-                          {et.name === 'C36' && 'S6 NIKHIL T.'}
-                          {et.name === '34MC' && 'S4 SATYAM S.'}
-                          {et.name === 'CM32' && 'S11 KAIF K.'}
-                          {et.name === 'JSG34' && 'S4 SATYAM S.'}
-                          {et.name === 'JSG40' && 'S12 KESHAV T.'}
-                          {et.name === 'JSG41' && 'S1 ADITYA G.'}
-                          {et.name === 'JSG43' && 'S13 ADITYA S.'}
-                        </div>
-                      </div>
-                    )}
-                  {/* Stack and Team Member Info */}
-                  {(
-                    et.name === '24MC'
-                    || et.name === 'C18'
-                    || et.name === '22MB'
-                    || et.name === '22mb'
-                    || et.name === 'C22'
-                    || et.name === '21MC'
-                    || et.name === 'G22C'
-                    || et.name === '21NC'
-                    || et.name === '34MC'
-                  )
-                    &&
-                    (
-                      <div className={`mx-0 text-[10px] text-gray-600 p-1 rounded-lg ${isDarkMode ? 'bg-green-900/30 text-gray-100' : 'bg-green-300'
-                        }`}>
-                        <div className="font-bold">
-                          {et.name === '24MC' && 'COM'}
-                          {et.name === 'C18' && 'COM'}
-                          {et.name === '22MB' && 'N-C'}
-                          {et.name === '22mb' && 'N-C'}
-                          {et.name === 'C22' && 'COM'}
-                          {et.name === '21MC' && 'COM'}
-                          {et.name === 'G22C' && 'COM'}
-                          {et.name === '34MC' && 'COM'}
-                          {et.name === '21NC' && 'N-C'}
 
-                        </div>
+                  {(() => {
+                    const info = getETInfo(et.name);
+                    if (!info) return null;
+
+                    return (
+                      <div className="flex items-center space-x-0 bg-red-500 rounded-xl">
+                        {/* Stack */}
+                        <span className="text-[13px] font-bold text-white pl-2 mr-2">
+                          {info.stack}
+                        </span>
+
+                        {/* Manager */}
+                        <span className="text-[13px] font-bold text-white pr-2">
+                          {info.manager}
+                        </span>
+
+                        {/* Type (optional) */}
+                        {info.type && (
+                          <span
+                            className={`text-[10px] px-1 py-[2px] rounded-xl font-bold ${info.type === "COM"
+                              ? "bg-blue-600 text-white"
+                              : "bg-purple-600 text-white"
+                              }`}
+                          >
+                            {info.type}
+                          </span>
+                        )}
                       </div>
-                    )}
+                    );
+                  })()}
+                </div>
+              </div>
+              <div className="mb-4 px-4 flex justify-between items-center">
+                <div>
+                  <p className="text-xl font-bold text-blue-500 mb-1">
+                    ${et.revenue.toLocaleString()}
+                  </p>
+                  <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Today Revenue
+                  </p>
+                </div>
+                <div>
+                  <div className='bg-green-400 py-[3px] rounded-md rounded-br-none rounded-bl-none'>
+                    <p className='text-center uppercase text-[10px] font-bold text-white'>{currentDate}</p>
+                  </div>
+                  <div className='bg-green-100 px-2 py-1 rounded-md rounded-tr-none rounded-tl-none'>
+                    <p className="text-xl font-bold text-green-500 mb-1">
+                      {getTargetRevenue(et.name).toLocaleString()}
+                    </p>
+                    <p className={`text-[12px] font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      Daily Target
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Stack and Team Member Info
-              {(et.name === 'JSG29' || et.name === 'JSG26' || et.name === 'JSG30PM') && (
-                <div className={`mb-3 p-2 rounded-md text-xs ${isDarkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-50 text-blue-700'
-                  }`}>
-                  <div className="font-medium">
-                    {et.name === 'JSG29' && 'S7 KESHAV'}
-                    {et.name === 'JSG26' && 'S7 NIKHIL'}
-                    {et.name === 'JSG30PM' && 'S7 ADITYA S.'}
-                  </div>
-                </div>
-              )} */}
-
-              <div className="mb-4">
-                <p className="text-2xl font-bold text-orange-500 mb-1">
-                  ${et.revenue.toLocaleString()}
-                </p>
-                <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Total Revenue
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between px-4">
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center">
                     <Layers className="h-4 w-4 mr-1 text-red-500" />
@@ -879,7 +933,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
               {/* Toggle button */}
               <button
                 onClick={() => toggleET(et.name)}
-                className={`mt-3 flex items-center gap-1 text-sm font-medium ${isDarkMode ? 'text-orange-400' : 'text-orange-600'
+                className={`mt-3 flex items-center gap-1 text-sm font-medium px-4 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'
                   } hover:underline`}
               >
                 {expandedETs.has(et.name) ? (
@@ -903,7 +957,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   {et.advertisersArray?.map(ad => (
                     <li
                       key={ad.name}
-                      className="flex flex-col justify-center items-center gap-2 bg-orange-500/10 p-1 rounded-[12px] p-2 w-[30%]"
+                      className="flex flex-col justify-center items-center gap-2 bg-blue-500/10 p-1 rounded-[12px] p-2 w-[30%]"
                     >
                       <span className="font-medium">{ad.name}</span>
                       <span
@@ -975,7 +1029,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     </span>
                   </div>
                   <div className="flex items-center">
-                    <Users className="h-4 w-4 mr-1 text-orange-500" />
+                    <Users className="h-4 w-4 mr-1 text-blue-500" />
                     <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                       {campaign.ets.length}
                     </span>
@@ -1084,7 +1138,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
             {/* ET Revenue for Selected Campaign */}
             <div className="mt-6">
               <div className="flex items-center mb-6">
-                <Users className="h-6 w-6 mr-3 text-orange-500" />
+                <Users className="h-6 w-6 mr-3 text-blue-500" />
                 <h4 className="text-xl font-bold">ET-Wise Revenue Breakdown</h4>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1122,7 +1176,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                         <div className="space-y-4">
                           {/* ET Header */}
                           <div className="flex items-center space-x-2">
-                            <Target className="h-5 w-5 text-orange-600" />
+                            <Target className="h-5 w-5 text-blue-600" />
                             <h4 className="text-xl font-bold">{etData.etName}</h4>
                           </div>
 
@@ -1155,7 +1209,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                           {/* Active Creatives */}
                           <div>
                             <div className="flex items-center space-x-2 mb-3">
-                              <Users className="h-4 w-4 text-orange-600" />
+                              <Users className="h-4 w-4 text-blue-600" />
                               <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                                 Active Creatives ({etData.creatives.length}):
                               </span>
@@ -1165,8 +1219,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                                 <span
                                   key={idx}
                                   className={`px-3 py-1 rounded-full text-xs font-medium ${isDarkMode
-                                    ? 'bg-orange-900/30 text-orange-300 border border-orange-800'
-                                    : 'bg-orange-100 text-orange-800 border border-orange-200'
+                                    ? 'bg-blue-900/30 text-blue-300 border border-blue-800'
+                                    : 'bg-blue-100 text-blue-800 border border-blue-200'
                                     }`}
                                 >
                                   {creative.name}
@@ -1223,13 +1277,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           }`}>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
-              <Users className="h-5 w-5 mr-2 text-orange-500" />
+              <Users className="h-5 w-5 mr-2 text-blue-500" />
               <h3 className="text-xl font-bold">ET Analysis</h3>
             </div>
             {selectedET && (
               <button
                 onClick={exportETCreatives}
-                className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${isDarkMode ? 'bg-orange-600 hover:bg-orange-700' : 'bg-orange-600 hover:bg-orange-700'
+                className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'
                   } text-white`}
               >
                 <Download className="h-4 w-4 mr-2" />
@@ -1238,13 +1292,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
             )}
           </div>
 
-          <div className={`p-4 rounded-lg mb-4 ${isDarkMode ? 'bg-orange-900/20 border border-orange-800' : 'bg-orange-50 border border-orange-200'
+          <div className={`p-4 rounded-lg mb-4 ${isDarkMode ? 'bg-blue-900/20 border border-blue-800' : 'bg-blue-50 border border-blue-200'
             }`}>
             <div className="flex items-center mb-2">
-              <Search className="h-5 w-5 mr-2 text-orange-500" />
-              <label className="block text-sm font-medium text-orange-600">Select ET for Detailed Analysis</label>
+              <Search className="h-5 w-5 mr-2 text-blue-500" />
+              <label className="block text-sm font-medium text-blue-600">Select ET for Detailed Analysis</label>
             </div>
-            <p className={`text-xs ${isDarkMode ? 'text-orange-300' : 'text-orange-600'}`}>
+            <p className={`text-xs ${isDarkMode ? 'text-blue-300' : 'text-blue-600'}`}>
               Choose an ET to view campaign-wise performance and export creative data
             </p>
           </div>
@@ -1253,9 +1307,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
             value={selectedET}
             onChange={(e) => setSelectedET(e.target.value)}
             className={`w-full p-4 rounded-lg border text-lg font-medium ${isDarkMode
-              ? 'bg-gray-700 border-gray-600 text-white focus:border-orange-500'
-              : 'bg-white border-gray-300 text-gray-900 focus:border-orange-500'
-              } focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-colors`}
+              ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
+              : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
+              } focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors`}
           >
             <option value="">All ETs</option>
             {analytics.etStats.map(et => (
@@ -1266,6 +1320,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           </select>
         </div>
         {/* ET Analysis */}
+
         {selectedETData && (
           <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
             }`}>
@@ -1494,13 +1549,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   </p>
                 </div>
 
-                <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gradient-to-br from-orange-900/20 to-orange-800/10 border-orange-800' : 'bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200'
+                <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gradient-to-br from-blue-900/20 to-blue-800/10 border-blue-800' : 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200'
                   }`}>
                   <div className="flex items-center mb-3">
-                    <Users className="h-6 w-6 text-orange-500 mr-2" />
-                    <h3 className="font-semibold text-orange-600">Total ETs</h3>
+                    <Users className="h-6 w-6 text-blue-500 mr-2" />
+                    <h3 className="font-semibold text-blue-600">Total ETs</h3>
                   </div>
-                  <p className="text-3xl font-bold text-orange-500">
+                  <p className="text-3xl font-bold text-blue-500">
                     {campaignPopup.campaign.ets.length}
                   </p>
                 </div>
@@ -1608,14 +1663,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
                       <div>
                         <div className="flex items-center mb-2">
-                          <Users className="h-4 w-4 text-orange-500 mr-2" />
+                          <Users className="h-4 w-4 text-blue-500 mr-2" />
                           <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                             Active in ETs ({creative.ets.length}):
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {creative.ets.map(et => (
-                            <span key={et} className={`px-2 py-1 rounded-md text-xs font-medium ${isDarkMode ? 'bg-orange-900/30 text-orange-300 border border-orange-800' : 'bg-orange-100 text-orange-700 border border-orange-200'
+                            <span key={et} className={`px-2 py-1 rounded-md text-xs font-medium ${isDarkMode ? 'bg-blue-900/30 text-blue-300 border border-blue-800' : 'bg-blue-100 text-blue-700 border border-blue-200'
                               }`}>
                               {et}
                             </span>

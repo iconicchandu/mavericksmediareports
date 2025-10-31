@@ -230,7 +230,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded, isDarkMode }) 
           <div className="absolute top-4 left-4 w-8 h-8 bg-blue-400 rounded-full animate-pulse"></div>
           <div className="absolute top-8 right-8 w-6 h-6 bg-red-400 rounded-full animate-pulse delay-1000"></div>
           <div className="absolute bottom-6 left-1/3 w-4 h-4 bg-emerald-400 rounded-full animate-pulse delay-2000"></div>
-          <div className="absolute bottom-4 right-1/4 w-5 h-5 bg-orange-400 rounded-full animate-pulse delay-3000"></div>
+          <div className="absolute bottom-4 right-1/4 w-5 h-5 bg-blue-400 rounded-full animate-pulse delay-3000"></div>
         </div>
 
         <div className="relative z-10">

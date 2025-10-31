@@ -51,7 +51,7 @@ function App() {
   React.useEffect(() => {
     if (combinedData && !hasTriggeredCelebration) {
       const totalRevenue = combinedData.records.reduce((sum, record) => sum + record.revenue, 0)
-      if (totalRevenue >= 12000) {
+      if (totalRevenue >= 15000) {
         setShowCelebration(true)
         setHasTriggeredCelebration(true)
       }
@@ -118,7 +118,7 @@ function App() {
           </div>
         )}
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-10 sm:py-12">
           {/* When no data yet: hero + upload intro + FileUpload card */}
           {!combinedData ? (
             <div className="space-y-12 sm:space-y-16">
