@@ -55,27 +55,24 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
   // 🎯 Target revenue map (keys stored normalized)
   const rawTargetRevenueMap: Record<string, string> = {
-    "JSG21": "$1800",
-    "24MC": "P24",
-    "P24": "$1800",
-    "JSG41": "$1800",
+    "JSG21": "$1100",
+    "P24": "$1100",
+    "JSG41": "$1100",
     "CM41": "JSG41",
     "JSG34": "$1100",
-    "JSG36": "$1100",
+    "JSG36": "$800",
     "C36": "JSG36",
     "JSG26": "$1800",
     "JSG29": "$1800",
     "JSG30PM": "$1800",
-    "C18": "$500",
-    "22MB": "0",
-    "22mb": "0",
     "JSG22": "0",
     "JSG32": "$1100",
     "EX32": "JSG32",
     "JSG20": "$1800",
-    "JSG38": "$1800",
-    "JSG40": "$1800",
-    "JSG43": "$500",
+    "JSG38": "$1100",
+    "JSG40": "$1100",
+    "JSG43": "$750",
+    "JSG44": "$1100",
   };
 
 
@@ -90,9 +87,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
   // ✅ Safe helper to get target revenue for an ET name
   const getTargetRevenue = (etName?: string): string => {
-    if (!etName) return "0"; // return string instead of number for consistency
+    if (!etName) return "NA"; // return string instead of number for consistency
     const key = etName.trim().toUpperCase();
-    return targetRevenueMap[key] ?? "0";
+    return targetRevenueMap[key] ?? "NA";
   };
 
   // ------------------ET Info Stack,Manager-----
@@ -131,6 +128,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
     "JSG32": { stack: "S11", manager: "Kaif K." },
     "EX32": { stack: "S11", manager: "Kaif K." },
     "JSG20": { stack: "S11", manager: "Harsh G." },
+    "JSG44": { stack: "S11", manager: "Harsh G." },
 
     // S12
     "JSG38": { stack: "S12", manager: "Kaif K." },
@@ -850,9 +848,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                 : 'bg-gradient-to-br from-blue-50 to-white border-blue-300'
                 } group`}>
               <div className="w-full flex items-center mb-4">
-                <div className="w-full flex items-center justify-between bg-blue-900 px-4 py-1 rounded-xl rounded-br-none rounded-bl-none">
+                <div className="w-full flex items-center justify-between bg-blue-800 px-4 py-1 rounded-xl rounded-br-none rounded-bl-none">
                   <div className="flex justify-start items-center">
-                    <Users className="h-6 w-6 text-blue-300 bg-blue-800 p-1 rounded-md" />
+                    <Users className="h-6 w-6 text-blue-300 bg-blue-600 p-1 rounded-md" />
                     <h4 className="font-bold text-lg ml-3 text-white">
                       {et.name}
                     </h4>
@@ -903,7 +901,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   <div className='bg-green-400 py-[3px] rounded-md rounded-br-none rounded-bl-none'>
                     <p className='text-center uppercase text-[10px] font-bold text-white'>{currentDate}</p>
                   </div>
-                  <div className='bg-green-100 px-2 py-1 rounded-md rounded-tr-none rounded-tl-none'>
+                  <div className="bg-green-100 px-2 py-1 rounded-md rounded-tr-none rounded-tl-none">
                     <p className="text-xl font-bold text-green-500 mb-1">
                       {getTargetRevenue(et.name).toLocaleString()}
                     </p>
