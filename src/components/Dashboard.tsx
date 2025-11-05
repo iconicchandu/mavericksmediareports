@@ -91,9 +91,71 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
     const key = etName.trim().toUpperCase();
     return targetRevenueMap[key] ?? "NA";
   };
+  // -----------------------
+
+  // -------------🧮 Calculate total of only numeric target revenues (ignore mixed strings)
+  let totalTargetRevenue = 0;
+
+  // ✅ Safely calculate totalRevenue if not already defined
+  let totalRevenue = 0;
+  if (Array.isArray(data.records)) {
+    totalRevenue = data.records.reduce((sum, et) => {
+      const rev = Number(getTargetRevenue(et.et)) || 0;
+      return sum + rev;
+    }, 0);
+  }
+
+  Object.values(targetRevenueMap).forEach((value) => {
+    if (!value) return;
+
+    const cleaned = value.toString().trim();
+
+    // ❌ Skip ET-like references (e.g., "JSG36", "CM41", "EX32")
+    if (/^[A-Z]+\d+$/i.test(cleaned)) return;
+
+    // ✅ Match only valid numeric or $ values: "$1800", "1,800", "$ 1,800", "1800"
+    const match = cleaned.match(/^\$?\s*[\d,]+(\.\d+)?$/);
+
+    if (match) {
+      const num = parseFloat(cleaned.replace(/[$,\s]/g, ""));
+      if (!isNaN(num) && isFinite(num)) {
+        totalTargetRevenue += num;
+      }
+    }
+  });
+
+  // NOTE: don't multiply here — we'll decide display-time multiplication
+  // after analytics.totalRevenue is known to avoid mixing data sources.
+  // -----------------------
+
+
+  // -------------------💡 Safe display for ET revenue target (handles numbers, strings, and mixed values)
+  const displayTargetRevenue = (etName: string, totalRevenue: number) => {
+    const rawValue = getTargetRevenue(etName); // e.g. "1100", "Demo", "Demo 1100"
+    if (!rawValue) return "0";
+
+    // Check if value has both letters and digits
+    const hasLetters = /[a-zA-Z]/.test(rawValue);
+    const hasNumbers = /\d/.test(rawValue);
+
+    // If both letters and numbers exist → return as-is (no math)
+    if (hasLetters && hasNumbers) {
+      return rawValue;
+    }
+
+    // If only numbers → apply multiplication when totalRevenue >= 40000
+    if (hasNumbers && !hasLetters) {
+      const numericValue = parseFloat(rawValue.replace(/[^0-9.]/g, ""));
+      const multiplied = numericValue * (totalRevenue >= 40000 ? 7 : 1);
+      return multiplied.toLocaleString();
+    }
+
+    // If only letters → return as-is
+    return rawValue;
+  };
+  // ---End of------For Weekly Revenue (Multiply by 7)-----------
 
   // ------------------ET Info Stack,Manager-----
-
   // 👥 ET Information Map (Stack, Manager, and optional Type)
   const etInfoMap: Record<
     string,
@@ -157,6 +219,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
   const analytics = useMemo(() => {
     const totalRevenue = data.records.reduce((sum, record) => sum + record.revenue, 0);
+
+    // 💰 If total revenue hits or exceeds 40,000
+    const isRevenueHigh = totalRevenue >= 40000;
 
     // Advertiser stats
     const advertiserStats = new Map<string, AdvertiserStats>();
@@ -319,6 +384,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         .sort((a, b) => b.value - a.value), // 👈 sorts descending by revenue
     };
   }, [data]);
+
+  // Displayed total target: multiply by 7 when overall revenue is > 40000
+  const displayedTotalTargetRevenue = totalTargetRevenue * (analytics.totalRevenue > 40000 ? 7 : 1);
 
   // Search functionality
   const searchResults = useMemo(() => {
@@ -704,7 +772,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
               <p className="text-sm font-medium text-white">
                 Daily Revenue Target
               </p>
-              <p className="text-2xl font-bold text-green-500">$18,200</p>
+              <div className="flex items-center">
+                <p className="text-2xl font-bold text-green-500">${displayedTotalTargetRevenue.toLocaleString()}</p>
+                {analytics.totalRevenue > 40000 }
+              </div>
             </div>
           </div>
         </div>
@@ -840,7 +911,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {analytics.etStats.slice(0, 50).map((et, index) => (
+          {analytics.etStats.slice(0, 100).map((et, index) => (
             <div
               key={et.name}
               className={`pb-4 rounded-xl border transition-all duration-300 hover:shadow-xl cursor-pointer ${isDarkMode
@@ -903,7 +974,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   </div>
                   <div className="bg-green-100 px-2 py-1 rounded-md rounded-tr-none rounded-tl-none">
                     <p className="text-xl font-bold text-green-500 mb-1">
-                      {getTargetRevenue(et.name).toLocaleString()}
+                      {displayTargetRevenue(et.name, analytics.totalRevenue)}
                     </p>
                     <p className={`text-[12px] font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                       Daily Target
@@ -1465,7 +1536,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
             {/* All Creatives for ET */}
             <h4 className="font-semibold mb-4 mt-4">All Creatives of {selectedETData.name}</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-              {selectedETData.creatives.map((creative, index) => (
+              {selectedETData.creatives.map((creative) => (
                 <div
                   key={creative.name}
                   className={`p-4 rounded-lg border transition-all duration-200 hover:shadow-lg ${isDarkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-650' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
