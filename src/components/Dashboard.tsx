@@ -21,6 +21,44 @@ const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'
 const TOP_ET_COLOR = "#10B981";
 const OTHER_ET_COLOR = "#3B82F6";
 
+// ---------------------- START: UI Accent Helpers ----------------------
+// Accent color per advertiser to keep UI visually coherent
+const getAdvertiserAccent = (name: string): string => {
+  switch (name) {
+    case 'Branded':
+      return '#3B82F6'; // blue
+    case 'RGR':
+      return '#f1b308'; // yellow
+    case 'GZ':
+      return '#0EA5E9'; // sky
+    case 'CM Gmail':
+      return '#F97316'; // orange
+    case 'MI':
+      return '#2563EB'; // accent for MI (indigo/blue)
+    case 'ES':
+      return '#22C55E'; // green
+    case 'XC':
+      return '#06B6D4'; // cyan
+    case 'Comcast':
+      return '#DC2626'; // red
+    case 'Other':
+      return '#9CA3AF'; // gray
+    default:
+      return '#10B981'; // emerald fallback
+  }
+};
+
+// Convert hex color to rgba with provided alpha for soft backgrounds
+const hexToRgba = (hex: string, alpha: number): string => {
+  const clean = hex.replace('#', '');
+  const bigint = parseInt(clean, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+// ----------------------- END: UI Accent Helpers -----------------------
+
 
 
 const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, searchQuery, onSearchChange, onReset }) => {
@@ -230,6 +268,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
     let cmRevenue = 0;
     let cmCampaigns: Set<string> = new Set();
 
+    // Precompute MI pattern so we can exclude MI from base advertiser buckets
+    const miSubidPattern = /(^MI(?:_|$))|(_MI(?:_|$))/;
+
     data.records.forEach(record => {
       if (
         record.subid?.includes("CM") || record.subid?.includes("JSG36")) {
@@ -246,6 +287,25 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       });
     }
 
+    // Custom MI aggregation (match MI at start/end or surrounded by underscores)
+    let miRevenue = 0;
+    let miCampaigns: Set<string> = new Set();
+
+    data.records.forEach(record => {
+      if (record.subid && miSubidPattern.test(record.subid)) {
+        miRevenue += record.revenue;
+        miCampaigns.add(record.campaign);
+      }
+    });
+
+    if (miRevenue > 0) {
+      advertiserStats.set("MI", {
+        name: "MI",
+        revenue: miRevenue,
+        campaigns: Array.from(miCampaigns) as string[],
+      });
+    }
+
     // Campaign stats
     const campaignStats = new Map<string, CampaignStats>();
 
@@ -259,18 +319,21 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
     const creativesByET = new Map<string, Map<string, CreativeStats>>();
 
     data.records.forEach(record => {
-      // Advertiser stats
-      if (!advertiserStats.has(record.advertiser)) {
-        advertiserStats.set(record.advertiser, {
-          name: record.advertiser,
-          revenue: 0,
-          campaigns: []
-        });
-      }
-      const advertiser = advertiserStats.get(record.advertiser)!;
-      advertiser.revenue += record.revenue;
-      if (!advertiser.campaigns.includes(record.campaign)) {
-        advertiser.campaigns.push(record.campaign);
+      // Advertiser stats (exclude MI-tagged subids from base advertisers)
+      const isMI = !!record.subid && miSubidPattern.test(record.subid);
+      if (!isMI) {
+        if (!advertiserStats.has(record.advertiser)) {
+          advertiserStats.set(record.advertiser, {
+            name: record.advertiser,
+            revenue: 0,
+            campaigns: []
+          });
+        }
+        const advertiser = advertiserStats.get(record.advertiser)!;
+        advertiser.revenue += record.revenue;
+        if (!advertiser.campaigns.includes(record.campaign)) {
+          advertiser.campaigns.push(record.campaign);
+        }
       }
 
       // Campaign stats
@@ -304,11 +367,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         et.campaigns.push(record.campaign);
       }
 
-      // Track advertiser revenue inside ET
-      if (!et.advertisers.has(record.advertiser)) {
-        et.advertisers.set(record.advertiser, 0);
+      // Track advertiser revenue inside ET (map MI-tagged subids to 'MI')
+      const advertiserKey = record.subid && miSubidPattern.test(record.subid)
+        ? 'MI'
+        : record.advertiser;
+      if (!et.advertisers.has(advertiserKey)) {
+        et.advertisers.set(advertiserKey, 0);
       }
-      et.advertisers.set(record.advertiser, et.advertisers.get(record.advertiser)! + record.revenue);
+      et.advertisers.set(advertiserKey, et.advertisers.get(advertiserKey)! + record.revenue);
 
       // Creatives by campaign
       if (!creativesByCampaign.has(record.campaign)) {
@@ -603,6 +669,54 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
     setCampaignPopup({ isOpen: false, campaign: null });
   };
 
+  // -------------------- START: Advertiser Popup State/logic --------------------
+  const [advertiserPopup, setAdvertiserPopup] = useState<{
+    isOpen: boolean;
+    name: string | null;
+    creatives: {
+      name: string;
+      totalRevenue: number;
+      frequency: number;
+      campaigns: string[];
+      ets: string[];
+    }[];
+    totalRevenue: number;
+  }>({ isOpen: false, name: null, creatives: [], totalRevenue: 0 });
+
+  const getAdvertiserRecords = (advertiserName: string) => {
+    const miPattern = /(^MI(?:_|$))|(_MI(?:_|$))/;
+    if (advertiserName === 'MI') {
+      return data.records.filter(r => r.subid && miPattern.test(r.subid));
+    }
+    if (advertiserName === 'CM Gmail') {
+      return data.records.filter(r => r.subid?.includes('CM') || r.subid?.includes('JSG36'));
+    }
+    return data.records.filter(r => r.advertiser === advertiserName && !(r.subid && miPattern.test(r.subid)));
+  };
+
+  const openAdvertiserPopup = (advertiserName: string) => {
+    const records = getAdvertiserRecords(advertiserName);
+    const map = new Map<string, { name: string; totalRevenue: number; frequency: number; campaigns: Set<string>; ets: Set<string>; }>();
+    records.forEach(r => {
+      if (!map.has(r.creative)) {
+        map.set(r.creative, { name: r.creative, totalRevenue: 0, frequency: 0, campaigns: new Set(), ets: new Set() });
+      }
+      const item = map.get(r.creative)!;
+      item.totalRevenue += r.revenue;
+      item.frequency += 1;
+      item.campaigns.add(r.campaign);
+      item.ets.add(r.et);
+    });
+    const creatives = Array.from(map.values())
+      .map(v => ({ name: v.name, totalRevenue: v.totalRevenue, frequency: v.frequency, campaigns: Array.from(v.campaigns), ets: Array.from(v.ets) }))
+      .sort((a, b) => b.totalRevenue - a.totalRevenue);
+    const totalRevenue = creatives.reduce((s, c) => s + c.totalRevenue, 0);
+    setAdvertiserPopup({ isOpen: true, name: advertiserName, creatives, totalRevenue });
+  };
+
+  const closeAdvertiserPopup = () => setAdvertiserPopup({ isOpen: false, name: null, creatives: [], totalRevenue: 0 });
+  // --------------------- END: Advertiser Popup State/logic ---------------------
+
 
 
   return (
@@ -637,6 +751,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         </div>
       </div>
 
+      {/* End: Header */}
+
       {/* Search Box */}
       <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gradient-to-r from-violet-200 to-pink-200 border-gray-200'
         }`}>
@@ -668,6 +784,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           )}
         </div>
       </div>
+
+      {/* End: Search Box */}
 
       {/* Search Results */}
       {searchResults && (
@@ -749,6 +867,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         </div>
       )}
 
+      {/* End: Search Results */}
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-[#d2f7e0] border-[#22c55e]'
@@ -774,7 +894,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
               </p>
               <div className="flex items-center">
                 <p className="text-2xl font-bold text-green-500">${displayedTotalTargetRevenue.toLocaleString()}</p>
-                {analytics.totalRevenue > 40000 }
+                {analytics.totalRevenue > 40000}
               </div>
             </div>
           </div>
@@ -820,49 +940,125 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         </div>
       </div>
 
-      {/* Advertiser Revenue Breakdown */}
-      <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        }`}>
-        <div className="flex items-center mb-6">
-          <Building2 className="h-6 w-6 mr-3 text-red-500" />
-          <h3 className="text-xl font-bold">Advertiser-Wise Revenue</h3>
+      {/* End: Summary Cards */}
+
+      {/* Advertiser Revenue Breakdown (redesigned cards) */}
+      <div className={`p-6 rounded-2xl border shadow-sm ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+        <div className="flex items-center mb-6 justify-between">
+          <div className="flex items-center">
+            <Building2 className="h-6 w-6 mr-3 text-red-500" />
+            <h3 className="text-xl font-bold">Advertiser-Wise Revenue</h3>
+          </div>
+          <div className={`text-sm px-3 py-1 rounded-full ${isDarkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-800'
+            }`}>
+            Top advertisers by revenue
+          </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {analytics.advertiserStats.map((advertiser, index) => (
-            <div
-              key={advertiser.name}
-              className={`p-4 rounded-lg border transition-all duration-200 hover:shadow-lg ${isDarkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-650' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                }`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center">
-                  {advertiser.name === 'Branded' && <Award className="h-4 w-4 mr-2 text-yellow-500" />}
-                  {advertiser.name === 'GZ' && <Zap className="h-4 w-4 mr-2 text-blue-500" />}
-                  {advertiser.name === 'XC' && <Zap className="h-4 w-4 mr-2 text-blue-500" />}
-                  {advertiser.name === 'ES' && <Globe className="h-4 w-4 mr-2 text-green-500" />}
-                  {advertiser.name === 'Comcast' && <Wifi className="h-4 w-4 mr-2 text-red-500" />}
-                  {advertiser.name === 'RGR' && <Target className="h-4 w-4 mr-2 text-red-500" />}
-                  {advertiser.name === 'CM Gmail' && <AtSign className="h-4 w-4 mr-2 text-red-500" />}
-                  <h4 className="font-semibold">{advertiser.name}</h4>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6">
+          {analytics.advertiserStats.map((advertiser, index) => {
+            const accent = getAdvertiserAccent(advertiser.name);
+            const iconBg = hexToRgba(accent, isDarkMode ? 0.15 : 0.08);
+            return (
+              <div
+                key={advertiser.name}
+                onClick={() => openAdvertiserPopup(advertiser.name)}
+                className={`relative p-3 rounded-2xl shadow-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-[2px] ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'} style:border-1 cursor-pointer`}
+                style={{ border: `1px solid ${accent}`, backgroundColor: iconBg }}
+              >
+                {/* colored indicator */}
+                <div className="absolute top-3 right-3 w-3 h-3 rounded-full" style={{ backgroundColor: accent }} />
+
+                <div className="flex items-center space-x-4">
+                  <div
+                    className={`flex items-center justify-center rounded-xl w-14 h-14`}
+                    style={{ backgroundColor: iconBg, border: `1px solid ${hexToRgba(accent, 0.35)}` }}
+                  >
+                    {advertiser.name === 'Branded' && <Award className="h-6 w-6" style={{ color: accent }} />}
+                    {advertiser.name === 'GZ' && <Zap className="h-6 w-6" style={{ color: accent }} />}
+                    {advertiser.name === 'XC' && <Zap className="h-6 w-6" style={{ color: accent }} />}
+                    {advertiser.name === 'ES' && <Globe className="h-6 w-6" style={{ color: accent }} />}
+                    {advertiser.name === 'Comcast' && <Wifi className="h-6 w-6" style={{ color: accent }} />}
+                    {advertiser.name === 'MI' && <Star className="h-6 w-6" style={{ color: accent }} />}
+                    {advertiser.name === 'RGR' && <Target className="h-6 w-6" style={{ color: accent }} />}
+                    {advertiser.name === 'CM Gmail' && <AtSign className="h-6 w-6" style={{ color: accent }} />}
+                  </div>
+
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-base truncate">{advertiser.name}</h4>
+                    <p className="text-3xl font-bold mt-1" style={{ color: accent }}>
+                      ${advertiser.revenue.toLocaleString()}
+                    </p>
+                    <p className="text-sm font-medium mt-2 text-gray-600">
+                      {advertiser.campaigns.length} campaign{advertiser.campaigns.length !== 1 ? 's' : ''}
+                    </p>
+                  </div>
                 </div>
-
-
-
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                />
               </div>
-              <p className="text-2xl font-bold text-green-500">
-                ${advertiser.revenue.toLocaleString()}
-              </p>
-              <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                {advertiser.campaigns.length} campaigns
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
+
+      {/* End: Advertiser Revenue Breakdown */}
+
+      {/* Advertiser Details Popup */}
+      {advertiserPopup.isOpen && advertiserPopup.name && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className={`max-w-6xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
+            <div className={`sticky top-0 p-6 border-b ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className={`${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-100'} p-3 rounded-xl`}>
+                    <Building2 className="h-8 w-8 text-blue-500" />
+                  </div>
+                  <div className="ml-4">
+                    <h2 className="text-2xl font-bold">Advertiser: {advertiserPopup.name}</h2>
+                    <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Creative performance</p>
+                  </div>
+                </div>
+                <button onClick={closeAdvertiserPopup} className={`p-2 rounded-full ${isDarkMode ? 'hover:bg-gray-700 text-gray-400 hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'}`}>
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium">Total Revenue</p>
+                  <p className="text-2xl font-bold text-green-500">${advertiserPopup.totalRevenue.toLocaleString()}</p>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className={`min-w-full text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                  <thead>
+                    <tr className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                      <th className="text-left px-4 py-2">Creative</th>
+                      <th className="text-right px-4 py-2">Revenue</th>
+                      <th className="text-right px-4 py-2">Frequency</th>
+                      <th className="text-left px-4 py-2">Campaigns</th>
+                      <th className="text-left px-4 py-2">ETs</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {advertiserPopup.creatives.map(cr => (
+                      <tr key={cr.name} className={`${isDarkMode ? 'border-gray-700' : 'border-gray-200'} border-b`}>
+                        <td className="px-4 py-2 font-medium">{cr.name}</td>
+                        <td className="px-4 py-2 text-right text-green-500 font-semibold">${cr.totalRevenue.toLocaleString()}</td>
+                        <td className="px-4 py-2 text-right">{cr.frequency}</td>
+                        <td className="px-4 py-2">{cr.campaigns.join(', ')}</td>
+                        <td className="px-4 py-2">{cr.ets.join(', ')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ET Revenue Charts */}
       <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
@@ -896,6 +1092,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         </div>
       </div>
 
+
+      {/* End: ET Revenue Charts */}
 
       {/* ET Revenue Breakdown */}
       <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
@@ -1022,11 +1220,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
               <div
                 className={`overflow-hidden transition-all duration-300 rounded-xl text-sm font-medium '}
                 ${expandedETs.has(et.name) ? 'max-h-96 p-0 opacity-100 mt-2' : 'max-h-0 p-0 opacity-0'}`}>
-                <ul className="text-xs space-y-1 flex flex-wrap gap-2 justify-center items-center p-0">
+                <ul className="text-xs flex flex-wrap gap-2 justify-start items-center px-4">
                   {et.advertisersArray?.map(ad => (
                     <li
                       key={ad.name}
-                      className="flex flex-col justify-center items-center gap-2 bg-blue-500/10 p-1 rounded-[12px] p-2 w-[30%]"
+                      className="flex justify-center items-center gap-2 bg-blue-500/10 rounded-[50px] p-1 px-2"
                     >
                       <span className="font-medium">{ad.name}</span>
                       <span
@@ -1043,6 +1241,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           ))}
         </div>
       </div>
+
+      {/* End: ET Revenue Breakdown */}
 
       {/* Campaign Revenue Breakdown */}
       <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
@@ -1114,6 +1314,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         </div>
       </div>
 
+
+      {/* End: Campaign Revenue Breakdown */}
 
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
@@ -1340,6 +1542,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         )}
       </div>
 
+      {/* End: Campaign Filters & Analysis */}
+
       {/* Filters 2 */}
       <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
         <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
@@ -1561,6 +1765,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       </div>
 
 
+      {/* End: ET Filters & Analysis */}
+
       {/* Campaign Details Popup */}
       {campaignPopup.isOpen && campaignPopup.campaign && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -1754,6 +1960,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           </div>
         </div>
       )}
+      {/* End: Campaign Details Popup */}
     </div>
   );
 };
