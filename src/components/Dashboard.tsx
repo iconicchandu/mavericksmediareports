@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Download, FileText, TrendingUp, Users, Target, DollarSign, RefreshCw, Building2, Zap, Globe, Wifi, Award, BarChart3, Search, X, Star, Activity, Layers, Eye, Hash, Calendar, AtSign, ChevronUp, ChevronDown } from 'lucide-react';
+import { Download, FileText, TrendingUp, Users, Target, DollarSign, RefreshCw, Building2, Zap, Globe, Wifi, Award, BarChart3, Search, X, Star, Activity, Layers, Eye, Hash, Calendar, AtSign, ChevronUp, ChevronDown, Crown } from 'lucide-react';
 import { ProcessedData, DataRecord, CreativeStats, CampaignStats, ETStats, AdvertiserStats } from '../types';
 
 interface UploadedFile {
@@ -1095,6 +1095,163 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
       {/* End: ET Revenue Charts */}
 
+      {/* Top Revenue ETs Section */}
+      {analytics.etStats.length > 0 && (
+        <div className={`p-6 rounded-lg border-2 shadow-2xl ${isDarkMode ? 'bg-gradient-to-br from-amber-900/30 via-yellow-900/20 to-amber-800/30 border-amber-500' : 'bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100 border-amber-400'
+          }`}>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <Award className="h-6 w-6 mr-3 text-amber-500" />
+              <h3 className="text-xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">Top Revenue ETs</h3>
+            </div>
+            <div className={`text-sm px-3 py-1 rounded-full ${isDarkMode ? 'bg-amber-900/50 text-amber-300 border border-amber-600' : 'bg-amber-100 text-amber-800 border border-amber-300'
+              }`}>
+              Top 3 Performing ETs
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {analytics.etStats.slice(0, 3).map((et, index) => (
+              <div
+                key={et.name}
+                className={`pb-4 rounded-xl border-2 transition-all duration-300 hover:shadow-2xl cursor-pointer relative overflow-hidden ${isDarkMode
+                  ? 'bg-gradient-to-br from-amber-900/40 via-yellow-900/30 to-amber-800/40 border-amber-500 hover:border-amber-400 shadow-amber-500/20'
+                  : 'bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100 border-amber-400 hover:border-amber-500 shadow-amber-400/30'
+                  } group`}>
+                {/* Crown Icon at Top Right */}
+
+                <div className="w-full flex items-center mb-4">
+                  <div className={`w-full flex items-center justify-between px-4 py-1 rounded-xl rounded-br-none rounded-bl-none ${isDarkMode
+                    ? 'bg-gradient-to-r from-amber-700 to-yellow-700'
+                    : 'bg-gradient-to-r from-amber-500 to-yellow-500'
+                    }`}>
+                    <div className="flex justify-start items-center">
+                      <Crown className={`h-8 w-8 ${isDarkMode ? 'text-amber-100' : 'text-amber-200'} drop-shadow-lg`} fill={isDarkMode ? '#fbbf24' : '#f59e0b'} />
+                      <h4 className="font-bold text-lg ml-3 text-white">
+                        {et.name}
+                      </h4>
+                      <span className={`ml-2 px-2 py-1 ${isDarkMode ? 'bg-amber-400 text-amber-900' : 'bg-amber-300 text-amber-900'} text-xs font-bold rounded`}>
+                        #{index + 1}
+                      </span>
+                    </div>
+
+                    {(() => {
+                      const info = getETInfo(et.name);
+                      if (!info) return null;
+
+                      return (
+                        <div className="flex items-center space-x-0 bg-red-500 rounded-xl">
+                          {/* Stack */}
+                          <span className="text-[13px] font-bold text-white pl-2 mr-2">
+                            {info.stack}
+                          </span>
+
+                          {/* Manager */}
+                          <span className="text-[13px] font-bold text-white pr-2">
+                            {info.manager}
+                          </span>
+
+                          {/* Type (optional) */}
+                          {info.type && (
+                            <span
+                              className={`text-[10px] px-1 py-[2px] rounded-xl font-bold ${info.type === "COM"
+                                ? "bg-blue-600 text-white"
+                                : "bg-purple-600 text-white"
+                                }`}
+                            >
+                              {info.type}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+                <div className="mb-4 px-4 flex justify-between items-center">
+                  <div>
+                    <p className={`text-xl font-bold mb-1 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
+                      ${et.revenue.toLocaleString()}
+                    </p>
+                    <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      Today Revenue
+                    </p>
+                  </div>
+                  <div>
+                    <div className='bg-green-400 py-[3px] rounded-md rounded-br-none rounded-bl-none'>
+                      <p className='text-center uppercase text-[10px] font-bold text-white'>{currentDate}</p>
+                    </div>
+                    <div className="bg-green-100 px-2 py-1 rounded-md rounded-tr-none rounded-tl-none">
+                      <p className="text-xl font-bold text-green-500 mb-1">
+                        {displayTargetRevenue(et.name, analytics.totalRevenue)}
+                      </p>
+                      <p className={`text-[12px] font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        Daily Target
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between px-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center">
+                      <Layers className="h-4 w-4 mr-1 text-red-500" />
+                      <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        {et.creatives.length}
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <Target className="h-4 w-4 mr-1 text-blue-500" />
+                      <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        {et.campaigns.length}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                {/* Toggle button */}
+                <button
+                  onClick={() => toggleET(et.name)}
+                  className={`mt-3 flex items-center gap-1 text-sm font-medium px-4 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'
+                    } hover:underline`}
+                >
+                  {expandedETs.has(et.name) ? (
+                    <>
+                      <ChevronUp className="w-4 h-4" />
+                      Hide Advertiser Revenue
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="w-4 h-4" />
+                      View Advertiser Revenue
+                    </>
+                  )}
+                </button>
+
+                {/* Advertiser Breakdown with Transition */}
+                <div
+                  className={`overflow-hidden transition-all duration-300 rounded-xl text-sm font-medium '}
+                  ${expandedETs.has(et.name) ? 'max-h-96 p-0 opacity-100 mt-2' : 'max-h-0 p-0 opacity-0'}`}>
+                  <ul className="text-xs flex flex-wrap gap-2 justify-start items-center px-4">
+                    {et.advertisersArray?.map(ad => (
+                      <li
+                        key={ad.name}
+                        className={`flex justify-center items-center gap-2 rounded-[50px] p-1 px-2 ${isDarkMode ? 'bg-amber-500/20' : 'bg-amber-500/10'}`}
+                      >
+                        <span className="font-medium">{ad.name}</span>
+                        <span
+                          className={`text-xs font-medium ${isDarkMode ? 'text-green-400' : 'text-green-600'
+                            }`}
+                        >
+                          ${ad.revenue.toFixed(2)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ET Revenue Breakdown */}
       <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
         }`}>
@@ -1105,11 +1262,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           </div>
           <div className={`text-sm px-3 py-1 rounded-full ${isDarkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-800'
             }`}>
-            Top performing ETs by revenue
+            All ETs by revenue
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {analytics.etStats.slice(0, 100).map((et, index) => (
+          {analytics.etStats.slice(3, 100).map((et, index) => (
             <div
               key={et.name}
               className={`pb-4 rounded-xl border transition-all duration-300 hover:shadow-xl cursor-pointer ${isDarkMode
