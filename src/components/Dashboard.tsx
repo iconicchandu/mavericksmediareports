@@ -1113,17 +1113,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
             {analytics.etStats.slice(0, 3).map((et, index) => (
               <div
                 key={et.name}
-                className={`pb-4 rounded-xl border-2 transition-all duration-300 hover:shadow-2xl cursor-pointer relative overflow-hidden ${isDarkMode
-                  ? 'bg-gradient-to-br from-amber-900/40 via-yellow-900/30 to-amber-800/40 border-amber-500 hover:border-amber-400 shadow-amber-500/20'
-                  : 'bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100 border-amber-400 hover:border-amber-500 shadow-amber-400/30'
-                  } group`}>
+                className="pb-4 rounded-xl border-2 transition-all duration-300 hover:shadow-2xl cursor-pointer relative overflow-hidden bg-[url('https://img.freepik.com/free-vector/gold-metal-background_78370-154.jpg?semt=ais_hybrid&w=740&q=80')] bg-cover bg-center">
                 {/* Crown Icon at Top Right */}
 
                 <div className="w-full flex items-center mb-4">
-                  <div className={`w-full flex items-center justify-between px-4 py-1 rounded-xl rounded-br-none rounded-bl-none ${isDarkMode
-                    ? 'bg-gradient-to-r from-amber-700 to-yellow-700'
-                    : 'bg-gradient-to-r from-amber-500 to-yellow-500'
-                    }`}>
+                  <div className="w-full flex items-center justify-between px-4 py-1 rounded-xl rounded-br-none rounded-bl-none ">
                     <div className="flex justify-start items-center">
                       <Crown className={`h-8 w-8 ${isDarkMode ? 'text-amber-100' : 'text-amber-200'} drop-shadow-lg`} fill={isDarkMode ? '#fbbf24' : '#f59e0b'} />
                       <h4 className="font-bold text-lg ml-3 text-white">
@@ -1139,7 +1133,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                       if (!info) return null;
 
                       return (
-                        <div className="flex items-center space-x-0 bg-red-500 rounded-xl">
+                        <div className="flex items-center space-x-0 bg-yellow-400 rounded-xl border-[2px] border-yellow-200">
                           {/* Stack */}
                           <span className="text-[13px] font-bold text-white pl-2 mr-2">
                             {info.stack}
@@ -1168,7 +1162,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                 </div>
                 <div className="mb-4 px-4 flex justify-between items-center">
                   <div>
-                    <p className={`text-xl font-bold mb-1 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
+                    <p className={`text-xl font-bold mb-1 ${isDarkMode ? 'text-amber-400' : 'text-amber-700'}`}>
                       ${et.revenue.toLocaleString()}
                     </p>
                     <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -1176,11 +1170,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     </p>
                   </div>
                   <div>
-                    <div className='bg-green-400 py-[3px] rounded-md rounded-br-none rounded-bl-none'>
+                    <div className='bg-yellow-400 py-[3px] rounded-md rounded-br-none rounded-bl-none'>
                       <p className='text-center uppercase text-[10px] font-bold text-white'>{currentDate}</p>
                     </div>
-                    <div className="bg-green-100 px-2 py-1 rounded-md rounded-tr-none rounded-tl-none">
-                      <p className="text-xl font-bold text-green-500 mb-1">
+                    <div className="bg-yellow-300 px-2 py-1 rounded-md rounded-tr-none rounded-tl-none">
+                      <p className="text-xl font-bold text-yellow-600 mb-1">
                         {displayTargetRevenue(et.name, analytics.totalRevenue)}
                       </p>
                       <p className={`text-[12px] font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -1233,7 +1227,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     {et.advertisersArray?.map(ad => (
                       <li
                         key={ad.name}
-                        className={`flex justify-center items-center gap-2 rounded-[50px] p-1 px-2 ${isDarkMode ? 'bg-amber-500/20' : 'bg-amber-500/10'}`}
+                        className={`flex justify-center items-center gap-2 rounded-[50px] p-1 px-2 ${isDarkMode ? 'bg-amber-500/50' : 'bg-amber-500/50'}`}
                       >
                         <span className="font-medium">{ad.name}</span>
                         <span
