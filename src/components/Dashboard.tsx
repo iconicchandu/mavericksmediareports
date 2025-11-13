@@ -205,6 +205,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
     "P24": { stack: "S1", manager: "Abhay S." },
     "JSG41": { stack: "S1", manager: "Aditya G." },
     "CM41": { stack: "S1", manager: "Aditya G." },
+    "JSG45": { stack: "S1", manager: "Aditya G. | Abhay S." },
 
     // S4
     "JSG34": { stack: "S4", manager: "Satyam S." },
@@ -223,6 +224,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
     "22MB": { stack: "S10", manager: "Keshav T.", type: "N-C" },
     "22mb": { stack: "S10", manager: "Keshav T.", type: "N-C" },
     "JSG22": { stack: "S10", manager: "Kaif K." },
+    "JSG18": { stack: "S10", manager: "Aditya S." },
 
     // S11
     "JSG32": { stack: "S11", manager: "Kaif K." },
@@ -232,14 +234,18 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
     // S12
     "JSG38": { stack: "S12", manager: "Kaif K." },
+    "JSG38N": { stack: "S12", manager: "Kaif K." },
     "JSG40": { stack: "S12", manager: "Keshav T." },
 
     // S13
     "JSG43": { stack: "S13", manager: "Aditya S." },
   };
 
-  // 🔍 Get ET Info (safe helper)
-  const getETInfo = (etName: string) => etInfoMap[etName] || null;
+  // 🔍 Get ET Info (safe helper, case-insensitive)
+  const getETInfo = (etName: string) => {
+    const upperET = etName.toUpperCase();
+    return etInfoMap[upperET] || etInfoMap[etName] || null;
+  };
 
   // --------------------------------------
 
@@ -268,12 +274,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
     let cmRevenue = 0;
     let cmCampaigns: Set<string> = new Set();
 
-    // Precompute MI pattern so we can exclude MI from base advertiser buckets
-    const miSubidPattern = /(^MI(?:_|$))|(_MI(?:_|$))/;
+    // Precompute MI pattern so we can exclude MI from base advertiser buckets (case-insensitive)
+    const miSubidPattern = /(^MI(?:_|$))|(_MI(?:_|$))/i;
 
     data.records.forEach(record => {
       if (
-        record.subid?.includes("CM") || record.subid?.includes("JSG36")) {
+        record.subid?.toUpperCase().includes("CM") || record.subid?.toUpperCase().includes("JSG36")) {
         cmRevenue += record.revenue;
         cmCampaigns.add(record.campaign);
       }
@@ -309,16 +315,19 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
     // Campaign stats
     const campaignStats = new Map<string, CampaignStats>();
 
-    // ET stats
+    // ET stats (use normalized uppercase ET names as keys)
     const etStats = new Map<string, ETStats>();
 
     // Creative stats by campaign
     const creativesByCampaign = new Map<string, Map<string, CreativeStats>>();
 
-    // Creative stats by ET
+    // Creative stats by ET (use normalized uppercase ET names as keys)
     const creativesByET = new Map<string, Map<string, CreativeStats>>();
 
     data.records.forEach(record => {
+      // Normalize ET name to uppercase for consistent grouping
+      const normalizedET = record.et.toUpperCase();
+
       // Advertiser stats (exclude MI-tagged subids from base advertisers)
       const isMI = !!record.subid && miSubidPattern.test(record.subid);
       if (!isMI) {
@@ -347,21 +356,21 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       }
       const campaign = campaignStats.get(record.campaign)!;
       campaign.revenue += record.revenue;
-      if (!campaign.ets.includes(record.et)) {
-        campaign.ets.push(record.et);
+      if (!campaign.ets.includes(normalizedET)) {
+        campaign.ets.push(normalizedET);
       }
 
-      // ET stats
-      if (!etStats.has(record.et)) {
-        etStats.set(record.et, {
-          name: record.et,
+      // ET stats (use normalized uppercase name as key, but store uppercase as display name)
+      if (!etStats.has(normalizedET)) {
+        etStats.set(normalizedET, {
+          name: normalizedET,
           revenue: 0,
           creatives: [],
           campaigns: [],
           advertisers: new Map<string, number>(), // 👈 track advertisers
         });
       }
-      const et = etStats.get(record.et)!;
+      const et = etStats.get(normalizedET)!;
       et.revenue += record.revenue;
       if (!et.campaigns.includes(record.campaign)) {
         et.campaigns.push(record.campaign);
@@ -392,15 +401,15 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       const campaignCreative = campaignCreatives.get(record.creative)!;
       campaignCreative.frequency += 1;
       campaignCreative.revenue += record.revenue;
-      if (!campaignCreative.ets.includes(record.et)) {
-        campaignCreative.ets.push(record.et);
+      if (!campaignCreative.ets.includes(normalizedET)) {
+        campaignCreative.ets.push(normalizedET);
       }
 
-      // Creatives by ET
-      if (!creativesByET.has(record.et)) {
-        creativesByET.set(record.et, new Map());
+      // Creatives by ET (use normalized uppercase ET name as key)
+      if (!creativesByET.has(normalizedET)) {
+        creativesByET.set(normalizedET, new Map());
       }
-      const etCreatives = creativesByET.get(record.et)!;
+      const etCreatives = creativesByET.get(normalizedET)!;
       if (!etCreatives.has(record.creative)) {
         etCreatives.set(record.creative, {
           name: record.creative,
@@ -412,8 +421,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       const etCreative = etCreatives.get(record.creative)!;
       etCreative.frequency += 1;
       etCreative.revenue += record.revenue;
-      if (!etCreative.ets.includes(record.et)) {
-        etCreative.ets.push(record.et);
+      if (!etCreative.ets.includes(normalizedET)) {
+        etCreative.ets.push(normalizedET);
       }
     });
 
@@ -493,7 +502,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       group.totalRevenue += record.revenue;
       group.frequency += 1;
       group.campaigns.add(record.campaign);
-      group.ets.add(record.et);
+      group.ets.add(record.et.toUpperCase());
       group.advertisers.add(record.advertiser);
       group.records.push(record);
     });
@@ -507,7 +516,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
   const selectedETData = useMemo(() => {
     if (!selectedET) return null;
-    return analytics.etStats.find(e => e.name === selectedET);
+    return analytics.etStats.find(e => e.name.toUpperCase() === selectedET.toUpperCase());
   }, [selectedET, analytics]);
 
 
@@ -539,7 +548,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
     }
 
     if (selectedET) {
-      filteredRecords = filteredRecords.filter(r => r.et === selectedET);
+      filteredRecords = filteredRecords.filter(r => r.et.toUpperCase() === selectedET.toUpperCase());
     }
 
     const headers = ['SUBID', 'Campaign', 'Creative', 'ET', 'Revenue', 'Advertiser', 'Source File'];
@@ -588,7 +597,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       const creative = creativeMap.get(record.creative)!;
       creative.frequency += 1;
       creative.totalRevenue += record.revenue;
-      creative.ets.add(record.et);
+      creative.ets.add(record.et.toUpperCase());
       creative.advertisers.add(record.advertiser);
     });
 
@@ -614,7 +623,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
   const exportETCreatives = () => {
     if (!selectedET) return;
 
-    const etRecords = data.records.filter(r => r.et === selectedET);
+    const etRecords = data.records.filter(r => r.et.toUpperCase() === selectedET.toUpperCase());
 
     // Group by creative and aggregate data
     const creativeMap = new Map<string, {
@@ -684,12 +693,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
   }>({ isOpen: false, name: null, creatives: [], totalRevenue: 0 });
 
   const getAdvertiserRecords = (advertiserName: string) => {
-    const miPattern = /(^MI(?:_|$))|(_MI(?:_|$))/;
+    const miPattern = /(^MI(?:_|$))|(_MI(?:_|$))/i;
     if (advertiserName === 'MI') {
       return data.records.filter(r => r.subid && miPattern.test(r.subid));
     }
     if (advertiserName === 'CM Gmail') {
-      return data.records.filter(r => r.subid?.includes('CM') || r.subid?.includes('JSG36'));
+      return data.records.filter(r => r.subid?.toUpperCase().includes('CM') || r.subid?.toUpperCase().includes('JSG36'));
     }
     return data.records.filter(r => r.advertiser === advertiserName && !(r.subid && miPattern.test(r.subid)));
   };
@@ -1567,10 +1576,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                 {selectedCampaignData.ets
                   .map(etName => {
                     const etRevenue = data.records
-                      .filter(r => r.campaign === selectedCampaignData.name && r.et === etName)
+                      .filter(r => r.campaign === selectedCampaignData.name && r.et.toUpperCase() === etName.toUpperCase())
                       .reduce((sum, r) => sum + r.revenue, 0);
                     const creatives = data.records
-                      .filter(r => r.campaign === selectedCampaignData.name && r.et === etName)
+                      .filter(r => r.campaign === selectedCampaignData.name && r.et.toUpperCase() === etName.toUpperCase())
                       .reduce((acc, r) => {
                         if (!acc.find(c => c.name === r.creative)) {
                           acc.push({
@@ -1792,10 +1801,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                 {selectedETData.campaigns
                   .map(campaignName => {
                     const campaignRevenue = data.records
-                      .filter(r => r.et === selectedETData.name && r.campaign === campaignName)
+                      .filter(r => r.et.toUpperCase() === selectedETData.name.toUpperCase() && r.campaign === campaignName)
                       .reduce((sum, r) => sum + r.revenue, 0);
                     const creatives = data.records
-                      .filter(r => r.et === selectedETData.name && r.campaign === campaignName)
+                      .filter(r => r.et.toUpperCase() === selectedETData.name.toUpperCase() && r.campaign === campaignName)
                       .reduce((acc, r) => {
                         if (!acc.find(c => c.name === r.creative)) {
                           acc.push({
