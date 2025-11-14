@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { Moon, Sun, BarChart3, Heart, Sparkles, TrendingUp, ShieldCheck, Zap, Image } from "lucide-react"
+import { Heart, TrendingUp, ShieldCheck, Zap } from "lucide-react"
 import FileUpload from "./components/FileUpload"
 import Dashboard from "./components/Dashboard"
 import CelebrationEffect from "./components/CelebrationEffect"
@@ -13,16 +13,11 @@ interface UploadedFile {
 }
 
 function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false)
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [combinedData, setCombinedData] = useState<ProcessedData | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [showCelebration, setShowCelebration] = useState(false)
   const [hasTriggeredCelebration, setHasTriggeredCelebration] = useState(false)
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode)
-  }
 
   const handleFilesUploaded = (files: UploadedFile[]) => {
     setUploadedFiles(files)
@@ -60,19 +55,16 @@ function App() {
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "bg-gray-950 text-white" : "bg-url('https://image.s7.sfmc-content.com/lib/fe2a11717d640474741277/m/1/17568be6-1b27-4f9f-92d8-8248b1c3992c.jpg')"
-        }`}
+      className="min-h-screen transition-colors duration-300"
         style={{
-          backgroundImage: "url('https://image.s7.sfmc-content.com/lib/fe2a11717d640474741277/m/1/17568be6-1b27-4f9f-92d8-8248b1c3992c.jpg')",
-          backgroundSize: "100%",
-          backgroundPosition: "top center",
-          backgroundRepeat: "repeat",
+          backgroundImage: "url('https://image.s7.sfmc-content.com/lib/fe2a11717d640474741277/m/1/ccab749f-caa2-4e75-ab01-cd02ac8632e7.gif')",
+          backgroundAttachment: "fixed",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
         }}
     >
-      <header className={`relative z-10 backdrop-blur-[5px] border-b transition-colors duration-300 ${isDarkMode
-        ? 'bg-gray-900/80 border-gray-800/50'
-        : 'bg-white/0 border-gray-200/50'
-        }`}>
+      <header className="relative z-10 backdrop-blur-[5px] border-b transition-colors duration-300 bg-white/0 border-gray-200/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
@@ -82,24 +74,14 @@ function App() {
                 </div>
               </div>
               <div>
-                <h1 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                <h1 className="text-xl font-bold text-gray-900">
                   MM Media
                 </h1>
-                <p className={`text-sm -mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <p className="text-sm -mt-1 text-gray-600">
                   Report & Campaign Management
                 </p>
               </div>
             </div>
-
-            {/* <nav className="hidden md:flex items-center space-x-8">
-              <button
-                onClick={toggleTheme}
-                className={`p-2 rounded-lg transition-colors bg-gray-200 ${isDarkMode ? 'bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-              >
-                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-            </nav> */}
           </div>
         </div>
       </header>
@@ -108,12 +90,10 @@ function App() {
         {!combinedData && (
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
             <div
-              className={`absolute -left-28 top-10 h-80 w-80 rounded-full blur-3xl ${isDarkMode ? "bg-blue-900/20" : "bg-blue-200/40"
-                }`}
+              className="absolute -left-28 top-10 h-80 w-80 rounded-full blur-3xl bg-blue-200/40"
             />
             <div
-              className={`absolute -right-28 top-24 h-80 w-80 rounded-full blur-3xl ${isDarkMode ? "bg-violet-900/20" : "bg-violet-200/40"
-                }`}
+              className="absolute -right-28 top-24 h-80 w-80 rounded-full blur-3xl bg-violet-200/40"
             />
           </div>
         )}
@@ -124,7 +104,7 @@ function App() {
             <div className="space-y-12 sm:space-y-16">
               {/* Hero */}
               <section
-                className={` ${isDarkMode ? "" : ""} p-4 sm:p-8 text-center`}
+                className="p-4 sm:p-8 text-center"
               >
                 <h1 className="mt-0 text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-balance">
                   Upload Campaign{" "}
@@ -134,8 +114,7 @@ function App() {
                 </h1>
 
                 <p
-                  className={`mt-5 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed ${isDarkMode ? "text-gray-400" : "text-slate-600"
-                    }`}
+                  className="mt-5 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed text-slate-600"
                 >
                   Upload multiple CSV files containing SUBID and REV columns.
                 </p>
@@ -144,15 +123,15 @@ function App() {
                 <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-6">
                   <div className="flex items-center gap-2 text-sm sm:text-base">
                     <TrendingUp className="h-5 w-5 text-emerald-500" />
-                    <span className={isDarkMode ? "text-gray-300" : "text-slate-700"}>Real‑time Analytics</span>
+                    <span className="text-slate-700">Real‑time Analytics</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm sm:text-base">
                     <ShieldCheck className="h-5 w-5 text-blue-600" />
-                    <span className={isDarkMode ? "text-gray-300" : "text-slate-700"}>Secure Processing</span>
+                    <span className="text-slate-700">Secure Processing</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm sm:text-base">
                     <Zap className="h-5 w-5 text-violet-600" />
-                    <span className={isDarkMode ? "text-gray-300" : "text-slate-700"}>Instant Results</span>
+                    <span className="text-slate-700">Instant Results</span>
                   </div>
                 </div>
               </section>
@@ -160,7 +139,7 @@ function App() {
               {/* Upload card wrapper; inner UI provided by existing FileUpload component (unchanged) */}
               <section>
                 <div>
-                  <FileUpload onFilesUploaded={handleFilesUploaded} isDarkMode={isDarkMode} />
+                  <FileUpload onFilesUploaded={handleFilesUploaded} />
                 </div>
               </section>
             </div>
@@ -168,7 +147,6 @@ function App() {
             <Dashboard
               data={combinedData}
               uploadedFiles={uploadedFiles}
-              isDarkMode={isDarkMode}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
               onReset={() => {
@@ -184,11 +162,10 @@ function App() {
 
       <CelebrationEffect isActive={showCelebration} onComplete={() => setShowCelebration(false)} />
 
-      <footer className={`mt-16`}>
+      <footer className="mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <p
-            className={`text-center text-sm flex items-center justify-center ${isDarkMode ? "text-gray-400" : "text-slate-600"
-              }`}
+            className="text-center text-sm flex items-center justify-center text-slate-600"
           >
             Made with <Heart className="h-4 w-4 mx-1 text-rose-500" fill="currentColor" aria-hidden="true" /> by <b className="ml-1">Chandu</b>
           </p>

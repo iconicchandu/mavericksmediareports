@@ -11,15 +11,14 @@ interface UploadedFile {
 interface DashboardProps {
   data: ProcessedData;
   uploadedFiles: UploadedFile[];
-  isDarkMode: boolean;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onReset: () => void;
 }
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'];
-const TOP_ET_COLOR = "#10B981";
-const OTHER_ET_COLOR = "#3B82F6";
+const TOP_ET_COLOR = "#ffc83a";
+const OTHER_ET_COLOR = "#1e40af";
 
 // ---------------------- START: UI Accent Helpers ----------------------
 // Accent color per advertiser to keep UI visually coherent
@@ -61,7 +60,7 @@ const hexToRgba = (hex: string, alpha: number): string => {
 
 
 
-const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, searchQuery, onSearchChange, onReset }) => {
+const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery, onSearchChange, onReset }) => {
   const [selectedCampaign, setSelectedCampaign] = useState('');
   const [selectedET, setSelectedET] = useState('');
   const [campaignPopup, setCampaignPopup] = useState<{
@@ -736,23 +735,21 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           <div className="flex items-center mb-2">
             <h2 className="text-3xl font-bold">Report & Campaign Management</h2>
           </div>
-          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className={`text-sm text-gray-600`}>
             {uploadedFiles.length} file{uploadedFiles.length > 1 ? 's' : ''} processed • {data.records.length} records analyzed
           </p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={exportFilteredData}
-            className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'
-              } text-white`}
+            className="flex items-center px-4 py-2 rounded-lg font-medium transition-colors bg-blue-600 hover:bg-blue-700 text-white"
           >
             <Download className="h-4 w-4 mr-2" />
             Export Data
           </button>
           <button
             onClick={onReset}
-            className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
-              }`}
+            className="flex items-center px-4 py-2 rounded-lg font-medium transition-colors bg-gray-200 hover:bg-gray-300"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             New Upload
@@ -763,30 +760,24 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       {/* End: Header */}
 
       {/* Search Box */}
-      <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gradient-to-r from-violet-200 to-pink-200 border-gray-200'
-        }`}>
+      <div className="p-6 rounded-lg border bg-white/50 backdrop-blur-sm border-gray-200">
         <div className="flex items-center mb-4">
           <Search className="h-6 w-6 mr-3 text-blue-500" />
           <h3 className="text-xl font-bold">Search Creatives</h3>
         </div>
         <div className="relative">
-          <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
-            }`} />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
           <input
             type="text"
             placeholder="Search for creative names..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className={`w-full pl-10 pr-10 py-3 rounded-lg border transition-colors ${isDarkMode
-              ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500'
-              : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'
-              } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
+            className={`w-full pl-10 pr-10 py-3 rounded-lg border transition-colors bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
           />
           {searchQuery && (
             <button
               onClick={() => onSearchChange('')}
-              className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'
-                }`}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-200 transition-colors text-gray-500 hover:text-gray-700"
             >
               <X className="h-4 w-4" />
             </button>
@@ -798,8 +789,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
       {/* Search Results */}
       {searchResults && (
-        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          }`}>
+        <div className="p-6 rounded-lg border bg-white border-gray-200">
           <div className="flex items-center mb-6">
             <Star className="h-6 w-6 mr-3 text-yellow-500" />
             <h3 className="text-md font-bold">
@@ -813,8 +803,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
             {searchResults.map((result, index) => (
               <div
                 key={result.creative}
-                className={`p-6 rounded-lg border transition-all duration-200 hover:shadow-lg ${isDarkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-650' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                  }`}
+                className="p-6 rounded-lg border transition-all duration-200 hover:shadow-lg bg-gray-50 border-gray-200 hover:bg-gray-100"
               >
                 <div className="flex items-center mb-4">
                   <Layers className="h-5 w-5 mr-2 text-red-500" />
@@ -823,7 +812,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
                 <div className="space-y-3">
                   <div className="flex justify-between items-cente">
-                    <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <span className={`text-sm font-medium text-gray-600`}>
                       Total Revenue:
                     </span>
                     <span className="text-xl font-bold text-green-500">
@@ -832,7 +821,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   </div>
 
                   <div className="flex justify-between items-center bg-gray-200 px-3 py-1 rounded-lg">
-                    <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <span className={`text-sm font-medium text-gray-600`}>
                       Frequency:
                     </span>
                     <span className="font-semibold text-blue-500">
@@ -842,29 +831,29 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
                   <div className="pt-3">
                     <div className="mb-2">
-                      <span className={`text-sm font-bold ${isDarkMode ? 'text-gray-400' : 'text-gray-800'}`}>
+                      <span className={`text-sm font-bold text-gray-800`}>
                         Campaign ({result.campaigns.size}):
                       </span><br />
-                      <div className={`text-center inline-block mt-3 bg-blue-100 border border-blue-400 px-2 py-1 rounded-lg text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <div className={`text-center inline-block mt-3 bg-blue-100 border border-blue-400 px-2 py-1 rounded-lg text-sm font-medium text-gray-700`}>
                         {Array.from(result.campaigns).join(', ')}
                       </div>
                     </div>
 
                     <div className="mb-2">
-                      <span className={`text-sm font-bold ${isDarkMode ? 'text-gray-400' : 'text-gray-800'}`}>
+                      <span className={`text-sm font-bold text-gray-800`}>
                         ETs ({result.ets.size}):
                       </span><br />
-                      <span className={`text-center inline-block mt-3 bg-blue-100 border border-blue-400 px-2 py-1 rounded-lg text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <span className={`text-center inline-block mt-3 bg-blue-100 border border-blue-400 px-2 py-1 rounded-lg text-sm font-medium text-gray-700`}>
                         {Array.from(result.ets).join(', ')}
                       </span>
 
                     </div>
 
                     <div>
-                      <span className={`text-sm font-bold ${isDarkMode ? 'text-gray-400' : 'text-gray-800'}`}>
+                      <span className={`text-sm font-bold text-gray-800`}>
                         Advertisers ({result.advertisers.size}):
                       </span>
-                      <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <p className={`text-sm mt-1 text-gray-700`}>
                         {Array.from(result.advertisers).join(', ')}
                       </p>
                     </div>
@@ -880,12 +869,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-[#d2f7e0] border-[#22c55e]'
-          }`}>
+        <div className="p-6 rounded-lg border bg-green-400/50 backdrop-blur-sm border-green-400">
           <div className="flex items-center">
-            <DollarSign className="h-8 w-8 text-green-500" />
+            <DollarSign className="h-8 w-8 text-green-800" />
             <div className="ml-4">
-              <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className={`text-sm font-medium text-gray-600`}>
                 Total Revenue
               </p>
               <p className="text-2xl font-bold">${analytics.totalRevenue.toLocaleString()}</p>
@@ -893,28 +881,26 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           </div>
         </div>
 
-        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-blue-900 border-blue-500'
-          }`}>
+        <div className="p-6 rounded-lg border bg-blue-600/50 backdrop-blur-sm border-blue-300">
           <div className="flex items-center">
-            <DollarSign className="h-8 w-8 text-green-500" />
+            <DollarSign className="h-8 w-8 text-green-400" />
             <div className="ml-4">
               <p className="text-sm font-medium text-white">
                 Daily Revenue Target
               </p>
               <div className="flex items-center">
-                <p className="text-2xl font-bold text-green-500">${displayedTotalTargetRevenue.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-green-400">${displayedTotalTargetRevenue.toLocaleString()}</p>
                 {analytics.totalRevenue > 40000}
               </div>
             </div>
           </div>
         </div>
 
-        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-[#ccdefd] border-[#3c83f6]'
-          }`}>
+        <div className="p-6 rounded-lg border bg-blue-400/50 backdrop-blur-sm border-blue-400">
           <div className="flex items-center">
-            <Target className="h-8 w-8 text-blue-500" />
+            <Target className="h-8 w-8 text-blue-700" />
             <div className="ml-4">
-              <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className={`text-sm font-medium text-gray-600`}>
                 Campaigns
               </p>
               <p className="text-2xl font-bold">{analytics.campaignStats.length}</p>
@@ -922,12 +908,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           </div>
         </div>
 
-        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-[#fbcdcd] border-[#ef4646]'
-          }`}>
+        <div className="p-6 rounded-lg border bg-red-400/50 backdrop-blur-sm border-red-400">
           <div className="flex items-center">
-            <Users className="h-8 w-8 text-red-500" />
+            <Users className="h-8 w-8 text-red-600" />
             <div className="ml-4">
-              <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className={`text-sm font-medium text-gray-600`}>
                 ETs
               </p>
               <p className="text-2xl font-bold">{analytics.etStats.length}</p>
@@ -935,12 +920,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           </div>
         </div>
 
-        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-[#fedfca] border-[#f97316]'
-          }`}>
+        <div className="p-6 rounded-lg border bg-[#fedfca]/50 backdrop-blur-sm border-orange-400">
           <div className="flex items-center">
             <Activity className="h-8 w-8 text-blue-500" />
             <div className="ml-4">
-              <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className={`text-sm font-medium text-gray-600`}>
                 Creatives
               </p>
               <p className="text-2xl font-bold">{data.creatives.size}</p>
@@ -952,14 +936,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       {/* End: Summary Cards */}
 
       {/* Advertiser Revenue Breakdown (redesigned cards) */}
-      <div className={`p-6 rounded-2xl border shadow-sm ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+      <div className={`p-6 rounded-2xl border shadow-sm bg-white/70 backdrop-blur-xl border-white/80`}>
         <div className="flex items-center mb-6 justify-between">
           <div className="flex items-center">
             <Building2 className="h-6 w-6 mr-3 text-red-500" />
             <h3 className="text-xl font-bold">Advertiser-Wise Revenue</h3>
           </div>
-          <div className={`text-sm px-3 py-1 rounded-full ${isDarkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-800'
-            }`}>
+          <div className="text-sm px-3 py-1 rounded-full bg-blue-100 text-blue-800">
             Top advertisers by revenue
           </div>
         </div>
@@ -967,12 +950,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6">
           {analytics.advertiserStats.map((advertiser, index) => {
             const accent = getAdvertiserAccent(advertiser.name);
-            const iconBg = hexToRgba(accent, isDarkMode ? 0.15 : 0.08);
+            const iconBg = hexToRgba(accent, 0.08);
             return (
               <div
                 key={advertiser.name}
                 onClick={() => openAdvertiserPopup(advertiser.name)}
-                className={`relative p-3 rounded-2xl shadow-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-[2px] ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'} style:border-1 cursor-pointer`}
+                className={`relative p-3 rounded-2xl shadow-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-[2px] bg-white border-gray-200 style:border-1 cursor-pointer`}
                 style={{ border: `1px solid ${accent}`, backgroundColor: iconBg }}
               >
                 {/* colored indicator */}
@@ -1014,19 +997,19 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       {/* Advertiser Details Popup */}
       {advertiserPopup.isOpen && advertiserPopup.name && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className={`max-w-6xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
-            <div className={`sticky top-0 p-6 border-b ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+          <div className="max-w-6xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl bg-white border border-gray-200">
+            <div className={`sticky top-0 p-6 border-b bg-white border-gray-200`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <div className={`${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-100'} p-3 rounded-xl`}>
+                  <div className="bg-blue-100 p-3 rounded-xl">
                     <Building2 className="h-8 w-8 text-blue-500" />
                   </div>
                   <div className="ml-4">
                     <h2 className="text-2xl font-bold">Advertiser: {advertiserPopup.name}</h2>
-                    <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Creative performance</p>
+                    <p className={`text-gray-600`}>Creative performance</p>
                   </div>
                 </div>
-                <button onClick={closeAdvertiserPopup} className={`p-2 rounded-full ${isDarkMode ? 'hover:bg-gray-700 text-gray-400 hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'}`}>
+                <button onClick={closeAdvertiserPopup} className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700">
                   <X className="h-6 w-6" />
                 </button>
               </div>
@@ -1041,9 +1024,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
               </div>
 
               <div className="overflow-x-auto">
-                <table className={`min-w-full text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                <table className="min-w-full text-sm text-gray-800">
                   <thead>
-                    <tr className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                    <tr className="bg-gray-100">
                       <th className="text-left px-4 py-2">Creative</th>
                       <th className="text-right px-4 py-2">Revenue</th>
                       <th className="text-right px-4 py-2">Frequency</th>
@@ -1053,7 +1036,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   </thead>
                   <tbody>
                     {advertiserPopup.creatives.map(cr => (
-                      <tr key={cr.name} className={`${isDarkMode ? 'border-gray-700' : 'border-gray-200'} border-b`}>
+                      <tr key={cr.name} className="border-gray-200 border-b">
                         <td className="px-4 py-2 font-medium">{cr.name}</td>
                         <td className="px-4 py-2 text-right text-green-500 font-semibold">${cr.totalRevenue.toLocaleString()}</td>
                         <td className="px-4 py-2 text-right">{cr.frequency}</td>
@@ -1070,8 +1053,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       )}
 
       {/* ET Revenue Charts */}
-      <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        }`}>
+        <div className="p-6 rounded-lg border bg-white/70 backdrop-blur-xs border-white/80">
         <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
           <BarChart3 className="w-5 h-5 text-blue-500" />
           ET Revenue Charts
@@ -1106,15 +1088,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
       {/* Top Revenue ETs Section */}
       {analytics.etStats.length > 0 && (
-        <div className={`p-6 rounded-lg border-2 shadow-2xl ${isDarkMode ? 'bg-gradient-to-br from-amber-900/30 via-yellow-900/20 to-amber-800/30 border-amber-500' : 'bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100 border-amber-400'
-          }`}>
+        <div className="p-6 rounded-lg border-2 shadow-2xl bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100 border-amber-400">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <Award className="h-6 w-6 mr-3 text-amber-500" />
               <h3 className="text-xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">Top Revenue ETs</h3>
             </div>
-            <div className={`text-sm px-3 py-1 rounded-full ${isDarkMode ? 'bg-amber-900/50 text-amber-300 border border-amber-600' : 'bg-amber-100 text-amber-800 border border-amber-300'
-              }`}>
+            <div className="text-sm px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
               Top 3 Performing ETs
             </div>
           </div>
@@ -1122,17 +1102,17 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
             {analytics.etStats.slice(0, 3).map((et, index) => (
               <div
                 key={et.name}
-                className="pb-4 rounded-xl border-2 transition-all duration-300 hover:shadow-2xl cursor-pointer relative overflow-hidden bg-[url('https://img.freepik.com/free-vector/gold-metal-background_78370-154.jpg?semt=ais_hybrid&w=740&q=80')] bg-cover bg-center">
+                className="pb-4 rounded-xl transition-all duration-300 hover:shadow-2xl cursor-pointer relative overflow-hidden bg-[url('https://img.freepik.com/free-vector/gold-metal-background_78370-154.jpg?semt=ais_hybrid&w=740&q=80')] bg-cover bg-center">
                 {/* Crown Icon at Top Right */}
 
                 <div className="w-full flex items-center mb-4">
                   <div className="w-full flex items-center justify-between px-4 py-1 rounded-xl rounded-br-none rounded-bl-none ">
                     <div className="flex justify-start items-center">
-                      <Crown className={`h-8 w-8 ${isDarkMode ? 'text-amber-100' : 'text-amber-200'} drop-shadow-lg`} fill={isDarkMode ? '#fbbf24' : '#f59e0b'} />
+                      <Crown className="h-8 w-8 text-amber-200 drop-shadow-lg" fill="#f59e0b" />
                       <h4 className="font-bold text-lg ml-3 text-white">
                         {et.name}
                       </h4>
-                      <span className={`ml-2 px-2 py-1 ${isDarkMode ? 'bg-amber-400 text-amber-900' : 'bg-amber-300 text-amber-900'} text-xs font-bold rounded`}>
+                      <span className="ml-2 px-2 py-1 bg-amber-300 text-amber-900 text-xs font-bold rounded">
                         #{index + 1}
                       </span>
                     </div>
@@ -1171,10 +1151,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                 </div>
                 <div className="mb-4 px-4 flex justify-between items-center">
                   <div>
-                    <p className={`text-xl font-bold mb-1 ${isDarkMode ? 'text-amber-400' : 'text-amber-700'}`}>
+                    <p className="text-xl font-bold mb-1 text-amber-700">
                       ${et.revenue.toLocaleString()}
                     </p>
-                    <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <p className={`text-sm font-medium text-gray-600`}>
                       Today Revenue
                     </p>
                   </div>
@@ -1186,7 +1166,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                       <p className="text-xl font-bold text-yellow-600 mb-1">
                         {displayTargetRevenue(et.name, analytics.totalRevenue)}
                       </p>
-                      <p className={`text-[12px] font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      <p className={`text-[12px] font-medium text-gray-600`}>
                         Daily Target
                       </p>
                     </div>
@@ -1197,13 +1177,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center">
                       <Layers className="h-4 w-4 mr-1 text-red-500" />
-                      <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      <span className={`text-sm font-medium text-gray-600`}>
                         {et.creatives.length}
                       </span>
                     </div>
                     <div className="flex items-center">
                       <Target className="h-4 w-4 mr-1 text-blue-500" />
-                      <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      <span className={`text-sm font-medium text-gray-600`}>
                         {et.campaigns.length}
                       </span>
                     </div>
@@ -1212,8 +1192,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                 {/* Toggle button */}
                 <button
                   onClick={() => toggleET(et.name)}
-                  className={`mt-3 flex items-center gap-1 text-sm font-medium px-4 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'
-                    } hover:underline`}
+                  className="mt-3 flex items-center gap-1 text-sm font-medium px-4 text-amber-600 hover:underline"
                 >
                   {expandedETs.has(et.name) ? (
                     <>
@@ -1236,12 +1215,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     {et.advertisersArray?.map(ad => (
                       <li
                         key={ad.name}
-                        className={`flex justify-center items-center gap-2 rounded-[50px] p-1 px-2 ${isDarkMode ? 'bg-amber-500/50' : 'bg-amber-500/50'}`}
+                        className="flex justify-center items-center gap-2 rounded-[50px] p-1 px-2 bg-amber-500/50"
                       >
                         <span className="font-medium">{ad.name}</span>
                         <span
-                          className={`text-xs font-medium ${isDarkMode ? 'text-green-400' : 'text-green-600'
-                            }`}
+                          className="text-xs font-medium text-green-600"
                         >
                           ${ad.revenue.toFixed(2)}
                         </span>
@@ -1256,15 +1234,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       )}
 
       {/* ET Revenue Breakdown */}
-      <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        }`}>
+        <div className="p-6 rounded-lg border bg-white/70 backdrop-blur-xs border-white/80">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
             <Users className="h-6 w-6 mr-3 text-blue-500" />
             <h3 className="text-xl font-bold">ET-Wise Revenue</h3>
           </div>
-          <div className={`text-sm px-3 py-1 rounded-full ${isDarkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-800'
-            }`}>
+          <div className="text-sm px-3 py-1 rounded-full bg-blue-100 text-blue-800">
             All ETs by revenue
           </div>
         </div>
@@ -1272,10 +1248,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           {analytics.etStats.slice(3, 100).map((et, index) => (
             <div
               key={et.name}
-              className={`pb-4 rounded-xl border transition-all duration-300 hover:shadow-xl cursor-pointer ${isDarkMode
-                ? 'bg-gradient-to-br from-gray-700 to-gray-800 border-gray-600 hover:from-gray-600 hover:to-gray-700 hover:border-blue-500'
-                : 'bg-gradient-to-br from-blue-50 to-white border-blue-300'
-                } group`}>
+              className="pb-4 rounded-xl border transition-all duration-300 hover:shadow-xl cursor-pointer bg-gradient-to-br from-blue-50 to-white border-blue-300 group">
               <div className="w-full flex items-center mb-4">
                 <div className="w-full flex items-center justify-between bg-blue-800 px-4 py-1 rounded-xl rounded-br-none rounded-bl-none">
                   <div className="flex justify-start items-center">
@@ -1322,7 +1295,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   <p className="text-xl font-bold text-blue-500 mb-1">
                     ${et.revenue.toLocaleString()}
                   </p>
-                  <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  <p className={`text-sm font-medium text-gray-600`}>
                     Today Revenue
                   </p>
                 </div>
@@ -1334,7 +1307,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     <p className="text-xl font-bold text-green-500 mb-1">
                       {displayTargetRevenue(et.name, analytics.totalRevenue)}
                     </p>
-                    <p className={`text-[12px] font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <p className={`text-[12px] font-medium text-gray-600`}>
                       Daily Target
                     </p>
                   </div>
@@ -1345,13 +1318,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center">
                     <Layers className="h-4 w-4 mr-1 text-red-500" />
-                    <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <span className={`text-sm font-medium text-gray-600`}>
                       {et.creatives.length}
                     </span>
                   </div>
                   <div className="flex items-center">
                     <Target className="h-4 w-4 mr-1 text-blue-500" />
-                    <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <span className={`text-sm font-medium text-gray-600`}>
                       {et.campaigns.length}
                     </span>
                   </div>
@@ -1360,8 +1333,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
               {/* Toggle button */}
               <button
                 onClick={() => toggleET(et.name)}
-                className={`mt-3 flex items-center gap-1 text-sm font-medium px-4 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'
-                  } hover:underline`}
+                className="mt-3 flex items-center gap-1 text-sm font-medium px-4 text-blue-600 hover:underline"
               >
                 {expandedETs.has(et.name) ? (
                   <>
@@ -1388,8 +1360,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     >
                       <span className="font-medium">{ad.name}</span>
                       <span
-                        className={`text-xs font-medium ${isDarkMode ? 'text-green-400' : 'text-green-600'
-                          }`}
+                        className="text-xs font-medium text-green-600"
                       >
                         ${ad.revenue.toFixed(2)}
                       </span>
@@ -1405,15 +1376,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       {/* End: ET Revenue Breakdown */}
 
       {/* Campaign Revenue Breakdown */}
-      <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        }`}>
+        <div className="p-6 rounded-lg border bg-white/70 backdrop-blur-xs border-white/80">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
             <Target className="h-6 w-6 mr-3 text-blue-500" />
             <h3 className="text-xl font-bold">Campaign-Wise Revenue</h3>
           </div>
-          <div className={`text-sm px-3 py-1 rounded-full ${isDarkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'
-            }`}>
+          <div className="text-sm px-3 py-1 rounded-full bg-blue-100 text-blue-700">
             Click any campaign for detailed view
           </div>
         </div>
@@ -1422,15 +1391,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
             <div
               key={campaign.name}
               onClick={() => openCampaignPopup(campaign)}
-              className={`p-6 rounded-xl border transition-all duration-300 hover:shadow-xl cursor-pointer transform hover:scale-105 ${isDarkMode
-                ? 'bg-gradient-to-br from-gray-700 to-gray-800 border-gray-600 hover:from-gray-600 hover:to-gray-700 hover:border-blue-500'
-                : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:from-blue-50 hover:to-white hover:border-blue-300'
-                } group`}
+              className="p-6 rounded-xl border transition-all duration-300 hover:shadow-xl cursor-pointer transform hover:scale-105 bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:from-blue-50 hover:to-white hover:border-blue-300 group"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
-                  <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-100'
-                    } group-hover:scale-110 transition-transform duration-200`}>
+                  <div className="p-2 rounded-lg bg-blue-100 group-hover:scale-110 transition-transform duration-200">
                     <Target className="h-5 w-5 text-blue-500" />
                   </div>
                   <h4 className="font-bold text-lg ml-3 group-hover:text-blue-600 transition-colors">
@@ -1444,7 +1409,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                 <p className="text-2xl font-bold text-green-500 mb-1">
                   ${campaign.revenue.toLocaleString()}
                 </p>
-                <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                <p className={`text-sm font-medium text-gray-600`}>
                   Total Revenue
                 </p>
               </div>
@@ -1453,19 +1418,18 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center">
                     <Layers className="h-4 w-4 mr-1 text-red-500" />
-                    <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <span className={`text-sm font-medium text-gray-600`}>
                       {campaign.creatives.length}
                     </span>
                   </div>
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-1 text-blue-500" />
-                    <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <span className={`text-sm font-medium text-gray-600`}>
                       {campaign.ets.length}
                     </span>
                   </div>
                 </div>
-                <div className={`text-xs px-2 py-1 rounded-full ${isDarkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-200 text-gray-600'
-                  } group-hover:bg-blue-500 group-hover:text-white transition-colors`}>
+                <div className="text-xs px-2 py-1 rounded-full bg-gray-200 text-gray-600 group-hover:bg-blue-500 group-hover:text-white transition-colors">
                   View Details
                 </div>
               </div>
@@ -1479,8 +1443,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          }`}>
+        <div className="p-6 rounded-lg border bg-white/70 backdrop-blur-xs border-white/80">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <Target className="h-5 w-5 mr-2 text-blue-500" />
@@ -1489,8 +1452,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
             {selectedCampaign && (
               <button
                 onClick={exportCampaignCreatives}
-                className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'
-                  } text-white`}
+                className="flex items-center px-4 py-2 rounded-lg font-medium transition-colors bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Download className="h-4 w-4 mr-2" />
                 Export Creatives
@@ -1498,13 +1460,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
             )}
           </div>
 
-          <div className={`p-4 rounded-lg mb-4 ${isDarkMode ? 'bg-blue-900/20 border border-blue-800' : 'bg-blue-50 border border-blue-200'
-            }`}>
+          <div className="p-4 rounded-lg mb-4 bg-blue-50 border border-blue-200">
             <div className="flex items-center mb-2">
               <Search className="h-5 w-5 mr-2 text-blue-500" />
               <label className="block text-sm font-medium text-blue-600">Select Campaign for Detailed Analysis</label>
             </div>
-            <p className={`text-xs ${isDarkMode ? 'text-blue-300' : 'text-blue-600'}`}>
+            <p className="text-xs text-blue-600">
               Choose a campaign to view ET-wise performance and export creative data
             </p>
           </div>
@@ -1512,10 +1473,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           <select
             value={selectedCampaign}
             onChange={(e) => setSelectedCampaign(e.target.value)}
-            className={`w-full p-4 rounded-lg border text-lg font-medium ${isDarkMode
-              ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
-              : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-              } focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors`}
+            className="w-full p-4 rounded-lg border text-lg font-medium bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors"
           >
             <option value="">All Campaigns</option>
             {analytics.campaignStats.map(campaign => (
@@ -1527,15 +1485,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         </div>
         {/* Campaign Analysis */}
         {selectedCampaignData && (
-          <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-            }`}>
+        <div className="p-6 rounded-lg border bg-white/70 backdrop-blur-xs border-white/80">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold">Campaign: {selectedCampaignData.name}</h3>
               <div className="text-right">
                 <p className="text-2xl font-bold text-green-500">
                   ${selectedCampaignData.revenue.toLocaleString()}
                 </p>
-                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <p className={`text-sm text-gray-600`}>
                   Total Revenue
                 </p>
               </div>
@@ -1543,8 +1500,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
             {/* Top Performing Creative */}
             {selectedCampaignData.creatives.length > 0 && (
-              <div className={`mb-6 p-4 rounded-lg ${isDarkMode ? 'bg-blue-900/20 border border-blue-800' : 'bg-blue-50 border border-blue-200'
-                }`}>
+              <div className="mb-6 p-4 rounded-lg bg-blue-50 border border-blue-200">
                 <div className="flex items-center mb-2">
                   <Award className="h-5 w-5 mr-2 text-yellow-500" />
                   <h4 className="font-semibold text-blue-600">Top Performing Creative</h4>
@@ -1552,13 +1508,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="font-medium">{selectedCampaignData.creatives[0].name}</p>
-                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p className={`text-sm text-gray-600`}>
                       ETs: {selectedCampaignData.creatives[0].ets.join(', ')}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold">${selectedCampaignData.creatives[0].revenue.toLocaleString()}</p>
-                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p className={`text-sm text-gray-600`}>
                       {selectedCampaignData.creatives[0].frequency} occurrences
                     </p>
                   </div>
@@ -1601,8 +1557,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     return (
                       <div
                         key={etData.etName}
-                        className={`p-6 rounded-xl border transition-all duration-300 hover:shadow-lg ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-gray-600' : 'bg-white border-gray-200 hover:border-gray-300'
-                          }`}
+                        className="p-6 rounded-xl border transition-all duration-300 hover:shadow-lg bg-white border-gray-200 hover:border-gray-300"
                       >
                         <div className="space-y-4">
                           {/* ET Header */}
@@ -1616,7 +1571,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                             <div>
                               <div className="flex items-center space-x-2 mb-1">
                                 <span className="text-green-600 font-medium">$</span>
-                                <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                <span className={`text-sm font-medium text-gray-600`}>
                                   Revenue
                                 </span>
                               </div>
@@ -1627,7 +1582,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                             <div>
                               <div className="flex items-center space-x-2 mb-1">
                                 <span className="text-blue-600 font-medium">#</span>
-                                <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                <span className={`text-sm font-medium text-gray-600`}>
                                   Frequency
                                 </span>
                               </div>
@@ -1641,7 +1596,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                           <div>
                             <div className="flex items-center space-x-2 mb-3">
                               <Users className="h-4 w-4 text-blue-600" />
-                              <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                              <span className={`text-sm font-medium text-gray-600`}>
                                 Active Creatives ({etData.creatives.length}):
                               </span>
                             </div>
@@ -1649,17 +1604,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                               {etData.creatives.slice(0, 6).map((creative, idx) => (
                                 <span
                                   key={idx}
-                                  className={`px-3 py-1 rounded-full text-xs font-medium ${isDarkMode
-                                    ? 'bg-blue-900/30 text-blue-300 border border-blue-800'
-                                    : 'bg-blue-100 text-blue-800 border border-blue-200'
-                                    }`}
+                                  className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200"
                                 >
                                   {creative.name}
                                 </span>
                               ))}
                               {etData.creatives.length > 6 && (
-                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
-                                  }`}>
+                                <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
                                   +{etData.creatives.length - 6} more
                                 </span>
                               )}
@@ -1678,8 +1629,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
               {selectedCampaignData.creatives.map((creative, index) => (
                 <div
                   key={creative.name}
-                  className={`p-4 rounded-lg border transition-all duration-200 hover:shadow-lg ${isDarkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-650' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                    }`}
+                  className="p-4 rounded-lg border transition-all duration-200 hover:shadow-lg bg-gray-50 border-gray-200 hover:bg-gray-100"
                 >
                   <div className="flex items-center mb-2">
                     <FileText className="h-4 w-4 mr-2 text-gray-500" />
@@ -1688,10 +1638,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   <p className="text-lg font-bold text-green-500">
                     ${creative.revenue.toLocaleString()}
                   </p>
-                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <p className={`text-sm text-gray-600`}>
                     Frequency: {creative.frequency}
                   </p>
-                  <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                  <p className="text-xs mt-1 text-gray-500">
                     ETs: {creative.ets.join(', ')}
                   </p>
                 </div>
@@ -1706,8 +1656,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
       {/* Filters 2 */}
       <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-        <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          }`}>
+        <div className="p-6 rounded-lg border bg-white/70 backdrop-blur-xs border-white/80">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <Users className="h-5 w-5 mr-2 text-blue-500" />
@@ -1716,8 +1665,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
             {selectedET && (
               <button
                 onClick={exportETCreatives}
-                className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'
-                  } text-white`}
+                className="flex items-center px-4 py-2 rounded-lg font-medium transition-colors bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Download className="h-4 w-4 mr-2" />
                 Export Creatives
@@ -1725,13 +1673,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
             )}
           </div>
 
-          <div className={`p-4 rounded-lg mb-4 ${isDarkMode ? 'bg-blue-900/20 border border-blue-800' : 'bg-blue-50 border border-blue-200'
-            }`}>
+          <div className="p-4 rounded-lg mb-4 bg-blue-50 border border-blue-200">
             <div className="flex items-center mb-2">
               <Search className="h-5 w-5 mr-2 text-blue-500" />
               <label className="block text-sm font-medium text-blue-600">Select ET for Detailed Analysis</label>
             </div>
-            <p className={`text-xs ${isDarkMode ? 'text-blue-300' : 'text-blue-600'}`}>
+            <p className="text-xs text-blue-600">
               Choose an ET to view campaign-wise performance and export creative data
             </p>
           </div>
@@ -1739,10 +1686,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
           <select
             value={selectedET}
             onChange={(e) => setSelectedET(e.target.value)}
-            className={`w-full p-4 rounded-lg border text-lg font-medium ${isDarkMode
-              ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
-              : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-              } focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors`}
+            className="w-full p-4 rounded-lg border text-lg font-medium bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors"
           >
             <option value="">All ETs</option>
             {analytics.etStats.map(et => (
@@ -1755,15 +1699,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
         {/* ET Analysis */}
 
         {selectedETData && (
-          <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-            }`}>
+        <div className="p-6 rounded-lg border bg-white border-gray-200">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold">ET: {selectedETData.name}</h3>
               <div className="text-right">
                 <p className="text-2xl font-bold text-blue-500">
                   ${selectedETData.revenue.toLocaleString()}
                 </p>
-                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <p className={`text-sm text-gray-600`}>
                   Total Revenue
                 </p>
               </div>
@@ -1771,8 +1714,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
             {/* Top Performing Creative for ET */}
             {selectedETData.creatives.length > 0 && (
-              <div className={`mb-6 p-4 rounded-lg ${isDarkMode ? 'bg-red-900/20 border border-red-800' : 'bg-red-50 border border-red-200'
-                }`}>
+              <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
                 <div className="flex items-center mb-2">
                   <Award className="h-5 w-5 mr-2 text-yellow-500" />
                   <h4 className="font-semibold text-red-600">Top Performing Creative</h4>
@@ -1783,7 +1725,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   </div>
                   <div className="text-right">
                     <p className="font-bold">${selectedETData.creatives[0].revenue.toLocaleString()}</p>
-                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p className={`text-sm text-gray-600`}>
                       {selectedETData.creatives[0].frequency} occurrences
                     </p>
                   </div>
@@ -1826,8 +1768,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                     return (
                       <div
                         key={campaignData.campaignName}
-                        className={`p-6 rounded-xl border transition-all duration-300 hover:shadow-lg ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-gray-600' : 'bg-white border-gray-200 hover:border-gray-300'
-                          }`}
+                        className="p-6 rounded-xl border transition-all duration-300 hover:shadow-lg bg-white border-gray-200 hover:border-gray-300"
                       >
                         <div className="space-y-4">
                           {/* Campaign Header */}
@@ -1841,7 +1782,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                             <div>
                               <div className="flex items-center space-x-2 mb-1">
                                 <span className="text-green-600 font-medium">$</span>
-                                <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                <span className={`text-sm font-medium text-gray-600`}>
                                   Revenue
                                 </span>
                               </div>
@@ -1852,7 +1793,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                             <div>
                               <div className="flex items-center space-x-2 mb-1">
                                 <span className="text-blue-600 font-medium">#</span>
-                                <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                <span className={`text-sm font-medium text-gray-600`}>
                                   Frequency
                                 </span>
                               </div>
@@ -1866,7 +1807,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                           <div>
                             <div className="flex items-center space-x-2 mb-3">
                               <Users className="h-4 w-4 text-blue-600" />
-                              <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                              <span className={`text-sm font-medium text-gray-600`}>
                                 Active Creatives ({campaignData.creatives.length}):
                               </span>
                             </div>
@@ -1874,17 +1815,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                               {campaignData.creatives.slice(0, 6).map((creative, idx) => (
                                 <span
                                   key={idx}
-                                  className={`px-3 py-1 rounded-full text-xs font-medium ${isDarkMode
-                                    ? 'bg-blue-900/30 text-blue-300 border border-blue-800'
-                                    : 'bg-blue-100 text-blue-800 border border-blue-200'
-                                    }`}
+                                  className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200"
                                 >
                                   {creative.name}
                                 </span>
                               ))}
                               {campaignData.creatives.length > 6 && (
-                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
-                                  }`}>
+                                <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
                                   +{campaignData.creatives.length - 6} more
                                 </span>
                               )}
@@ -1903,8 +1840,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
               {selectedETData.creatives.map((creative) => (
                 <div
                   key={creative.name}
-                  className={`p-4 rounded-lg border transition-all duration-200 hover:shadow-lg ${isDarkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-650' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                    }`}
+                  className="p-4 rounded-lg border transition-all duration-200 hover:shadow-lg bg-gray-50 border-gray-200 hover:bg-gray-100"
                 >
                   <div className="flex items-center mb-2">
                     <FileText className="h-4 w-4 mr-2 text-gray-500" />
@@ -1913,7 +1849,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   <p className="text-lg font-bold text-blue-500">
                     ${creative.revenue.toLocaleString()}
                   </p>
-                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <p className={`text-sm text-gray-600`}>
                     Frequency: {creative.frequency}
                   </p>
                 </div>
@@ -1930,28 +1866,24 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
       {/* Campaign Details Popup */}
       {campaignPopup.isOpen && campaignPopup.campaign && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className={`max-w-6xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
-            }`}>
+          <div className="max-w-6xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl bg-white border border-gray-200">
             {/* Popup Header */}
-            <div className={`sticky top-0 p-6 border-b ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-              } z-10`}>
+            <div className="sticky top-0 p-6 border-b bg-white border-gray-200 z-10">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <div className={`p-3 rounded-xl ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-100'
-                    }`}>
+                  <div className="p-3 rounded-xl bg-blue-100">
                     <Target className="h-8 w-8 text-blue-500" />
                   </div>
                   <div className="ml-4">
                     <h2 className="text-3xl font-bold">{campaignPopup.campaign.name}</h2>
-                    <p className={`text-lg ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <p className={`text-lg text-gray-600`}>
                       Campaign Details & Performance
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={closeCampaignPopup}
-                  className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400 hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
-                    }`}
+                  className="p-2 rounded-full transition-colors hover:bg-gray-100 text-gray-500 hover:text-gray-700"
                 >
                   <X className="h-6 w-6" />
                 </button>
@@ -1962,8 +1894,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
             <div className="p-6">
               {/* Campaign Summary */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gradient-to-br from-green-900/20 to-green-800/10 border-green-800' : 'bg-gradient-to-br from-green-50 to-green-100 border-green-200'
-                  }`}>
+                <div className="p-6 rounded-xl border bg-gradient-to-br from-green-50 to-green-100 border-green-200">
                   <div className="flex items-center mb-3">
                     <DollarSign className="h-6 w-6 text-green-500 mr-2" />
                     <h3 className="font-semibold text-green-600">Total Revenue</h3>
@@ -1973,8 +1904,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   </p>
                 </div>
 
-                <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gradient-to-br from-red-900/20 to-red-800/10 border-red-800' : 'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
-                  }`}>
+                <div className="p-6 rounded-xl border bg-gradient-to-br from-red-50 to-red-100 border-red-200">
                   <div className="flex items-center mb-3">
                     <Layers className="h-6 w-6 text-red-500 mr-2" />
                     <h3 className="font-semibold text-red-600">Total Creatives</h3>
@@ -1984,8 +1914,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   </p>
                 </div>
 
-                <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gradient-to-br from-blue-900/20 to-blue-800/10 border-blue-800' : 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200'
-                  }`}>
+                <div className="p-6 rounded-xl border bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
                   <div className="flex items-center mb-3">
                     <Users className="h-6 w-6 text-blue-500 mr-2" />
                     <h3 className="font-semibold text-blue-600">Total ETs</h3>
@@ -1998,8 +1927,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
 
               {/* Top Performer */}
               {campaignPopup.campaign.creatives.length > 0 && (
-                <div className={`mb-8 p-6 rounded-xl border ${isDarkMode ? 'bg-gradient-to-r from-yellow-900/20 to-amber-900/20 border-yellow-800' : 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200'
-                  }`}>
+                <div className="mb-8 p-6 rounded-xl border bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200">
                   <div className="flex items-center mb-4">
                     <Award className="h-6 w-6 text-yellow-500 mr-3" />
                     <h3 className="text-xl font-bold text-yellow-600">🏆 Top Performing Creative</h3>
@@ -2023,13 +1951,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                       </div>
                     </div>
                     <div className="mt-4 md:mt-0">
-                      <p className={`text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      <p className={`text-sm font-medium mb-1 text-gray-600`}>
                         Active in ETs:
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {campaignPopup.campaign.creatives[0].ets.map(et => (
-                          <span key={et} className={`px-3 py-1 rounded-full text-xs font-medium ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'
-                            }`}>
+                          <span key={et} className="px-3 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
                             {et}
                           </span>
                         ))}
@@ -2050,8 +1977,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                   {campaignPopup.campaign.creatives.map((creative, index) => (
                     <div
                       key={creative.name}
-                      className={`p-6 rounded-xl border transition-all duration-200 hover:shadow-lg ${isDarkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-650' : 'bg-gray-50 border-gray-200 hover:bg-white'
-                        }`}
+                      className="p-6 rounded-xl border transition-all duration-200 hover:shadow-lg bg-gray-50 border-gray-200 hover:bg-white"
                     >
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
@@ -2059,7 +1985,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3 ${index === 0 ? 'bg-yellow-500 text-white' :
                               index === 1 ? 'bg-gray-400 text-white' :
                                 index === 2 ? 'bg-amber-600 text-white' :
-                                  isDarkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-300 text-gray-700'
+                                  'bg-gray-300 text-gray-700'
                               }`}>
                               {index + 1}
                             </div>
@@ -2069,11 +1995,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                       </div>
 
                       <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'
-                          }`}>
+                        <div className="p-3 rounded-lg bg-white">
                           <div className="flex items-center mb-1">
                             <DollarSign className="h-4 w-4 text-green-500 mr-1" />
-                            <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                            <span className={`text-sm font-medium text-gray-600`}>
                               Revenue
                             </span>
                           </div>
@@ -2082,11 +2007,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                           </p>
                         </div>
 
-                        <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'
-                          }`}>
+                        <div className="p-3 rounded-lg bg-white">
                           <div className="flex items-center mb-1">
                             <Hash className="h-4 w-4 text-blue-500 mr-1" />
-                            <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                            <span className={`text-sm font-medium text-gray-600`}>
                               Frequency
                             </span>
                           </div>
@@ -2099,14 +2023,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, isDarkMode, 
                       <div>
                         <div className="flex items-center mb-2">
                           <Users className="h-4 w-4 text-blue-500 mr-2" />
-                          <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                          <span className={`text-sm font-medium text-gray-600`}>
                             Active in ETs ({creative.ets.length}):
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {creative.ets.map(et => (
-                            <span key={et} className={`px-2 py-1 rounded-md text-xs font-medium ${isDarkMode ? 'bg-blue-900/30 text-blue-300 border border-blue-800' : 'bg-blue-100 text-blue-700 border border-blue-200'
-                              }`}>
+                            <span key={et} className="px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200">
                               {et}
                             </span>
                           ))}
