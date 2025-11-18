@@ -110,6 +110,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG40": "$1100",
     "JSG43": "$750",
     "JSG44": "$1100",
+    "JSG20+JSG44": "$2500",
+    "JSG38+JSG38N": "$2500",
   };
 
 
@@ -230,10 +232,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "EX32": { stack: "S11", manager: "Kaif K." },
     "JSG20": { stack: "S11", manager: "Harsh G." },
     "JSG44": { stack: "S11", manager: "Harsh G." },
+    "JSG20+JSG44": { stack: "S11", manager: "Harsh G." },
 
     // S12
     "JSG38": { stack: "S12", manager: "Kaif K." },
     "JSG38N": { stack: "S12", manager: "Kaif K." },
+    "JSG38+JSG38N": { stack: "S12", manager: "Kaif K." },
     "JSG40": { stack: "S12", manager: "Keshav T." },
 
     // S13
@@ -443,6 +447,87 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         .sort((a, b) => b.revenue - a.revenue);
     });
 
+    // Helper function to combine two ETs
+    const combineETs = (et1Name: string, et2Name: string, combinedName: string) => {
+      const et1Data = etStats.get(et1Name);
+      const et2Data = etStats.get(et2Name);
+      
+      if (!et1Data && !et2Data) return;
+
+      const combinedET: ETStats & { et1Revenue?: number; et2Revenue?: number; et1Name?: string; et2Name?: string } = {
+        name: combinedName,
+        revenue: (et1Data?.revenue || 0) + (et2Data?.revenue || 0),
+        creatives: [],
+        campaigns: [],
+        advertisers: new Map<string, number>(),
+        et1Revenue: et1Data?.revenue || 0,
+        et2Revenue: et2Data?.revenue || 0,
+        et1Name: et1Name,
+        et2Name: et2Name,
+      };
+
+      // Combine creatives
+      const combinedCreatives = new Map<string, CreativeStats>();
+      if (et1Data) {
+        et1Data.creatives.forEach(c => {
+          if (!combinedCreatives.has(c.name)) {
+            combinedCreatives.set(c.name, { ...c, ets: [] });
+          } else {
+            const existing = combinedCreatives.get(c.name)!;
+            existing.frequency += c.frequency;
+            existing.revenue += c.revenue;
+          }
+        });
+      }
+      if (et2Data) {
+        et2Data.creatives.forEach(c => {
+          if (!combinedCreatives.has(c.name)) {
+            combinedCreatives.set(c.name, { ...c, ets: [] });
+          } else {
+            const existing = combinedCreatives.get(c.name)!;
+            existing.frequency += c.frequency;
+            existing.revenue += c.revenue;
+          }
+        });
+      }
+      combinedET.creatives = Array.from(combinedCreatives.values())
+        .sort((a, b) => b.frequency - a.frequency);
+
+      // Combine campaigns
+      const combinedCampaigns = new Set<string>();
+      if (et1Data) et1Data.campaigns.forEach(c => combinedCampaigns.add(c));
+      if (et2Data) et2Data.campaigns.forEach(c => combinedCampaigns.add(c));
+      combinedET.campaigns = Array.from(combinedCampaigns);
+
+      // Combine advertisers
+      if (et1Data) {
+        et1Data.advertisers.forEach((revenue, name) => {
+          const current = combinedET.advertisers.get(name) || 0;
+          combinedET.advertisers.set(name, current + revenue);
+        });
+      }
+      if (et2Data) {
+        et2Data.advertisers.forEach((revenue, name) => {
+          const current = combinedET.advertisers.get(name) || 0;
+          combinedET.advertisers.set(name, current + revenue);
+        });
+      }
+      combinedET.advertisersArray = Array.from(combinedET.advertisers.entries())
+        .map(([name, revenue]) => ({ name, revenue }))
+        .sort((a, b) => b.revenue - a.revenue);
+
+      // Remove individual ETs from etStats
+      etStats.delete(et1Name);
+      etStats.delete(et2Name);
+      
+      // Add combined ET
+      etStats.set(combinedName, combinedET);
+    };
+
+    // Combine ETs - Add your combinations here
+    combineETs('JSG20', 'JSG44', 'JSG20+JSG44');
+    combineETs('JSG38', 'JSG38N', 'JSG38+JSG38N');
+    // Example: combineETs('JSG29', 'JSG30PM', 'JSG29+JSG30PM');
 
     // For Pie and Bar chart
     return {
@@ -1155,8 +1240,19 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                       ${et.revenue.toLocaleString()}
                     </p>
                     <p className={`text-sm font-medium text-gray-600`}>
-                      Today Revenue
+                      {et.name.includes('+') ? 'Combined Revenue' : 'Today Revenue'}
                     </p>
+                    {et.name.includes('+') && (
+                      <div className="mt-1 flex gap-2 font-bold text-[12px] text-gray-600">
+                        {(et as any).et1Name ? (
+                          <span className="bg-amber-500/50 rounded-xl p-0.5 px-2">{(et as any).et1Name}: ${((et as any).et1Revenue ?? 0).toLocaleString()}</span>
+                        ) : null}
+                        {(et as any).et1Name && (et as any).et2Name ? <span></span> : null}
+                        {(et as any).et2Name ? (
+                          <span className="bg-amber-500/50 rounded-xl p-0.5 px-2">{(et as any).et2Name}: ${((et as any).et2Revenue ?? 0).toLocaleString()}</span>
+                        ) : null}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <div className='bg-yellow-400 py-[3px] rounded-md rounded-br-none rounded-bl-none'>
@@ -1248,12 +1344,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
           {analytics.etStats.slice(3, 100).map((et, index) => (
             <div
               key={et.name}
-              className="pb-4 rounded-xl border transition-all duration-300 hover:shadow-xl cursor-pointer bg-gradient-to-br from-blue-50 to-white border-blue-300 group">
+              className={`pb-4 rounded-xl border transition-all duration-300 hover:shadow-xl cursor-pointer ${et.name.includes('+') ? 'bg-gradient-to-br from-purple-50 to-white border-purple-300' : 'bg-gradient-to-br from-blue-50 to-white border-blue-300'} group`}>
               <div className="w-full flex items-center mb-4">
-                <div className="w-full flex items-center justify-between bg-blue-800 px-4 py-1 rounded-xl rounded-br-none rounded-bl-none">
+                <div className={`w-full flex items-center justify-between px-4 py-1 rounded-xl rounded-br-none rounded-bl-none ${et.name.includes('+') ? 'bg-purple-800' : 'bg-blue-800'}`}>
                   <div className="flex justify-start items-center">
-                    <Users className="h-6 w-6 text-blue-300 bg-blue-600 p-1 rounded-md" />
-                    <h4 className="font-bold text-lg ml-3 text-white">
+                    <Users className={`h-6 w-6 p-1 rounded-md ${et.name.includes('+') ? 'text-purple-300 bg-purple-600' : 'text-blue-300 bg-blue-600'}`} />
+                    <h4 className={`font-bold ml-3 text-white ${et.name.includes('+') ? 'text-base truncate' : 'text-lg'}`}>
                       {et.name}
                     </h4>
                   </div>
@@ -1292,12 +1388,23 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
               </div>
               <div className="mb-4 px-4 flex justify-between items-center">
                 <div>
-                  <p className="text-xl font-bold text-blue-500 mb-1">
+                  <p className={`text-xl font-bold mb-1 ${et.name.includes('+') ? 'text-purple-500' : 'text-blue-500'}`}>
                     ${et.revenue.toLocaleString()}
                   </p>
-                  <p className={`text-sm font-medium text-gray-600`}>
-                    Today Revenue
+                  <p className={`text-xs font-medium text-gray-600`}>
+                    {et.name.includes('+') ? 'Combined Revenue' : 'Today Revenue'}
                   </p>
+                  {et.name.includes('+') && (
+                    <div className="mt-1 flex gap-2 text-[10px] text-gray-500">
+                      {(et as any).et1Name ? (
+                        <span>{(et as any).et1Name}: ${((et as any).et1Revenue ?? 0).toLocaleString()}</span>
+                      ) : null}
+                      {(et as any).et1Name && (et as any).et2Name ? <span>|</span> : null}
+                      {(et as any).et2Name ? (
+                        <span>{(et as any).et2Name}: ${((et as any).et2Revenue ?? 0).toLocaleString()}</span>
+                      ) : null}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <div className='bg-green-400 py-[3px] rounded-md rounded-br-none rounded-bl-none'>
@@ -1333,7 +1440,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
               {/* Toggle button */}
               <button
                 onClick={() => toggleET(et.name)}
-                className="mt-3 flex items-center gap-1 text-sm font-medium px-4 text-blue-600 hover:underline"
+                className={`mt-3 flex items-center gap-1 text-sm font-medium px-4 hover:underline ${et.name.includes('+') ? 'text-purple-600' : 'text-blue-600'}`}
               >
                 {expandedETs.has(et.name) ? (
                   <>
