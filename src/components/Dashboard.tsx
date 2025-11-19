@@ -598,6 +598,15 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     return analytics.campaignStats.find(c => c.name === selectedCampaign);
   }, [selectedCampaign, analytics]);
 
+  // Helper function to get individual ET names from a combined ET or return the ET name itself
+  const getETNamesForFilter = (etName: string): string[] => {
+    if (etName.includes('+')) {
+      // Split combined ET like "JSG20+JSG44" into ["JSG20", "JSG44"]
+      return etName.split('+').map(et => et.trim().toUpperCase());
+    }
+    return [etName.toUpperCase()];
+  };
+
   const selectedETData = useMemo(() => {
     if (!selectedET) return null;
     return analytics.etStats.find(e => e.name.toUpperCase() === selectedET.toUpperCase());
@@ -632,7 +641,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     }
 
     if (selectedET) {
-      filteredRecords = filteredRecords.filter(r => r.et.toUpperCase() === selectedET.toUpperCase());
+      const etNames = getETNamesForFilter(selectedET);
+      filteredRecords = filteredRecords.filter(r => etNames.includes(r.et.toUpperCase()));
     }
 
     const headers = ['SUBID', 'Campaign', 'Creative', 'ET', 'Revenue', 'Advertiser', 'Source File'];
@@ -707,7 +717,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
   const exportETCreatives = () => {
     if (!selectedET) return;
 
-    const etRecords = data.records.filter(r => r.et.toUpperCase() === selectedET.toUpperCase());
+    const etNames = getETNamesForFilter(selectedET);
+    const etRecords = data.records.filter(r => etNames.includes(r.et.toUpperCase()));
 
     // Group by creative and aggregate data
     const creativeMap = new Map<string, {
@@ -1592,36 +1603,54 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         </div>
         {/* Campaign Analysis */}
         {selectedCampaignData && (
-        <div className="p-6 rounded-lg border bg-white/70 backdrop-blur-xs border-white/80">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold">Campaign: {selectedCampaignData.name}</h3>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-green-500">
-                  ${selectedCampaignData.revenue.toLocaleString()}
-                </p>
-                <p className={`text-sm text-gray-600`}>
-                  Total Revenue
-                </p>
+        <div className="p-6 rounded-xl border-2 shadow-xl bg-gradient-to-br from-white via-green-50/30 to-white border-green-200">
+            {/* Header Section */}
+            <div className="mb-6 p-5 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg">
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm">
+                    <Target className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold mb-1">Campaign: {selectedCampaignData.name}</h3>
+                    <p className="text-green-100 text-sm flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      {selectedCampaignData.creatives.length} creatives • {selectedCampaignData.ets.length} ETs
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right bg-white/10 backdrop-blur-sm px-4 py-3 rounded-lg border border-white/20">
+                  <p className="text-3xl font-bold mb-1">
+                    ${selectedCampaignData.revenue.toLocaleString()}
+                  </p>
+                  <p className="text-green-100 text-sm font-medium">
+                    Total Revenue
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* Top Performing Creative */}
             {selectedCampaignData.creatives.length > 0 && (
-              <div className="mb-6 p-4 rounded-lg bg-blue-50 border border-blue-200">
-                <div className="flex items-center mb-2">
-                  <Award className="h-5 w-5 mr-2 text-yellow-500" />
-                  <h4 className="font-semibold text-blue-600">Top Performing Creative</h4>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">{selectedCampaignData.creatives[0].name}</p>
-                    <p className={`text-sm text-gray-600`}>
-                      ETs: {selectedCampaignData.creatives[0].ets.join(', ')}
-                    </p>
+              <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200 shadow-md">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-amber-100">
+                      <Award className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-amber-900 mb-1">Top Performing Creative</h4>
+                      <p className="text-sm font-medium text-amber-700">{selectedCampaignData.creatives[0].name}</p>
+                      <p className="text-xs text-amber-600 mt-1">
+                        ETs: {selectedCampaignData.creatives[0].ets.join(', ')}
+                      </p>
+                    </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold">${selectedCampaignData.creatives[0].revenue.toLocaleString()}</p>
-                    <p className={`text-sm text-gray-600`}>
+                    <p className="text-2xl font-bold text-amber-700">
+                      ${selectedCampaignData.creatives[0].revenue.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-amber-600 font-medium">
                       {selectedCampaignData.creatives[0].frequency} occurrences
                     </p>
                   </div>
@@ -1630,12 +1659,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             )}
 
             {/* ET Revenue for Selected Campaign */}
-            <div className="mt-6">
-              <div className="flex items-center mb-6">
-                <Users className="h-6 w-6 mr-3 text-blue-500" />
-                <h4 className="text-xl font-bold">ET-Wise Revenue Breakdown</h4>
+            <div className="mb-6">
+              <div className="flex items-center mb-4 gap-2">
+                <div className="p-2 rounded-lg bg-green-100">
+                  <Users className="h-5 w-5 text-green-600" />
+                </div>
+                <h4 className="text-lg font-bold text-gray-800">ET-Wise Revenue Breakdown</h4>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {selectedCampaignData.ets
                   .map(etName => {
                     const etRevenue = data.records
@@ -1664,64 +1695,52 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                     return (
                       <div
                         key={etData.etName}
-                        className="p-6 rounded-xl border transition-all duration-300 hover:shadow-lg bg-white border-gray-200 hover:border-gray-300"
+                        className="p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-white to-green-50/50 border-green-200 hover:border-green-300"
                       >
-                        <div className="space-y-4">
-                          {/* ET Header */}
-                          <div className="flex items-center space-x-2">
-                            <Target className="h-5 w-5 text-blue-600" />
-                            <h4 className="text-xl font-bold">{etData.etName}</h4>
-                          </div>
+                        {/* ET Header */}
+                        <div className="flex items-center gap-2 mb-3 pb-3 border-b border-green-100">
+                          <Users className="h-4 w-4 text-green-600 flex-shrink-0" />
+                          <h4 className="text-base font-bold text-gray-800 truncate">{etData.etName}</h4>
+                        </div>
 
-                          {/* Revenue and Frequency Row */}
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <div className="flex items-center space-x-2 mb-1">
-                                <span className="text-green-600 font-medium">$</span>
-                                <span className={`text-sm font-medium text-gray-600`}>
-                                  Revenue
-                                </span>
-                              </div>
-                              <div className="text-2xl font-bold text-green-600">
-                                ${etData.etRevenue.toFixed(1)}
-                              </div>
-                            </div>
-                            <div>
-                              <div className="flex items-center space-x-2 mb-1">
-                                <span className="text-blue-600 font-medium">#</span>
-                                <span className={`text-sm font-medium text-gray-600`}>
-                                  Frequency
-                                </span>
-                              </div>
-                              <div className="text-2xl font-bold text-blue-600">
-                                {etData.creatives.reduce((sum, c) => sum + c.frequency, 0)}
-                              </div>
-                            </div>
+                        {/* Revenue and Frequency - Compact */}
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                          <div className="bg-green-50 rounded-lg p-2 border border-green-200">
+                            <p className="text-xs text-green-700 font-medium mb-1">Revenue</p>
+                            <p className="text-lg font-bold text-green-600">
+                              ${etData.etRevenue.toFixed(1)}
+                            </p>
                           </div>
+                          <div className="bg-blue-50 rounded-lg p-2 border border-blue-200">
+                            <p className="text-xs text-blue-700 font-medium mb-1">Frequency</p>
+                            <p className="text-lg font-bold text-blue-600">
+                              {etData.creatives.reduce((sum, c) => sum + c.frequency, 0)}
+                            </p>
+                          </div>
+                        </div>
 
-                          {/* Active Creatives */}
-                          <div>
-                            <div className="flex items-center space-x-2 mb-3">
-                              <Users className="h-4 w-4 text-blue-600" />
-                              <span className={`text-sm font-medium text-gray-600`}>
-                                Active Creatives ({etData.creatives.length}):
+                        {/* Active Creatives - Compact */}
+                        <div>
+                          <div className="flex items-center gap-1 mb-2">
+                            <FileText className="h-3 w-3 text-gray-500" />
+                            <span className="text-xs font-medium text-gray-600">
+                              Creatives ({etData.creatives.length})
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {etData.creatives.slice(0, 4).map((creative, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-green-100 text-green-700 border border-green-200"
+                              >
+                                {creative.name.length > 15 ? creative.name.substring(0, 15) + '...' : creative.name}
                               </span>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              {etData.creatives.slice(0, 6).map((creative, idx) => (
-                                <span
-                                  key={idx}
-                                  className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200"
-                                >
-                                  {creative.name}
-                                </span>
-                              ))}
-                              {etData.creatives.length > 6 && (
-                                <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                  +{etData.creatives.length - 6} more
-                                </span>
-                              )}
-                            </div>
+                            ))}
+                            {etData.creatives.length > 4 && (
+                              <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                                +{etData.creatives.length - 4}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1731,28 +1750,42 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             </div>
 
             {/* All Creatives */}
-            <h4 className="font-semibold mb-4 mt-4">All Creatives of {selectedCampaignData.name}</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {selectedCampaignData.creatives.map((creative, index) => (
-                <div
-                  key={creative.name}
-                  className="p-4 rounded-lg border transition-all duration-200 hover:shadow-lg bg-gray-50 border-gray-200 hover:bg-gray-100"
-                >
-                  <div className="flex items-center mb-2">
-                    <FileText className="h-4 w-4 mr-2 text-gray-500" />
-                    <h5 className="font-semibold">{creative.name}</h5>
-                  </div>
-                  <p className="text-lg font-bold text-green-500">
-                    ${creative.revenue.toLocaleString()}
-                  </p>
-                  <p className={`text-sm text-gray-600`}>
-                    Frequency: {creative.frequency}
-                  </p>
-                  <p className="text-xs mt-1 text-gray-500">
-                    ETs: {creative.ets.join(', ')}
-                  </p>
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-2 rounded-lg bg-emerald-100">
+                  <FileText className="h-5 w-5 text-emerald-600" />
                 </div>
-              ))}
+                <h4 className="text-lg font-bold text-gray-800">All Creatives ({selectedCampaignData.creatives.length})</h4>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {selectedCampaignData.creatives.map((creative, idx) => (
+                  <div
+                    key={creative.name}
+                    className="p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-gradient-to-br from-white to-emerald-50/30 border-emerald-200 hover:border-emerald-300"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <FileText className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                        <h5 className="font-semibold text-sm text-gray-800 truncate">{creative.name}</h5>
+                      </div>
+                      {idx === 0 && (
+                        <Award className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                      )}
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-emerald-100">
+                      <p className="text-lg font-bold text-emerald-600 mb-1">
+                        ${creative.revenue.toLocaleString()}
+                      </p>
+                      <p className="text-xs text-gray-500 font-medium mb-1">
+                        {creative.frequency} {creative.frequency === 1 ? 'occurrence' : 'occurrences'}
+                      </p>
+                      <p className="text-xs text-gray-600 font-medium">
+                        ETs: {creative.ets.join(', ')}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
           </div>
@@ -1806,33 +1839,51 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         {/* ET Analysis */}
 
         {selectedETData && (
-        <div className="p-6 rounded-lg border bg-white border-gray-200">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold">ET: {selectedETData.name}</h3>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-blue-500">
-                  ${selectedETData.revenue.toLocaleString()}
-                </p>
-                <p className={`text-sm text-gray-600`}>
-                  Total Revenue
-                </p>
+        <div className="p-6 rounded-xl border-2 shadow-xl bg-gradient-to-br from-white via-blue-50/30 to-white border-blue-200">
+            {/* Header Section */}
+            <div className="mb-6 p-5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg">
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm">
+                    <Users className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold mb-1">ET: {selectedETData.name}</h3>
+                    <p className="text-blue-100 text-sm flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      {selectedETData.creatives.length} creatives • {selectedETData.campaigns.length} campaigns
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right bg-white/10 backdrop-blur-sm px-4 py-3 rounded-lg border border-white/20">
+                  <p className="text-3xl font-bold mb-1">
+                    ${selectedETData.revenue.toLocaleString()}
+                  </p>
+                  <p className="text-blue-100 text-sm font-medium">
+                    Total Revenue
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* Top Performing Creative for ET */}
             {selectedETData.creatives.length > 0 && (
-              <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
-                <div className="flex items-center mb-2">
-                  <Award className="h-5 w-5 mr-2 text-yellow-500" />
-                  <h4 className="font-semibold text-red-600">Top Performing Creative</h4>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">{selectedETData.creatives[0].name}</p>
+              <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200 shadow-md">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-amber-100">
+                      <Award className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-amber-900 mb-1">Top Performing Creative</h4>
+                      <p className="text-sm font-medium text-amber-700">{selectedETData.creatives[0].name}</p>
+                    </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold">${selectedETData.creatives[0].revenue.toLocaleString()}</p>
-                    <p className={`text-sm text-gray-600`}>
+                    <p className="text-2xl font-bold text-amber-700">
+                      ${selectedETData.creatives[0].revenue.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-amber-600 font-medium">
                       {selectedETData.creatives[0].frequency} occurrences
                     </p>
                   </div>
@@ -1841,19 +1892,22 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             )}
 
             {/* Campaign Revenue for Selected ET */}
-            <div>
-              <div className="flex items-center mb-6">
-                <Target className="h-6 w-6 mr-3 text-blue-500" />
-                <h4 className="text-xl font-bold">Campaign-Wise Revenue Breakdown</h4>
+            <div className="mb-6">
+              <div className="flex items-center mb-4 gap-2">
+                <div className="p-2 rounded-lg bg-blue-100">
+                  <Target className="h-5 w-5 text-blue-600" />
+                </div>
+                <h4 className="text-lg font-bold text-gray-800">Campaign-Wise Revenue Breakdown</h4>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {selectedETData.campaigns
                   .map(campaignName => {
+                    const etNames = getETNamesForFilter(selectedETData.name);
                     const campaignRevenue = data.records
-                      .filter(r => r.et.toUpperCase() === selectedETData.name.toUpperCase() && r.campaign === campaignName)
+                      .filter(r => etNames.includes(r.et.toUpperCase()) && r.campaign === campaignName)
                       .reduce((sum, r) => sum + r.revenue, 0);
                     const creatives = data.records
-                      .filter(r => r.et.toUpperCase() === selectedETData.name.toUpperCase() && r.campaign === campaignName)
+                      .filter(r => etNames.includes(r.et.toUpperCase()) && r.campaign === campaignName)
                       .reduce((acc, r) => {
                         if (!acc.find(c => c.name === r.creative)) {
                           acc.push({
@@ -1875,64 +1929,52 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                     return (
                       <div
                         key={campaignData.campaignName}
-                        className="p-6 rounded-xl border transition-all duration-300 hover:shadow-lg bg-white border-gray-200 hover:border-gray-300"
+                        className="p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-white to-blue-50/50 border-blue-200 hover:border-blue-300"
                       >
-                        <div className="space-y-4">
-                          {/* Campaign Header */}
-                          <div className="flex items-center space-x-2">
-                            <Target className="h-5 w-5 text-blue-600" />
-                            <h4 className="text-xl font-bold">{campaignData.campaignName}</h4>
-                          </div>
+                        {/* Campaign Header */}
+                        <div className="flex items-center gap-2 mb-3 pb-3 border-b border-blue-100">
+                          <Target className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                          <h4 className="text-base font-bold text-gray-800 truncate">{campaignData.campaignName}</h4>
+                        </div>
 
-                          {/* Revenue and Frequency Row */}
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <div className="flex items-center space-x-2 mb-1">
-                                <span className="text-green-600 font-medium">$</span>
-                                <span className={`text-sm font-medium text-gray-600`}>
-                                  Revenue
-                                </span>
-                              </div>
-                              <div className="text-2xl font-bold text-green-600">
-                                ${campaignData.campaignRevenue.toFixed(1)}
-                              </div>
-                            </div>
-                            <div>
-                              <div className="flex items-center space-x-2 mb-1">
-                                <span className="text-blue-600 font-medium">#</span>
-                                <span className={`text-sm font-medium text-gray-600`}>
-                                  Frequency
-                                </span>
-                              </div>
-                              <div className="text-2xl font-bold text-blue-600">
-                                {campaignData.creatives.reduce((sum, c) => sum + c.frequency, 0)}
-                              </div>
-                            </div>
+                        {/* Revenue and Frequency - Compact */}
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                          <div className="bg-green-50 rounded-lg p-2 border border-green-200">
+                            <p className="text-xs text-green-700 font-medium mb-1">Revenue</p>
+                            <p className="text-lg font-bold text-green-600">
+                              ${campaignData.campaignRevenue.toFixed(1)}
+                            </p>
                           </div>
+                          <div className="bg-blue-50 rounded-lg p-2 border border-blue-200">
+                            <p className="text-xs text-blue-700 font-medium mb-1">Frequency</p>
+                            <p className="text-lg font-bold text-blue-600">
+                              {campaignData.creatives.reduce((sum, c) => sum + c.frequency, 0)}
+                            </p>
+                          </div>
+                        </div>
 
-                          {/* Active Creatives */}
-                          <div>
-                            <div className="flex items-center space-x-2 mb-3">
-                              <Users className="h-4 w-4 text-blue-600" />
-                              <span className={`text-sm font-medium text-gray-600`}>
-                                Active Creatives ({campaignData.creatives.length}):
+                        {/* Active Creatives - Compact */}
+                        <div>
+                          <div className="flex items-center gap-1 mb-2">
+                            <Users className="h-3 w-3 text-gray-500" />
+                            <span className="text-xs font-medium text-gray-600">
+                              Creatives ({campaignData.creatives.length})
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {campaignData.creatives.slice(0, 4).map((creative, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-blue-100 text-blue-700 border border-blue-200"
+                              >
+                                {creative.name.length > 15 ? creative.name.substring(0, 15) + '...' : creative.name}
                               </span>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              {campaignData.creatives.slice(0, 6).map((creative, idx) => (
-                                <span
-                                  key={idx}
-                                  className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200"
-                                >
-                                  {creative.name}
-                                </span>
-                              ))}
-                              {campaignData.creatives.length > 6 && (
-                                <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                  +{campaignData.creatives.length - 6} more
-                                </span>
-                              )}
-                            </div>
+                            ))}
+                            {campaignData.creatives.length > 4 && (
+                              <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                                +{campaignData.creatives.length - 4}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1942,25 +1984,41 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             </div>
 
             {/* All Creatives for ET */}
-            <h4 className="font-semibold mb-4 mt-4">All Creatives of {selectedETData.name}</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-              {selectedETData.creatives.map((creative) => (
-                <div
-                  key={creative.name}
-                  className="p-4 rounded-lg border transition-all duration-200 hover:shadow-lg bg-gray-50 border-gray-200 hover:bg-gray-100"
-                >
-                  <div className="flex items-center mb-2">
-                    <FileText className="h-4 w-4 mr-2 text-gray-500" />
-                    <h5 className="font-semibold">{creative.name}</h5>
-                  </div>
-                  <p className="text-lg font-bold text-blue-500">
-                    ${creative.revenue.toLocaleString()}
-                  </p>
-                  <p className={`text-sm text-gray-600`}>
-                    Frequency: {creative.frequency}
-                  </p>
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-2 rounded-lg bg-purple-100">
+                  <FileText className="h-5 w-5 text-purple-600" />
                 </div>
-              ))}
+                <h4 className="text-lg font-bold text-gray-800">All Creatives ({selectedETData.creatives.length})</h4>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {selectedETData.creatives.map((creative, idx) => (
+                  <div
+                    key={creative.name}
+                    className="p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-gradient-to-br from-white to-purple-50/30 border-purple-200 hover:border-purple-300"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <FileText className="h-4 w-4 text-purple-600 flex-shrink-0" />
+                        <h5 className="font-semibold text-sm text-gray-800 truncate">{creative.name}</h5>
+                      </div>
+                      {idx === 0 && (
+                        <Award className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-purple-100">
+                      <div>
+                        <p className="text-lg font-bold text-purple-600">
+                          ${creative.revenue.toLocaleString()}
+                        </p>
+                        <p className="text-xs text-gray-500 font-medium">
+                          {creative.frequency} {creative.frequency === 1 ? 'occurrence' : 'occurrences'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
