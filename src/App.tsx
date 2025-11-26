@@ -113,7 +113,7 @@ function App() {
                 <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">Restricted Access</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2 tracking-tight">
-                You Don't Have Access
+                Fuck You Chor 💦
               </h2>
               <p className="text-gray-300 text-sm sm:text-base">
                 Please enter the password to continue
