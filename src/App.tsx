@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { Heart, TrendingUp, ShieldCheck, Zap } from "lucide-react"
+import { Heart, TrendingUp, ShieldCheck, Zap, Lock } from "lucide-react"
 import FileUpload from "./components/FileUpload"
 import Dashboard from "./components/Dashboard"
 import CelebrationEffect from "./components/CelebrationEffect"
@@ -12,12 +12,27 @@ interface UploadedFile {
   data: ProcessedData
 }
 
+// Password stored in code
+const PASSWORD = "MMmEdiaak@8767"
+
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [passwordInput, setPasswordInput] = useState("")
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [combinedData, setCombinedData] = useState<ProcessedData | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [showCelebration, setShowCelebration] = useState(false)
   const [hasTriggeredCelebration, setHasTriggeredCelebration] = useState(false)
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (passwordInput === PASSWORD) {
+      setIsAuthenticated(true)
+    } else {
+      alert("Incorrect password")
+      setPasswordInput("")
+    }
+  }
 
   const handleFilesUploaded = (files: UploadedFile[]) => {
     setUploadedFiles(files)
@@ -53,6 +68,118 @@ function App() {
     }
   }, [combinedData, hasTriggeredCelebration])
 
+  // Password Screen - Show if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute top-1/2 left-0 w-72 h-72 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+          {/* Grid Pattern Overlay */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        </div>
+
+        <div className="w-full max-w-md relative z-10">
+          {/* Glow Effect Behind Card */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl blur-xl opacity-30 animate-pulse"></div>
+          
+          <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-2xl shadow-2xl p-6 sm:p-8 border border-white/20">
+            {/* Decorative Top Accent */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent rounded-full"></div>
+            
+            {/* Security Icon with Enhanced Design */}
+            <div className="flex justify-center mb-5">
+              <div className="relative">
+                {/* Outer Glow Ring */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full blur-lg opacity-50 animate-pulse"></div>
+                {/* Main Icon Container */}
+                <div className="relative w-16 h-16 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-xl transform hover:scale-105 transition-transform duration-300">
+                  <Lock className="h-8 w-8 text-white" strokeWidth={2.5} />
+                  {/* Shine Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl"></div>
+                </div>
+                {/* Status Indicator */}
+                <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full border-3 border-white/90 flex items-center justify-center shadow-md">
+                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Title Section with Enhanced Typography */}
+            <div className="text-center mb-6">
+              <div className="inline-block mb-2 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full">
+                <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">Restricted Access</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2 tracking-tight">
+                You Don't Have Access
+              </h2>
+              <p className="text-gray-300 text-sm sm:text-base">
+                Please enter the password to continue
+              </p>
+            </div>
+
+            {/* Password Form with Enhanced Styling */}
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="password" className="block text-xs font-bold text-gray-200 mb-2 uppercase tracking-wide">
+                  Password
+                </label>
+                <div className="relative group">
+                  {/* Input Glow Effect */}
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-lg opacity-0 group-hover:opacity-20 blur transition-opacity duration-300"></div>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-4 w-4 text-gray-400 group-focus-within:text-blue-400 transition-colors" />
+                    </div>
+                    <input
+                      id="password"
+                      type="password"
+                      value={passwordInput}
+                      onChange={(e) => setPasswordInput(e.target.value)}
+                      className="w-full pl-10 pr-3 py-3 border-2 border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 outline-none transition-all text-sm bg-white/10 backdrop-blur-sm text-white placeholder-gray-400 hover:bg-white/15 focus:bg-white/20"
+                      placeholder="Enter your password"
+                      autoFocus
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full relative group overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-500/50 transition-all shadow-xl hover:shadow-blue-500/50 transform hover:-translate-y-0.5 active:translate-y-0"
+              >
+                {/* Button Shine Effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                <span className="relative flex items-center justify-center gap-2 text-base">
+                  <Lock className="h-4 w-4" />
+                  Unlock Access
+                </span>
+              </button>
+            </form>
+
+            {/* Footer Note with Enhanced Design */}
+            <div className="mt-6 pt-4 border-t border-white/10">
+              <div className="flex items-center justify-center gap-2">
+                <div className="p-1 bg-green-500/20 rounded">
+                  <ShieldCheck className="h-3.5 w-3.5 text-green-400" />
+                </div>
+                <p className="text-[10px] text-gray-400 font-medium">
+                  Secure access required • Your data is protected
+                </p>
+              </div>
+            </div>
+
+            {/* Bottom Decorative Accent */}
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-0.5 bg-gradient-to-r from-transparent via-purple-500 to-transparent rounded-full"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Main Content - Show only after authentication
   return (
     <div
       className="min-h-screen transition-colors duration-300"
