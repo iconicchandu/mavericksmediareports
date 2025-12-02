@@ -111,8 +111,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG40": "$1100",
     "JSG43": "$750",
     "JSG44": "$1100",
-    "JSG20+JSG44": "$2500",
-    "JSG38+JSG38N": "$2500",
+    "JSG18": "$800",
+    "JSG20+JSG44": "$2000",
+    "JSG38+JSG38N": "$1800",
   };
 
 
