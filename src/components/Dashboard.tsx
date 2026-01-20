@@ -114,6 +114,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG18": "$800",
     "JSG20+JSG44": "$2000",
     "JSG38+JSG38N": "$1800",
+    "JSG36+P36": "$800",
   };
 
 
@@ -217,6 +218,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG36": { stack: "CM36 | S6", manager: "Nikhil T." },
     "C36": { stack: "S6", manager: "Nikhil T." },
     "P36": { stack: "RGR36 | S6", manager: "Nikhil T." },
+    "JSG36+P36": { stack: "S6", manager: "Nikhil T." },
 
     // S7
     "JSG26": { stack: "S7", manager: "Nikhil T." },
@@ -405,7 +407,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         });
       }
       const campaignCreative = campaignCreatives.get(record.creative)!;
-      campaignCreative.frequency += 1;
+      campaignCreative.frequency += record.conv ?? 1; // Use CONV value if available, otherwise 1
       campaignCreative.revenue += record.revenue;
       if (!campaignCreative.ets.includes(normalizedET)) {
         campaignCreative.ets.push(normalizedET);
@@ -425,7 +427,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         });
       }
       const etCreative = etCreatives.get(record.creative)!;
-      etCreative.frequency += 1;
+      etCreative.frequency += record.conv ?? 1; // Use CONV value if available, otherwise 1
       etCreative.revenue += record.revenue;
       if (!etCreative.ets.includes(normalizedET)) {
         etCreative.ets.push(normalizedET);
@@ -530,6 +532,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     // Combine ETs - Add your combinations here
     combineETs('JSG20', 'JSG44', 'JSG20+JSG44');
     combineETs('JSG38', 'JSG38N', 'JSG38+JSG38N');
+    combineETs('JSG36', 'P36', 'JSG36+P36');
     // Example: combineETs('JSG29', 'JSG30PM', 'JSG29+JSG30PM');
 
     // For Pie and Bar chart
@@ -587,7 +590,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
       const group = creativeGroups.get(record.creative)!;
       group.totalRevenue += record.revenue;
-      group.frequency += 1;
+      group.frequency += record.conv ?? 1; // Use CONV value if available, otherwise 1
       group.campaigns.add(record.campaign);
       group.ets.add(record.et.toUpperCase());
       group.advertisers.add(record.advertiser);
@@ -642,7 +645,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
           });
         } else {
           const existing = creativesMap.get(r.creative)!;
-          existing.frequency += 1;
+          existing.frequency += r.conv ?? 1; // Use CONV value if available, otherwise 1
           existing.revenue += r.revenue;
           existing.campaigns.add(r.campaign);
         }
@@ -745,7 +748,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       }
 
       const creative = creativeMap.get(record.creative)!;
-      creative.frequency += 1;
+      creative.frequency += record.conv ?? 1; // Use CONV value if available, otherwise 1
       creative.totalRevenue += record.revenue;
       creative.ets.add(record.et.toUpperCase());
       creative.advertisers.add(record.advertiser);
@@ -797,7 +800,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       }
 
       const creative = creativeMap.get(record.creative)!;
-      creative.frequency += 1;
+      creative.frequency += record.conv ?? 1; // Use CONV value if available, otherwise 1
       creative.totalRevenue += record.revenue;
       creative.campaigns.add(record.campaign);
       creative.advertisers.add(record.advertiser);
@@ -863,7 +866,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       }
       const item = map.get(r.creative)!;
       item.totalRevenue += r.revenue;
-      item.frequency += 1;
+      item.frequency += r.conv ?? 1; // Use CONV value if available, otherwise 1
       item.campaigns.add(r.campaign);
       item.ets.add(r.et);
     });
@@ -1834,12 +1837,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                         if (!acc.find(c => c.name === r.creative)) {
                           acc.push({
                             name: r.creative,
-                            frequency: 1,
+                            frequency: r.conv ?? 1, // Use CONV value if available, otherwise 1
                             revenue: r.revenue
                           });
                         } else {
                           const existing = acc.find(c => c.name === r.creative)!;
-                          existing.frequency += 1;
+                          existing.frequency += r.conv ?? 1; // Use CONV value if available, otherwise 1
                           existing.revenue += r.revenue;
                         }
                         return acc;
@@ -2101,12 +2104,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                               if (!acc.find(c => c.name === r.creative)) {
                                 acc.push({
                                   name: r.creative,
-                                  frequency: 1,
+                                  frequency: r.conv ?? 1, // Use CONV value if available, otherwise 1
                                   revenue: r.revenue
                                 });
                               } else {
                                 const existing = acc.find(c => c.name === r.creative)!;
-                                existing.frequency += 1;
+                                existing.frequency += r.conv ?? 1; // Use CONV value if available, otherwise 1
                                 existing.revenue += r.revenue;
                               }
                               return acc;
@@ -2286,12 +2289,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                             if (!acc.find(c => c.name === r.creative)) {
                               acc.push({
                                 name: r.creative,
-                                frequency: 1,
+                                frequency: r.conv ?? 1, // Use CONV value if available, otherwise 1
                                 revenue: r.revenue
                               });
                             } else {
                               const existing = acc.find(c => c.name === r.creative)!;
-                              existing.frequency += 1;
+                              existing.frequency += r.conv ?? 1; // Use CONV value if available, otherwise 1
                               existing.revenue += r.revenue;
                             }
                             return acc;

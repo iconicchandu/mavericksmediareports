@@ -6,6 +6,7 @@ export interface DataRecord {
   et: string;
   advertiser: string;
   fileName: string;
+  conv?: number; // Optional conversion count from CONV column
 }
 
 export interface ProcessedData {

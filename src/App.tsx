@@ -290,11 +290,11 @@ function App() {
       <CelebrationEffect isActive={showCelebration} onComplete={() => setShowCelebration(false)} />
 
       <footer className="mt-16">
-        <div className="max-w-[260px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-[320px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <p
             className="text-center text-sm flex items-center justify-center text-slate-600 bg-white/50 backdrop-blur-sm rounded-lg p-1"
           >
-            Made with <Heart className="h-4 w-4 mx-1 text-rose-500" fill="currentColor" aria-hidden="true" /> by <b className="ml-1">Chandu</b>
+            Made with <Heart className="h-4 w-4 mx-1 text-rose-500" fill="currentColor" aria-hidden="true" /> by <b className="ml-1"><a href="https://iconicchandu.online/" target="_blank" rel="noopener noreferrer">Iconic Chandu</a></b>
           </p>
         </div>
       </footer>

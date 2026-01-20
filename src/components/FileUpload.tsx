@@ -105,6 +105,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
 
           const subidIndex = headers.findIndex(h => h.includes('subid'));
           const revIndex = headers.findIndex(h => h.includes('rev'));
+          const convIndex = headers.findIndex(h => h.includes('conv')); // Optional CONV column
 
           if (subidIndex === -1 || revIndex === -1) {
             reject(new Error(`Invalid CSV format in ${file.name}. Required columns: SUBID, REV`));
@@ -123,25 +124,52 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
 
             const subid = values[subidIndex];
             const revenue = parseFloat(values[revIndex]) || 0;
+            // Parse CONV column if it exists (0 is a valid value, undefined means column doesn't exist)
+            let conv: number | undefined = undefined;
+            if (convIndex !== -1 && values.length > convIndex && values[convIndex].trim() !== '') {
+              const parsed = parseFloat(values[convIndex]);
+              conv = isNaN(parsed) ? undefined : parsed;
+            }
 
             if (!subid || revenue === 0) continue;
 
-            // Parse SUBID format: Campaign_Creative_ET
-            const parts = subid.split('_');
+            // Parse SUBID format: Campaign_Creative_ET or Campaign/AC2/ET (forward slash format)
             let campaign = '', creative = '', et = '';
 
-            if (parts.length >= 3) {
-              campaign = parts[0];
-              et = parts[parts.length - 1];
-              creative = parts.slice(0, -1).join('_');
-            } else if (parts.length === 2) {
-              campaign = parts[0];
-              creative = parts[0];
-              et = parts[1];
+            // Check for forward slash format (e.g., SQLI/AC2/JSG43, ABC/XY/Z123, etc.)
+            if (subid.includes('/')) {
+              const parts = subid.split('/').filter(part => part.trim() !== ''); // Filter out empty parts
+              if (parts.length >= 2) {
+                campaign = parts[0].trim(); // First part = campaign
+                et = parts[parts.length - 1].trim(); // Last part = ET name
+                creative = parts.slice(0, -1).join('/').trim(); // All parts except last = template name
+              } else if (parts.length === 1) {
+                // Only one valid part found
+                campaign = parts[0].trim();
+                creative = subid.trim();
+                et = parts[0].trim();
+              } else {
+                // No valid parts, use full subid
+                campaign = subid.trim();
+                creative = subid.trim();
+                et = subid.trim();
+              }
             } else {
-              campaign = subid;
-              creative = subid;
-              et = subid;
+              // Parse SUBID format: Campaign_Creative_ET (underscore format)
+              const parts = subid.split('_');
+              if (parts.length >= 3) {
+                campaign = parts[0];
+                et = parts[parts.length - 1];
+                creative = parts.slice(0, -1).join('_');
+              } else if (parts.length === 2) {
+                campaign = parts[0];
+                creative = parts[0];
+                et = parts[1];
+              } else {
+                campaign = subid;
+                creative = subid;
+                et = subid;
+              }
             }
 
             // Handle special cases
@@ -158,7 +186,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
               creative,
               et,
               advertiser,
-              fileName: file.name
+              fileName: file.name,
+              conv // Include CONV value if available
             };
 
             records.push(record);
