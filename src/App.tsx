@@ -184,7 +184,7 @@ function App() {
     <div
       className="min-h-screen transition-colors duration-300"
         style={{
-          backgroundImage: "url('https://image.s7.sfmc-content.com/lib/fe2a11717d640474741277/m/1/ccab749f-caa2-4e75-ab01-cd02ac8632e7.gif')",
+          backgroundImage: "url('/summer.gif')",
           backgroundAttachment: "fixed",
           backgroundSize: "cover",
           backgroundPosition: "center",

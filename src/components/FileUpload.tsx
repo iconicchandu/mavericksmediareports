@@ -75,7 +75,16 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
     const upperFileName = fileName.toUpperCase();
     const upperCampaign = campaign.toUpperCase();
 
-    if (upperFileName.includes('XC CAMPS')) {
+    // Check for DB in filename first (takes priority)
+    if (upperFileName.includes('DB')) {
+      return 'DB';
+    } 
+    // Check for XC EXC or XCE before checking for XC (these are different advertisers)
+    else if (upperFileName.includes('XC EXC') || upperFileName.includes('XCE')) {
+      return 'XC EXC';
+    } 
+    // Check for XC CAMPS or just XC (but not if it's part of XC EXC or XCE)
+    else if (upperFileName.includes('XC CAMPS') || upperFileName.includes('XC')) {
       return 'XC';
     } else if (upperFileName.includes('NON COMCAST')) {
       return 'NON COMCAST';

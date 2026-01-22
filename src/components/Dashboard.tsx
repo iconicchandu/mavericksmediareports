@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
 import { Download, FileText, TrendingUp, Users, Target, DollarSign, RefreshCw, Building2, Zap, Globe, Wifi, Award, BarChart3, Search, X, Star, Activity, Layers, Eye, Hash, Calendar, AtSign, ChevronUp, ChevronDown, Crown } from 'lucide-react';
 import { ProcessedData, DataRecord, CreativeStats, CampaignStats, ETStats, AdvertiserStats } from '../types';
 
@@ -25,23 +25,31 @@ const OTHER_ET_COLOR = "#1e40af";
 const getAdvertiserAccent = (name: string): string => {
   switch (name) {
     case 'Branded':
-      return '#3B82F6'; // blue
+      return '#6366F1'; // indigo
     case 'RGR':
-      return '#f1b308'; // yellow
+      return '#F59E0B'; // amber
     case 'GZ':
-      return '#0EA5E9'; // sky
+      return '#8B5CF6'; // purple
     case 'CM Gmail':
-      return '#F97316'; // orange
+      return '#EF4444'; // red
     case 'MI':
-      return '#2563EB'; // accent for MI (indigo/blue)
+      return '#3B82F6'; // blue
     case 'ES':
-      return '#22C55E'; // green
+      return '#10B981'; // emerald
     case 'XC':
       return '#06B6D4'; // cyan
+    case 'XC EXC':
+      return '#14B8A6'; // teal
+    case 'DB':
+      return '#84CC16'; // lime
+    case 'COMCAST':
+      return '#F43F5E'; // rose
+    case 'NON COMCAST':
+      return '#EC4899'; // pink
     case 'Comcast':
       return '#DC2626'; // red
     case 'Other':
-      return '#9CA3AF'; // gray
+      return '#6B7280'; // gray
     default:
       return '#10B981'; // emerald fallback
   }
@@ -1153,52 +1161,55 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       {/* End: Summary Cards */}
 
       {/* Advertiser Revenue Breakdown (redesigned cards) */}
-      <div className={`p-6 rounded-2xl border shadow-sm bg-white/70 backdrop-blur-xl border-white/80`}>
-        <div className="flex items-center mb-6 justify-between">
+      <div className={`p-4 rounded-xl border shadow-sm bg-white/70 backdrop-blur-xl border-white/80`}>
+        <div className="flex items-center mb-4 justify-between">
           <div className="flex items-center">
-            <Building2 className="h-6 w-6 mr-3 text-red-500" />
-            <h3 className="text-xl font-bold">Advertiser-Wise Revenue</h3>
+            <Building2 className="h-5 w-5 mr-2 text-red-500" />
+            <h3 className="text-lg font-bold">Advertiser-Wise Revenue</h3>
           </div>
-          <div className="text-sm px-3 py-1 rounded-full bg-blue-100 text-blue-800">
+          <div className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
             Top advertisers by revenue
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6">
-          {analytics.advertiserStats.map((advertiser, index) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-3">
+          {analytics.advertiserStats.map((advertiser) => {
             const accent = getAdvertiserAccent(advertiser.name);
-            const iconBg = hexToRgba(accent, 0.08);
+            const iconBg = hexToRgba(accent, 0.12);
+            // Get first letter(s) of advertiser name
+            const getInitials = (name: string): string => {
+              if (name === 'CM Gmail') return 'CM';
+              if (name === 'XC EXC') return 'XE';
+              if (name === 'NON COMCAST') return 'NC';
+              if (name.length <= 3) return name.toUpperCase(); // For short names like GZ, ES, XC, DB, MI, RGR
+              return name.substring(0, 2).toUpperCase();
+            };
+            const initials = getInitials(advertiser.name);
+
             return (
               <div
                 key={advertiser.name}
                 onClick={() => openAdvertiserPopup(advertiser.name)}
-                className={`relative p-3 rounded-2xl shadow-sm transition-colors bg-white border-gray-200 style:border-1 cursor-pointer`}
-                style={{ border: `1px solid ${accent}`, backgroundColor: iconBg }}
+                className={`relative p-3 rounded-xl shadow-sm transition-all hover:shadow-md bg-white border cursor-pointer hover:scale-[1.02]`}
+                style={{ borderColor: accent, backgroundColor: iconBg }}
               >
                 {/* colored indicator */}
-                <div className="absolute top-3 right-3 w-3 h-3 rounded-full" style={{ backgroundColor: accent }} />
+                <div className="absolute top-2 right-2 w-2 h-2 rounded-full" style={{ backgroundColor: accent }} />
 
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-3">
                   <div
-                    className={`flex items-center justify-center rounded-xl w-14 h-14`}
-                    style={{ backgroundColor: iconBg, border: `1px solid ${hexToRgba(accent, 0.35)}` }}
+                    className={`flex items-center justify-center rounded-lg w-10 h-10 flex-shrink-0 font-bold text-sm`}
+                    style={{ backgroundColor: accent, color: '#FFFFFF' }}
                   >
-                    {advertiser.name === 'Branded' && <Award className="h-6 w-6" style={{ color: accent }} />}
-                    {advertiser.name === 'GZ' && <Zap className="h-6 w-6" style={{ color: accent }} />}
-                    {advertiser.name === 'XC' && <Zap className="h-6 w-6" style={{ color: accent }} />}
-                    {advertiser.name === 'ES' && <Globe className="h-6 w-6" style={{ color: accent }} />}
-                    {advertiser.name === 'Comcast' && <Wifi className="h-6 w-6" style={{ color: accent }} />}
-                    {advertiser.name === 'MI' && <Star className="h-6 w-6" style={{ color: accent }} />}
-                    {advertiser.name === 'RGR' && <Target className="h-6 w-6" style={{ color: accent }} />}
-                    {advertiser.name === 'CM Gmail' && <AtSign className="h-6 w-6" style={{ color: accent }} />}
+                    {initials}
                   </div>
 
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-base truncate">{advertiser.name}</h4>
-                    <p className="text-3xl font-bold mt-1" style={{ color: accent }}>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-sm truncate">{advertiser.name}</h4>
+                    <p className="text-xl font-bold mt-0.5" style={{ color: accent }}>
                       ${advertiser.revenue.toLocaleString()}
                     </p>
-                    <p className="text-sm font-medium mt-2 text-gray-600">
+                    <p className="text-xs font-medium mt-1 text-gray-600">
                       {advertiser.campaigns.length} campaign{advertiser.campaigns.length !== 1 ? 's' : ''}
                     </p>
                   </div>
@@ -1213,56 +1224,123 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
       {/* Advertiser Details Popup */}
       {advertiserPopup.isOpen && advertiserPopup.name && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="max-w-6xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl bg-white border border-gray-200">
-            <div className={`sticky top-0 p-6 border-b bg-white border-gray-200`}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3">
+          <div className="max-w-5xl w-full max-h-[90vh] overflow-hidden rounded-xl shadow-2xl bg-white border border-gray-200 flex flex-col">
+            {/* Compact Header */}
+            <div
+              className="sticky top-0 px-4 py-3 border-b bg-gradient-to-r from-white to-gray-50 border-gray-200 z-10"
+              style={{ borderTopColor: getAdvertiserAccent(advertiserPopup.name), borderTopWidth: '3px' }}
+            >
               <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="bg-blue-100 p-3 rounded-xl">
-                    <Building2 className="h-8 w-8 text-blue-500" />
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white text-sm"
+                    style={{ backgroundColor: getAdvertiserAccent(advertiserPopup.name) }}
+                  >
+                    {advertiserPopup.name === 'CM Gmail' ? 'CM' :
+                      advertiserPopup.name === 'XC EXC' ? 'XE' :
+                        advertiserPopup.name === 'NON COMCAST' ? 'NC' :
+                          advertiserPopup.name.length <= 3 ? advertiserPopup.name.toUpperCase() :
+                            advertiserPopup.name.substring(0, 2).toUpperCase()}
                   </div>
-                  <div className="ml-4">
-                    <h2 className="text-2xl font-bold">Advertiser: {advertiserPopup.name}</h2>
-                    <p className={`text-gray-600`}>Creative performance</p>
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900">{advertiserPopup.name}</h2>
+                    <p className="text-xs text-gray-500">Creative Performance</p>
                   </div>
                 </div>
-                <button onClick={closeAdvertiserPopup} className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700">
-                  <X className="h-6 w-6" />
-                </button>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500">Total Revenue</p>
+                    <p
+                      className="text-xl font-bold"
+                      style={{ color: getAdvertiserAccent(advertiserPopup.name) }}
+                    >
+                      ${advertiserPopup.totalRevenue.toLocaleString()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={closeAdvertiserPopup}
+                    className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium">Total Revenue</p>
-                  <p className="text-2xl font-bold text-green-500">${advertiserPopup.totalRevenue.toLocaleString()}</p>
-                </div>
-              </div>
-
+            {/* Compact Table */}
+            <div className="flex-1 overflow-y-auto">
               <div className="overflow-x-auto">
-                <table className="min-w-full text-sm text-gray-800">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="text-left px-4 py-2">Creative</th>
-                      <th className="text-right px-4 py-2">Revenue</th>
-                      <th className="text-right px-4 py-2">Frequency</th>
-                      <th className="text-left px-4 py-2">Campaigns</th>
-                      <th className="text-left px-4 py-2">ETs</th>
+                <table className="min-w-full text-xs">
+                  <thead className="sticky top-0 z-10">
+                    <tr style={{ backgroundColor: hexToRgba(getAdvertiserAccent(advertiserPopup.name), 0.1) }}>
+                      <th className="text-left px-3 py-2 font-semibold text-gray-700">Creative</th>
+                      <th className="text-right px-3 py-2 font-semibold text-gray-700">Revenue</th>
+                      <th className="text-right px-3 py-2 font-semibold text-gray-700">Frequency</th>
+                      <th className="text-left px-3 py-2 font-semibold text-gray-700">Campaigns</th>
+                      <th className="text-left px-3 py-2 font-semibold text-gray-700">ETs</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {advertiserPopup.creatives.map(cr => (
-                      <tr key={cr.name} className="border-gray-200 border-b">
-                        <td className="px-4 py-2 font-medium">{cr.name}</td>
-                        <td className="px-4 py-2 text-right text-green-500 font-semibold">${cr.totalRevenue.toLocaleString()}</td>
-                        <td className="px-4 py-2 text-right">{cr.frequency}</td>
-                        <td className="px-4 py-2">{cr.campaigns.join(', ')}</td>
-                        <td className="px-4 py-2">{cr.ets.join(', ')}</td>
+                  <tbody className="divide-y divide-gray-100">
+                    {advertiserPopup.creatives.map((cr, idx) => (
+                      <tr
+                        key={cr.name}
+                        className={`hover:bg-gray-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
+                      >
+                        <td className="px-3 py-2 font-medium text-gray-900 truncate max-w-xs" title={cr.name}>
+                          {cr.name}
+                        </td>
+                        <td className="px-3 py-2 text-right font-semibold" style={{ color: getAdvertiserAccent(advertiserPopup.name!) }}>
+                          ${cr.totalRevenue.toLocaleString()}
+                        </td>
+                        <td className="px-3 py-2 text-right text-gray-600">
+                          {cr.frequency}
+                        </td>
+                        <td className="px-3 py-2 text-gray-600">
+                          <div className="flex flex-wrap gap-1">
+                            {cr.campaigns.map((camp, i) => (
+                              <span
+                                key={i}
+                                className="px-1.5 py-0.5 rounded text-xs"
+                                style={{
+                                  backgroundColor: hexToRgba(getAdvertiserAccent(advertiserPopup.name!), 0.1),
+                                  color: getAdvertiserAccent(advertiserPopup.name!)
+                                }}
+                              >
+                                {camp}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 text-gray-600">
+                          <div className="flex flex-wrap gap-1">
+                            {cr.ets.slice(0, 5).map((et, i) => (
+                              <span
+                                key={i}
+                                className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 text-xs"
+                              >
+                                {et}
+                              </span>
+                            ))}
+                            {cr.ets.length > 5 && (
+                              <span className="px-1.5 py-0.5 rounded bg-gray-200 text-gray-600 text-xs">
+                                +{cr.ets.length - 5}
+                              </span>
+                            )}
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+
+            {/* Footer with summary */}
+            <div className="px-4 py-2 border-t bg-gray-50 text-xs text-gray-600">
+              <div className="flex items-center justify-between">
+                <span>{advertiserPopup.creatives.length} creative{advertiserPopup.creatives.length !== 1 ? 's' : ''}</span>
+                <span>Total: ${advertiserPopup.totalRevenue.toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -1633,6 +1711,49 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
           </div>
         </div>
 
+        {/* Campaign Revenue Bar Chart */}
+        <div className="mb-6 p-4 rounded-xl bg-white border border-gray-200">
+          <h4 className="text-lg font-bold text-gray-800 mb-4">Campaign Revenue</h4>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={analytics.campaignStats
+                  .slice(0, 12)
+                  .map(campaign => ({
+                    name: campaign.name.length > 10 ? campaign.name.substring(0, 10) + '...' : campaign.name,
+                    revenue: campaign.revenue,
+                    fullName: campaign.name
+                  }))
+                  .sort((a, b) => b.revenue - a.revenue)
+                }
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                <XAxis
+                  dataKey="name"
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  tick={{ fontSize: 11 }}
+                />
+                <YAxis
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={(value) => `$${value.toLocaleString()}`}
+                />
+                <Tooltip
+                  formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']}
+                  labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label}
+                />
+                <Bar
+                  dataKey="revenue"
+                  fill="#3B82F6"
+                  radius={[8, 8, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
         {/* Campaign Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {analytics.campaignStats.slice(0, 12).map((campaign, index) => (
@@ -1742,11 +1863,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                   <button
                     key={campaign.name}
                     onClick={() => setSelectedCampaign(campaign.name)}
-                    className={`px-4 py-1 rounded-full transition-colors whitespace-nowrap ${
-                      isSelected
-                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md ring-2 ring-green-300'
-                        : 'bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 hover:border-green-400 text-green-700 hover:shadow-md'
-                    }`}
+                    className={`px-4 py-1 rounded-full transition-colors whitespace-nowrap ${isSelected
+                      ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md ring-2 ring-green-300'
+                      : 'bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 hover:border-green-400 text-green-700 hover:shadow-md'
+                      }`}
                   >
                     <span className={`font-bold text-sm ${isSelected ? 'text-white' : ''}`}>
                       {campaign.name}:
@@ -2005,12 +2125,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                     key={et.name}
                     onClick={() => setSelectedET(et.name)}
                     className={`px-4 py-1 rounded-full transition-colors whitespace-nowrap ${isSelected
-                        ? isCombined
-                          ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md ring-2 ring-purple-300'
-                          : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md ring-2 ring-blue-300'
-                        : isCombined
-                          ? 'bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-300 hover:border-purple-400 text-purple-700 hover:shadow-md'
-                          : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 hover:border-blue-400 text-blue-700 hover:shadow-md'
+                      ? isCombined
+                        ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md ring-2 ring-purple-300'
+                        : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md ring-2 ring-blue-300'
+                      : isCombined
+                        ? 'bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-300 hover:border-purple-400 text-purple-700 hover:shadow-md'
+                        : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 hover:border-blue-400 text-blue-700 hover:shadow-md'
                       }`}
                   >
                     <span className={`font-bold text-sm ${isSelected ? 'text-white' : ''}`}>
@@ -2409,178 +2529,161 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
       {/* Campaign Details Popup */}
       {campaignPopup.isOpen && campaignPopup.campaign && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="max-w-6xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl bg-white border border-gray-200">
-            {/* Popup Header */}
-            <div className="sticky top-0 p-6 border-b bg-white border-gray-200 z-10">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3">
+          <div className="max-w-5xl w-full max-h-[90vh] overflow-hidden rounded-xl shadow-2xl bg-white border border-gray-200 flex flex-col">
+            {/* Compact Header */}
+            <div className="sticky top-0 px-4 py-3 border-b bg-gradient-to-r from-white to-gray-50 border-gray-200 z-10">
               <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="p-3 rounded-xl bg-blue-100">
-                    <Target className="h-8 w-8 text-blue-500" />
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-blue-500">
+                    <Target className="h-5 w-5 text-white" />
                   </div>
-                  <div className="ml-4">
-                    <h2 className="text-3xl font-bold">{campaignPopup.campaign.name}</h2>
-                    <p className={`text-lg text-gray-600`}>
-                      Campaign Details & Performance
-                    </p>
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900">{campaignPopup.campaign.name}</h2>
+                    <p className="text-xs text-gray-500">Campaign Details & Performance</p>
                   </div>
                 </div>
-                <button
-                  onClick={closeCampaignPopup}
-                  className="p-2 rounded-full transition-colors hover:bg-gray-100 text-gray-500 hover:text-gray-700"
-                >
-                  <X className="h-6 w-6" />
-                </button>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500">Total Revenue</p>
+                    <p className="text-xl font-bold text-green-600">
+                      ${campaignPopup.campaign.revenue.toLocaleString()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={closeCampaignPopup}
+                    className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Popup Content */}
-            <div className="p-6">
-              {/* Campaign Summary */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="p-6 rounded-xl border bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-                  <div className="flex items-center mb-3">
-                    <DollarSign className="h-6 w-6 text-green-500 mr-2" />
-                    <h3 className="font-semibold text-green-600">Total Revenue</h3>
+            {/* Compact Content */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {/* Summary Cards - Compact */}
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="p-3 rounded-lg bg-green-50 border border-green-200">
+                  <div className="flex items-center gap-2 mb-1">
+                    <DollarSign className="h-4 w-4 text-green-600" />
+                    <p className="text-xs font-semibold text-green-700">Revenue</p>
                   </div>
-                  <p className="text-3xl font-bold text-green-500">
+                  <p className="text-xl font-bold text-green-600">
                     ${campaignPopup.campaign.revenue.toLocaleString()}
                   </p>
                 </div>
-
-                <div className="p-6 rounded-xl border bg-gradient-to-br from-red-50 to-red-100 border-red-200">
-                  <div className="flex items-center mb-3">
-                    <Layers className="h-6 w-6 text-red-500 mr-2" />
-                    <h3 className="font-semibold text-red-600">Total Creatives</h3>
+                <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Layers className="h-4 w-4 text-red-600" />
+                    <p className="text-xs font-semibold text-red-700">Creatives</p>
                   </div>
-                  <p className="text-3xl font-bold text-red-500">
+                  <p className="text-xl font-bold text-red-600">
                     {campaignPopup.campaign.creatives.length}
                   </p>
                 </div>
-
-                <div className="p-6 rounded-xl border bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-                  <div className="flex items-center mb-3">
-                    <Users className="h-6 w-6 text-blue-500 mr-2" />
-                    <h3 className="font-semibold text-blue-600">Total ETs</h3>
+                <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Users className="h-4 w-4 text-blue-600" />
+                    <p className="text-xs font-semibold text-blue-700">ETs</p>
                   </div>
-                  <p className="text-3xl font-bold text-blue-500">
+                  <p className="text-xl font-bold text-blue-600">
                     {campaignPopup.campaign.ets.length}
                   </p>
                 </div>
               </div>
 
-              {/* Top Performer */}
+              {/* Top Performer - Compact */}
               {campaignPopup.campaign.creatives.length > 0 && (
-                <div className="mb-8 p-6 rounded-xl border bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200">
-                  <div className="flex items-center mb-4">
-                    <Award className="h-6 w-6 text-yellow-500 mr-3" />
-                    <h3 className="text-xl font-bold text-yellow-600">🏆 Top Performing Creative</h3>
+                <div className="mb-4 p-3 rounded-lg bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Award className="h-4 w-4 text-amber-600" />
+                    <h3 className="text-sm font-bold text-amber-900">Top Performing Creative</h3>
                   </div>
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-2xl font-bold mb-2">{campaignPopup.campaign.creatives[0].name}</p>
-                      <div className="flex items-center space-x-6">
-                        <div className="flex items-center">
-                          <DollarSign className="h-5 w-5 text-green-500 mr-1" />
-                          <span className="text-xl font-bold text-green-500">
-                            ${campaignPopup.campaign.creatives[0].revenue.toLocaleString()}
-                          </span>
-                        </div>
-                        <div className="flex items-center">
-                          <Hash className="h-5 w-5 text-blue-500 mr-1" />
-                          <span className="font-semibold text-blue-500">
-                            {campaignPopup.campaign.creatives[0].frequency} occurrences
-                          </span>
-                        </div>
+                      <p className="text-sm font-bold text-gray-900 mb-1">{campaignPopup.campaign.creatives[0].name}</p>
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm font-semibold text-green-600">
+                          ${campaignPopup.campaign.creatives[0].revenue.toLocaleString()}
+                        </span>
+                        <span className="text-xs text-blue-600">
+                          {campaignPopup.campaign.creatives[0].frequency} occurrences
+                        </span>
                       </div>
                     </div>
-                    <div className="mt-4 md:mt-0">
-                      <p className={`text-sm font-medium mb-1 text-gray-600`}>
-                        Active in ETs:
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {campaignPopup.campaign.creatives[0].ets.map(et => (
-                          <span key={et} className="px-3 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
-                            {et}
-                          </span>
-                        ))}
-                      </div>
+                    <div className="flex flex-wrap gap-1 max-w-xs">
+                      {campaignPopup.campaign.creatives[0].ets.slice(0, 5).map(et => (
+                        <span key={et} className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 text-xs">
+                          {et}
+                        </span>
+                      ))}
+                      {campaignPopup.campaign.creatives[0].ets.length > 5 && (
+                        <span className="px-1.5 py-0.5 rounded bg-gray-200 text-gray-600 text-xs">
+                          +{campaignPopup.campaign.creatives[0].ets.length - 5}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* All Creatives */}
+              {/* All Creatives - Compact Table */}
               <div>
-                <div className="flex items-center mb-6">
-                  <Layers className="h-6 w-6 text-blue-500 mr-3" />
-                  <h3 className="text-2xl font-bold">All Creatives Performance</h3>
+                <div className="flex items-center gap-2 mb-3">
+                  <Layers className="h-4 w-4 text-blue-500" />
+                  <h3 className="text-sm font-bold text-gray-800">All Creatives ({campaignPopup.campaign.creatives.length})</h3>
                 </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {campaignPopup.campaign.creatives.map((creative, index) => (
-                    <div
-                      key={creative.name}
-                      className="p-6 rounded-xl border transition-colors bg-gray-50 border-gray-200 hover:bg-white"
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center mb-2">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3 ${index === 0 ? 'bg-yellow-500 text-white' :
-                              index === 1 ? 'bg-gray-400 text-white' :
-                                index === 2 ? 'bg-amber-600 text-white' :
-                                  'bg-gray-300 text-gray-700'
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-xs">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="text-left px-3 py-2 font-semibold text-gray-700">#</th>
+                        <th className="text-left px-3 py-2 font-semibold text-gray-700">Creative</th>
+                        <th className="text-right px-3 py-2 font-semibold text-gray-700">Revenue</th>
+                        <th className="text-right px-3 py-2 font-semibold text-gray-700">Frequency</th>
+                        <th className="text-left px-3 py-2 font-semibold text-gray-700">ETs</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {campaignPopup.campaign.creatives.map((creative, index) => (
+                        <tr key={creative.name} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
+                          <td className="px-3 py-2">
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${index === 0 ? 'bg-yellow-500 text-white' :
+                                index === 1 ? 'bg-gray-400 text-white' :
+                                  index === 2 ? 'bg-amber-600 text-white' :
+                                    'bg-gray-300 text-gray-700'
                               }`}>
                               {index + 1}
                             </div>
-                            <h4 className="font-bold text-lg">{creative.name}</h4>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="p-3 rounded-lg bg-white">
-                          <div className="flex items-center mb-1">
-                            <DollarSign className="h-4 w-4 text-green-500 mr-1" />
-                            <span className={`text-sm font-medium text-gray-600`}>
-                              Revenue
-                            </span>
-                          </div>
-                          <p className="text-xl font-bold text-green-500">
+                          </td>
+                          <td className="px-3 py-2 font-medium text-gray-900 truncate max-w-xs" title={creative.name}>
+                            {creative.name}
+                          </td>
+                          <td className="px-3 py-2 text-right font-semibold text-green-600">
                             ${creative.revenue.toLocaleString()}
-                          </p>
-                        </div>
-
-                        <div className="p-3 rounded-lg bg-white">
-                          <div className="flex items-center mb-1">
-                            <Hash className="h-4 w-4 text-blue-500 mr-1" />
-                            <span className={`text-sm font-medium text-gray-600`}>
-                              Frequency
-                            </span>
-                          </div>
-                          <p className="text-xl font-bold text-blue-500">
+                          </td>
+                          <td className="px-3 py-2 text-right text-blue-600">
                             {creative.frequency}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex items-center mb-2">
-                          <Users className="h-4 w-4 text-blue-500 mr-2" />
-                          <span className={`text-sm font-medium text-gray-600`}>
-                            Active in ETs ({creative.ets.length}):
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {creative.ets.map(et => (
-                            <span key={et} className="px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200">
-                              {et}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="flex flex-wrap gap-1">
+                              {creative.ets.slice(0, 3).map(et => (
+                                <span key={et} className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-xs">
+                                  {et}
+                                </span>
+                              ))}
+                              {creative.ets.length > 3 && (
+                                <span className="px-1.5 py-0.5 rounded bg-gray-200 text-gray-600 text-xs">
+                                  +{creative.ets.length - 3}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
