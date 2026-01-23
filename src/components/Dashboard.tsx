@@ -110,14 +110,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "C36": "JSG36",
     "JSG26": "$1800",
     "JSG29": "$1800",
-    "JSG30PM": "$1800",
+    "JSG30PM": "$2000",
     "JSG22": "0",
     "JSG32": "$1100",
     "EX32": "JSG32",
     "JSG20": "$1800",
     "JSG38": "$1100",
     "JSG40": "$1100",
-    "JSG43": "$750",
+    "JSG43": "$1000",
     "JSG44": "$1100",
     "JSG18": "$800",
     "JSG20+JSG44": "$2000",
@@ -1718,13 +1718,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={analytics.campaignStats
-                  .slice(0, 12)
-                  .map(campaign => ({
+                  .slice(0, 100)
+                  .map((campaign: CampaignStats) => ({
                     name: campaign.name.length > 10 ? campaign.name.substring(0, 10) + '...' : campaign.name,
                     revenue: campaign.revenue,
                     fullName: campaign.name
                   }))
-                  .sort((a, b) => b.revenue - a.revenue)
+                  .sort((a: { revenue: number }, b: { revenue: number }) => b.revenue - a.revenue)
                 }
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >
