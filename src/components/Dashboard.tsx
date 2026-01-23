@@ -1711,6 +1711,95 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
           </div>
         </div>
 
+        {/* Highest Revenue Creative - Premium Section */}
+        {(() => {
+          // Find the highest revenue creative across all campaigns
+          let topCreativeData: { name: string; revenue: number; campaign: string; ets: string[] } | null = null;
+          analytics.campaignStats.forEach(campaign => {
+            campaign.creatives.forEach(creative => {
+              if (!topCreativeData || creative.revenue > topCreativeData.revenue) {
+                topCreativeData = {
+                  name: creative.name,
+                  revenue: creative.revenue,
+                  campaign: campaign.name,
+                  ets: creative.ets
+                };
+              }
+            });
+          });
+
+          if (!topCreativeData) return null;
+
+          // Extract values to avoid TypeScript narrowing issues
+          const tc = topCreativeData as { name: string; revenue: number; campaign: string; ets: string[] };
+          const creativeName = tc.name;
+          const totalRevenue = tc.revenue;
+          const campaignName = tc.campaign;
+
+          // Calculate revenue per ET for this creative
+          const etRevenues = new Map<string, number>();
+          data.records
+            .filter(r => r.creative === creativeName && r.campaign === campaignName)
+            .forEach(record => {
+              const et = record.et.toUpperCase();
+              const current = etRevenues.get(et) || 0;
+              etRevenues.set(et, current + record.revenue);
+            });
+
+          const etRevenueList = Array.from(etRevenues.entries())
+            .map(([et, revenue]) => ({ et, revenue }))
+            .sort((a, b) => b.revenue - a.revenue);
+
+          return (
+            <div className="mb-6 p-5 rounded-2xl bg-gradient-to-br from-amber-500 via-yellow-500 to-amber-600 shadow-2xl border-4 border-amber-300/50 relative overflow-hidden">
+              {/* Animated background effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse"></div>
+              
+              {/* Content */}
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-2xl bg-white/25 backdrop-blur-md flex items-center justify-center shadow-lg border-2 border-white/30">
+                      <Crown className="h-8 w-8 text-white" fill="white" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white/95 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                        Top Performing Creative of the day
+                      </p>
+                      <h4 className="text-2xl font-bold text-white mb-1 drop-shadow-lg">{creativeName}</h4>
+                      <p className="text-sm text-white/90 font-medium">Campaign: {campaignName}</p>
+                    </div>
+
+                  </div>
+                  <div className="text-right bg-white/20 backdrop-blur-sm px-4 py-3 rounded-xl border-2 border-white/30">
+                    <p className="text-xs font-bold text-white/95 uppercase tracking-wider mb-1">Total Revenue</p>
+                    <p className="text-3xl font-bold text-white drop-shadow-lg">${Number(totalRevenue).toLocaleString()}</p>
+                  </div>
+                </div>
+
+                {/* ET Revenue Breakdown */}
+                {etRevenueList.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-white/30">
+                    <p className="text-xs font-bold text-white/95 uppercase tracking-wider mb-3">Revenue by ET</p>
+                    <div className="flex flex-wrap gap-2">
+                      {etRevenueList.map(({ et, revenue }) => (
+                        <div
+                          key={et}
+                          className="px-3 py-2 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 flex items-center gap-2 hover:bg-white/30 transition-all"
+                        >
+                          <span className="text-sm font-bold text-white">{et}</span>
+                          <span className="text-xs font-semibold text-white/90">${revenue.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Campaign Revenue Bar Chart */}
         <div className="mb-6 p-4 rounded-xl bg-white border border-gray-200">
           <h4 className="text-lg font-bold text-gray-800 mb-4">Campaign Revenue</h4>
@@ -2650,9 +2739,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                         <tr key={creative.name} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
                           <td className="px-3 py-2">
                             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${index === 0 ? 'bg-yellow-500 text-white' :
-                                index === 1 ? 'bg-gray-400 text-white' :
-                                  index === 2 ? 'bg-amber-600 text-white' :
-                                    'bg-gray-300 text-gray-700'
+                              index === 1 ? 'bg-gray-400 text-white' :
+                                index === 2 ? 'bg-amber-600 text-white' :
+                                  'bg-gray-300 text-gray-700'
                               }`}>
                               {index + 1}
                             </div>
