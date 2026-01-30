@@ -221,6 +221,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
     // S4
     "JSG34": { stack: "S4", manager: "Satyam S." },
+    "C34": { stack: "S4", manager: "Abhay S." },
 
     // S6
     "JSG36": { stack: "CM36 | S6", manager: "Nikhil T." },
@@ -232,6 +233,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG26": { stack: "S7", manager: "Nikhil T." },
     "JSG29": { stack: "S7", manager: "Keshav T." },
     "JSG30PM": { stack: "S7", manager: "Aditya S." },
+    "JSG47": { stack: "S7", manager: "Keshav T." },
 
     // S10
     "C18": { stack: "S10", manager: "Aditya S.", type: "COM" },
@@ -255,6 +257,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
     // S13
     "JSG43": { stack: "S13", manager: "Aditya S." },
+    "CM43": { stack: "S13", manager: "Aditya S." },
   };
 
   // 🔍 Get ET Info (safe helper, case-insensitive)
@@ -538,8 +541,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     };
 
     // Combine ETs - Add your combinations here
-    combineETs('JSG20', 'JSG44', 'JSG20+JSG44');
-    combineETs('JSG38', 'JSG38N', 'JSG38+JSG38N');
+    // combineETs('JSG20', 'JSG44', 'JSG20+JSG44');
+    // combineETs('JSG38', 'JSG38N', 'JSG38+JSG38N');
     combineETs('JSG36', 'P36', 'JSG36+P36');
     // Example: combineETs('JSG29', 'JSG30PM', 'JSG29+JSG30PM');
 
