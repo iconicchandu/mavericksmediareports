@@ -94,6 +94,9 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
       return 'Branded';
     } else if (upperFileName.includes('GZ')) {
       return 'GZ';
+    } else if (upperFileName.includes('RGR')) {
+      // Filename-based RGR first so a file named "RGR" is always RGR (even with multiple files)
+      return 'RGR';
     } else if (upperFileName.includes('ES') || upperCampaign.includes('ES')) {
       return 'ES';
     } else if (upperCampaign === 'RGR' || upperCampaign === 'RAH') {
@@ -101,6 +104,28 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
     } else {
       return 'Other';
     }
+  };
+
+  /** Map parenthesized ET number to prebuilt ET name: (30)→JSG30PM, (32)→JSG32, etc. */
+  const parenEtNumberToETName = (num: number): string => {
+    if (num === 30) return 'JSG30PM';
+    return 'JSG' + num; // JSG18, JSG32, JSG20, etc.
+  };
+
+  /** Parse subid format: ADVERTISER/CAMPAIGN/CREATIVE(NUM) e.g. XCE/NADR/064IMG(30), MI/JGWDS/225(32) */
+  const parseParenEtSubid = (subid: string): { advertiser: string; campaign: string; creative: string; et: string } | null => {
+    const m = subid.trim().match(/^([^/]+)\/([^/]+)\/(.+?)\((\d+)\)\s*$/i);
+    if (!m) return null;
+    const [, adv, camp, creativeSuffix, numStr] = m;
+    const num = parseInt(numStr, 10);
+    const et = parenEtNumberToETName(num);
+    const creative = camp.trim() + '/' + creativeSuffix.trim(); // NADR/064IMG, JGWDS/225
+    return {
+      advertiser: adv.trim(),
+      campaign: camp.trim(),
+      creative,
+      et,
+    };
   };
 
   const parseCSV = async (file: File): Promise<ProcessedData> => {
@@ -142,51 +167,62 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
 
             if (!subid || revenue === 0) continue;
 
-            // Parse SUBID format: Campaign_Creative_ET or Campaign/AC2/ET (forward slash format)
+            // Parse SUBID format: Advertiser/Campaign/Creative(NUM) e.g. XCE/NADR/064IMG(30), MI/JGWDS/225(32)
             let campaign = '', creative = '', et = '';
+            let advertiser: string;
 
-            // Check for forward slash format (e.g., SQLI/AC2/JSG43, ABC/XY/Z123, etc.)
-            if (subid.includes('/')) {
-              const parts = subid.split('/').filter(part => part.trim() !== ''); // Filter out empty parts
-              if (parts.length >= 2) {
-                campaign = parts[0].trim(); // First part = campaign
-                et = parts[parts.length - 1].trim(); // Last part = ET name
-                creative = parts.slice(0, -1).join('/').trim(); // All parts except last = template name
-              } else if (parts.length === 1) {
-                // Only one valid part found
-                campaign = parts[0].trim();
-                creative = subid.trim();
-                et = parts[0].trim();
-              } else {
-                // No valid parts, use full subid
-                campaign = subid.trim();
-                creative = subid.trim();
-                et = subid.trim();
-              }
+            const parenEtParsed = parseParenEtSubid(subid);
+            if (parenEtParsed) {
+              // XCE counts under XC EXC (same advertiser)
+              advertiser = parenEtParsed.advertiser.toUpperCase() === 'XCE' ? 'XC EXC' : parenEtParsed.advertiser;
+              campaign = parenEtParsed.campaign;     // NADR, JGWDS etc
+              creative = parenEtParsed.creative;     // NADR/064IMG, JGWDS/225 etc
+              et = parenEtParsed.et;                 // JSG30PM, JSG32 etc (prebuilt ET name)
             } else {
-              // Parse SUBID format: Campaign_Creative_ET (underscore format)
-              const parts = subid.split('_');
-              if (parts.length >= 3) {
-                campaign = parts[0];
-                et = parts[parts.length - 1];
-                creative = parts.slice(0, -1).join('_');
-              } else if (parts.length === 2) {
-                campaign = parts[0];
-                creative = parts[0];
-                et = parts[1];
+              // Parse SUBID format: Campaign_Creative_ET or Campaign/AC2/ET (forward slash format)
+              // Check for forward slash format (e.g., SQLI/AC2/JSG43, ABC/XY/Z123, etc.)
+              if (subid.includes('/')) {
+                const parts = subid.split('/').filter(part => part.trim() !== ''); // Filter out empty parts
+                if (parts.length >= 2) {
+                  campaign = parts[0].trim(); // First part = campaign
+                  et = parts[parts.length - 1].trim(); // Last part = ET name
+                  creative = parts.slice(0, -1).join('/').trim(); // All parts except last = template name
+                } else if (parts.length === 1) {
+                  // Only one valid part found
+                  campaign = parts[0].trim();
+                  creative = subid.trim();
+                  et = parts[0].trim();
+                } else {
+                  // No valid parts, use full subid
+                  campaign = subid.trim();
+                  creative = subid.trim();
+                  et = subid.trim();
+                }
               } else {
-                campaign = subid;
-                creative = subid;
-                et = subid;
+                // Parse SUBID format: Campaign_Creative_ET (underscore format)
+                const parts = subid.split('_');
+                if (parts.length >= 3) {
+                  campaign = parts[0];
+                  et = parts[parts.length - 1];
+                  creative = parts.slice(0, -1).join('_');
+                } else if (parts.length === 2) {
+                  campaign = parts[0];
+                  creative = parts[0];
+                  et = parts[1];
+                } else {
+                  campaign = subid;
+                  creative = subid;
+                  et = subid;
+                }
               }
-            }
 
-            // Handle special cases
-            if (campaign === 'RAH') {
-              campaign = 'RGR';
-            }
+              // Handle special cases
+              if (campaign === 'RAH') {
+                campaign = 'RGR';
+              }
 
-            const advertiser = determineAdvertiser(file.name, campaign);
+              advertiser = determineAdvertiser(file.name, campaign);
+            }
 
             const record: DataRecord = {
               subid,

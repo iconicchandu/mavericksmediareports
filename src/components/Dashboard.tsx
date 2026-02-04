@@ -39,7 +39,8 @@ const getAdvertiserAccent = (name: string): string => {
     case 'XC':
       return '#06B6D4'; // cyan
     case 'XC EXC':
-      return '#14B8A6'; // teal
+    case 'XCE':
+      return '#14B8A6'; // teal (XCE from subid format XCE/NADR/064IMG(30))
     case 'DB':
       return '#84CC16'; // lime
     case 'COMCAST':
@@ -293,8 +294,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     let cmRevenue = 0;
     let cmCampaigns: Set<string> = new Set();
 
-    // Precompute MI pattern so we can exclude MI from base advertiser buckets (case-insensitive)
-    const miSubidPattern = /(^MI(?:_|$))|(_MI(?:_|$))/i;
+    // MI: only when file name is "MI CAMPS" and subid starts with "MI" (e.g. MI/JGWDS)
+    const isMIRecord = (r: DataRecord) =>
+      !!r.fileName && r.fileName.toUpperCase().includes('MI CAMPS') &&
+      !!r.subid && /^MI(\/|_|$)/i.test(r.subid.trim());
 
     data.records.forEach(record => {
       if (
@@ -312,12 +315,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       });
     }
 
-    // Custom MI aggregation (match MI at start/end or surrounded by underscores)
+    // Custom MI aggregation: file name "MI CAMPS" + subid starting with MI; sum all such revenue
     let miRevenue = 0;
     let miCampaigns: Set<string> = new Set();
 
     data.records.forEach(record => {
-      if (record.subid && miSubidPattern.test(record.subid)) {
+      if (isMIRecord(record)) {
         miRevenue += record.revenue;
         miCampaigns.add(record.campaign);
       }
@@ -347,8 +350,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       // Normalize ET name to uppercase for consistent grouping
       const normalizedET = record.et.toUpperCase();
 
-      // Advertiser stats (exclude MI-tagged subids from base advertisers)
-      const isMI = !!record.subid && miSubidPattern.test(record.subid);
+      // Advertiser stats (exclude MI CAMPS + subid starting with MI from base advertisers)
+      const isMI = isMIRecord(record);
       if (!isMI) {
         if (!advertiserStats.has(record.advertiser)) {
           advertiserStats.set(record.advertiser, {
@@ -395,8 +398,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         et.campaigns.push(record.campaign);
       }
 
-      // Track advertiser revenue inside ET (map MI-tagged subids to 'MI')
-      const advertiserKey = record.subid && miSubidPattern.test(record.subid)
+      // Track advertiser revenue inside ET (map MI CAMPS + subid starting with MI to 'MI')
+      const advertiserKey = isMIRecord(record)
         ? 'MI'
         : record.advertiser;
       if (!et.advertisers.has(advertiserKey)) {
@@ -858,14 +861,17 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
   }>({ isOpen: false, name: null, creatives: [], totalRevenue: 0 });
 
   const getAdvertiserRecords = (advertiserName: string) => {
-    const miPattern = /(^MI(?:_|$))|(_MI(?:_|$))/i;
+    // MI: only file name "MI CAMPS" and subid starting with MI (e.g. MI/JGWDS)
+    const isMIRecord = (r: DataRecord) =>
+      !!r.fileName && r.fileName.toUpperCase().includes('MI CAMPS') &&
+      !!r.subid && /^MI(\/|_|$)/i.test(r.subid.trim());
     if (advertiserName === 'MI') {
-      return data.records.filter(r => r.subid && miPattern.test(r.subid));
+      return data.records.filter(isMIRecord);
     }
     if (advertiserName === 'CM Gmail') {
       return data.records.filter(r => r.subid?.toUpperCase().includes('CM') || r.subid?.toUpperCase().includes('JSG36'));
     }
-    return data.records.filter(r => r.advertiser === advertiserName && !(r.subid && miPattern.test(r.subid)));
+    return data.records.filter(r => r.advertiser === advertiserName && !isMIRecord(r));
   };
 
   const openAdvertiserPopup = (advertiserName: string) => {
