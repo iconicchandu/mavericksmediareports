@@ -71,9 +71,16 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const determineAdvertiser = (fileName: string, campaign: string): string => {
+  const determineAdvertiser = (fileName: string, campaign: string, creative: string): string => {
     const upperFileName = fileName.toUpperCase();
     const upperCampaign = campaign.toUpperCase();
+    const upperCreative = creative.toUpperCase();
+
+    // Check for MI in creative name first (highest priority for MI routing)
+    // e.g., JG_225_OG2_IMG_MI, VPU_ADV_002_MI
+    if (upperCreative.includes('_MI')) {
+      return 'MI';
+    }
 
     // Check for DB in filename first (takes priority)
     if (upperFileName.includes('DB')) {
@@ -95,11 +102,19 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
     } else if (upperFileName.includes('GZ')) {
       return 'GZ';
     } else if (upperFileName.includes('RGR')) {
+      // If creative starts with ICO, treat as ICO advertiser (separate from RGR)
+      if (upperCreative.startsWith('ICO')) {
+        return 'ICO';
+      }
       // Filename-based RGR first so a file named "RGR" is always RGR (even with multiple files)
       return 'RGR';
     } else if (upperFileName.includes('ES') || upperCampaign.includes('ES')) {
       return 'ES';
     } else if (upperCampaign === 'RGR' || upperCampaign === 'RAH') {
+      // If creative starts with ICO, treat as ICO advertiser (separate from RGR)
+      if (upperCreative.startsWith('ICO')) {
+        return 'ICO';
+      }
       return 'RGR';
     } else {
       return 'Other';
@@ -221,7 +236,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
                 campaign = 'RGR';
               }
 
-              advertiser = determineAdvertiser(file.name, campaign);
+              advertiser = determineAdvertiser(file.name, campaign, creative);
             }
 
             const record: DataRecord = {

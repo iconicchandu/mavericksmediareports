@@ -28,6 +28,7 @@ export interface AdvertiserStats {
   name: string;
   revenue: number;
   campaigns: string[];
+  frequency?: number; // Total count/frequency (sum of CONV values)
 }
 
 export interface CampaignStats {

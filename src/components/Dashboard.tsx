@@ -28,6 +28,8 @@ const getAdvertiserAccent = (name: string): string => {
       return '#6366F1'; // indigo
     case 'RGR':
       return '#F59E0B'; // amber
+    case 'ICO':
+      return '#14B8A6'; // teal for ICO
     case 'GZ':
       return '#8B5CF6'; // purple
     case 'CM Gmail':
@@ -294,10 +296,15 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     let cmRevenue = 0;
     let cmCampaigns: Set<string> = new Set();
 
-    // MI: only when file name is "MI CAMPS" and subid starts with "MI" (e.g. MI/JGWDS)
+    // MI: when file name is "MI CAMPS" and subid starts with "MI" (e.g. MI/JGWDS)
+    // OR when creative name contains "_MI" (e.g., JG_225_OG2_IMG_MI, VPU_ADV_002_MI)
     const isMIRecord = (r: DataRecord) =>
-      !!r.fileName && r.fileName.toUpperCase().includes('MI CAMPS') &&
-      !!r.subid && /^MI(\/|_|$)/i.test(r.subid.trim());
+      (!!r.fileName && r.fileName.toUpperCase().includes('MI CAMPS') &&
+       !!r.subid && /^MI(\/|_|$)/i.test(r.subid.trim())) ||
+      (!!r.creative && r.creative.toUpperCase().includes('_MI'));
+
+    // ICO: records with advertiser 'ICO' (creatives starting with ICO from RGR files)
+    const isICORecord = (r: DataRecord) => r.advertiser === 'ICO';
 
     data.records.forEach(record => {
       if (
@@ -307,11 +314,20 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       }
     });
 
+    // Calculate CM Gmail frequency
+    let cmFrequency = 0;
+    data.records.forEach(record => {
+      if (record.subid?.toUpperCase().includes("CM") || record.subid?.toUpperCase().includes("JSG36")) {
+        cmFrequency += record.conv ?? 1;
+      }
+    });
+
     if (cmRevenue > 0) {
       advertiserStats.set("CM Gmail", {
         name: "CM Gmail",
         revenue: cmRevenue,
         campaigns: Array.from(cmCampaigns) as string[],
+        frequency: cmFrequency,
       });
     }
 
@@ -326,11 +342,42 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       }
     });
 
+    // Calculate MI frequency
+    let miFrequency = 0;
+    data.records.forEach(record => {
+      if (isMIRecord(record)) {
+        miFrequency += record.conv ?? 1;
+      }
+    });
+
     if (miRevenue > 0) {
       advertiserStats.set("MI", {
         name: "MI",
         revenue: miRevenue,
         campaigns: Array.from(miCampaigns) as string[],
+        frequency: miFrequency,
+      });
+    }
+
+    // Custom ICO aggregation: creatives starting with ICO (separated from RGR)
+    let icoRevenue = 0;
+    let icoCampaigns: Set<string> = new Set();
+    let icoFrequency = 0;
+
+    data.records.forEach(record => {
+      if (isICORecord(record)) {
+        icoRevenue += record.revenue;
+        icoCampaigns.add(record.campaign);
+        icoFrequency += record.conv ?? 1;
+      }
+    });
+
+    if (icoRevenue > 0) {
+      advertiserStats.set("ICO", {
+        name: "ICO",
+        revenue: icoRevenue,
+        campaigns: Array.from(icoCampaigns) as string[],
+        frequency: icoFrequency,
       });
     }
 
@@ -350,18 +397,21 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       // Normalize ET name to uppercase for consistent grouping
       const normalizedET = record.et.toUpperCase();
 
-      // Advertiser stats (exclude MI CAMPS + subid starting with MI from base advertisers)
+      // Advertiser stats (exclude MI CAMPS + subid starting with MI and ICO records from base advertisers)
       const isMI = isMIRecord(record);
-      if (!isMI) {
+      const isICO = isICORecord(record);
+      if (!isMI && !isICO) {
         if (!advertiserStats.has(record.advertiser)) {
           advertiserStats.set(record.advertiser, {
             name: record.advertiser,
             revenue: 0,
-            campaigns: []
+            campaigns: [],
+            frequency: 0,
           });
         }
         const advertiser = advertiserStats.get(record.advertiser)!;
         advertiser.revenue += record.revenue;
+        advertiser.frequency = (advertiser.frequency || 0) + (record.conv ?? 1);
         if (!advertiser.campaigns.includes(record.campaign)) {
           advertiser.campaigns.push(record.campaign);
         }
@@ -398,10 +448,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         et.campaigns.push(record.campaign);
       }
 
-      // Track advertiser revenue inside ET (map MI CAMPS + subid starting with MI to 'MI')
+      // Track advertiser revenue inside ET (map MI CAMPS + subid starting with MI to 'MI', ICO to 'ICO')
       const advertiserKey = isMIRecord(record)
         ? 'MI'
-        : record.advertiser;
+        : isICORecord(record)
+          ? 'ICO'
+          : record.advertiser;
       if (!et.advertisers.has(advertiserKey)) {
         et.advertisers.set(advertiserKey, 0);
       }
@@ -861,17 +913,24 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
   }>({ isOpen: false, name: null, creatives: [], totalRevenue: 0 });
 
   const getAdvertiserRecords = (advertiserName: string) => {
-    // MI: only file name "MI CAMPS" and subid starting with MI (e.g. MI/JGWDS)
+    // MI: file name "MI CAMPS" and subid starting with MI (e.g. MI/JGWDS)
+    // OR creative name contains "_MI" (e.g., JG_225_OG2_IMG_MI, VPU_ADV_002_MI)
     const isMIRecord = (r: DataRecord) =>
-      !!r.fileName && r.fileName.toUpperCase().includes('MI CAMPS') &&
-      !!r.subid && /^MI(\/|_|$)/i.test(r.subid.trim());
+      (!!r.fileName && r.fileName.toUpperCase().includes('MI CAMPS') &&
+       !!r.subid && /^MI(\/|_|$)/i.test(r.subid.trim())) ||
+      (!!r.creative && r.creative.toUpperCase().includes('_MI'));
+    // ICO: records with advertiser 'ICO' (creatives starting with ICO from RGR files)
+    const isICORecord = (r: DataRecord) => r.advertiser === 'ICO';
     if (advertiserName === 'MI') {
       return data.records.filter(isMIRecord);
     }
     if (advertiserName === 'CM Gmail') {
       return data.records.filter(r => r.subid?.toUpperCase().includes('CM') || r.subid?.toUpperCase().includes('JSG36'));
     }
-    return data.records.filter(r => r.advertiser === advertiserName && !isMIRecord(r));
+    if (advertiserName === 'ICO') {
+      return data.records.filter(isICORecord);
+    }
+    return data.records.filter(r => r.advertiser === advertiserName && !isMIRecord(r) && !isICORecord(r));
   };
 
   const openAdvertiserPopup = (advertiserName: string) => {
@@ -1219,7 +1278,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                       ${advertiser.revenue.toLocaleString()}
                     </p>
                     <p className="text-xs font-medium mt-1 text-gray-600">
-                      {advertiser.campaigns.length} campaign{advertiser.campaigns.length !== 1 ? 's' : ''}
+                      {advertiser.name === 'RGR' || advertiser.name === 'ICO'
+                        ? `${advertiser.frequency || 0} count`
+                        : `${advertiser.campaigns.length} campaign${advertiser.campaigns.length !== 1 ? 's' : ''}`
+                      }
                     </p>
                   </div>
                 </div>
