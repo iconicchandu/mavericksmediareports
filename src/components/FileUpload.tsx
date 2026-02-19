@@ -121,9 +121,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
     }
   };
 
-  /** Map parenthesized ET number to prebuilt ET name: (30)→JSG30PM, (32)→JSG32, etc. */
+  /** Map parenthesized ET number to prebuilt ET name: (30)→JSG30PM, (24)→P24, (32)→JSG32, etc. */
   const parenEtNumberToETName = (num: number): string => {
     if (num === 30) return 'JSG30PM';
+    if (num === 24) return 'P24'; // Map (24) to P24
     return 'JSG' + num; // JSG18, JSG32, JSG20, etc.
   };
 

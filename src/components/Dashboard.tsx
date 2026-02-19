@@ -82,6 +82,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
   // Expanded ET state for advertiser breakdown
   const [expandedETs, setExpandedETs] = useState<Set<string>>(new Set());
 
+  // Campaign filter for ET creative view
+  const [selectedETCreativeFilter, setSelectedETCreativeFilter] = useState<string>('all');
+
   // 🕒 Live Date State
   const [currentDate, setCurrentDate] = useState<string>("");
 
@@ -2463,33 +2466,87 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                       </div>
                       <h4 className="text-lg font-bold text-gray-800">All Creatives ({etData.creatives.length})</h4>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                      {etData.creatives.map((creative, idx) => (
-                        <div
-                          key={creative.name}
-                          className="p-3 rounded-xl border-2 transition-colors bg-gradient-to-br from-white to-purple-50/30 border-purple-200 hover:border-purple-300"
+                    
+                    {/* Campaign Tabs for Filtering */}
+                    <div className="mb-4 overflow-x-auto">
+                      <div className="flex space-x-1 pb-2">
+                        <button
+                          onClick={() => setSelectedETCreativeFilter('all')}
+                          className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap ${
+                            selectedETCreativeFilter === 'all'
+                              ? 'bg-purple-600 text-white'
+                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          }`}
                         >
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <FileText className="h-4 w-4 text-purple-600 flex-shrink-0" />
-                              <h5 className="font-semibold text-sm text-gray-800 truncate">{creative.name}</h5>
+                          All ({etData.creatives.length})
+                        </button>
+                        {etData.campaigns.map((campaign) => {
+                          // Count how many creatives belong to this campaign within this ET
+                          const campaignCreativeCount = etData.creatives.filter(creative => {
+                            // Need to check which campaigns this creative belongs to by looking at the original records
+                            return data.records.some(
+                              record => record.et.toUpperCase() === etData.name.toUpperCase() &&
+                                        record.creative === creative.name &&
+                                        record.campaign === campaign
+                            );
+                          }).length;
+                          
+                          return (
+                            <button
+                              key={campaign}
+                              onClick={() => setSelectedETCreativeFilter(campaign)}
+                              className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap ${
+                                selectedETCreativeFilter === campaign
+                                  ? 'bg-purple-600 text-white'
+                                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                              }`}
+                            >
+                              {campaign} ({campaignCreativeCount})
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    
+                    {/* Filtered Creatives Display */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                      {etData.creatives
+                        .filter(creative => {
+                          if (selectedETCreativeFilter === 'all') return true;
+                          
+                          // Filter creatives based on selected campaign
+                          return data.records.some(
+                            record => record.et.toUpperCase() === etData.name.toUpperCase() &&
+                                      record.creative === creative.name &&
+                                      record.campaign === selectedETCreativeFilter
+                          );
+                        })
+                        .map((creative, idx) => (
+                          <div
+                            key={creative.name}
+                            className="p-3 rounded-xl border-2 transition-colors bg-gradient-to-br from-white to-purple-50/30 border-purple-200 hover:border-purple-300"
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <FileText className="h-4 w-4 text-purple-600 flex-shrink-0" />
+                                <h5 className="font-semibold text-sm text-gray-800 truncate">{creative.name}</h5>
+                              </div>
+                              {idx === 0 && (
+                                <Award className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                              )}
                             </div>
-                            {idx === 0 && (
-                              <Award className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                            )}
-                          </div>
-                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-purple-100">
-                            <div>
-                              <p className="text-lg font-bold text-purple-600">
-                                ${creative.revenue.toLocaleString()}
-                              </p>
-                              <p className="text-xs text-gray-500 font-medium">
-                                {creative.frequency} {creative.frequency === 1 ? 'occurrence' : 'occurrences'}
-                              </p>
+                            <div className="flex items-center justify-between mt-2 pt-2 border-t border-purple-100">
+                              <div>
+                                <p className="text-lg font-bold text-purple-600">
+                                  ${creative.revenue.toLocaleString()}
+                                </p>
+                                <p className="text-xs text-gray-500 font-medium">
+                                  {creative.frequency} {creative.frequency === 1 ? 'occurrence' : 'occurrences'}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   </div>
                 </div>
@@ -2648,33 +2705,87 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                     </div>
                     <h4 className="text-lg font-bold text-gray-800">All Creatives ({selectedETData.creatives.length})</h4>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                    {selectedETData.creatives.map((creative, idx) => (
-                      <div
-                        key={creative.name}
-                        className="p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-gradient-to-br from-white to-purple-50/30 border-purple-200 hover:border-purple-300"
+                  
+                  {/* Campaign Tabs for Filtering */}
+                  <div className="mb-4 overflow-x-auto">
+                    <div className="flex space-x-1 pb-2">
+                      <button
+                        onClick={() => setSelectedETCreativeFilter('all')}
+                        className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap ${
+                          selectedETCreativeFilter === 'all'
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
                       >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <FileText className="h-4 w-4 text-purple-600 flex-shrink-0" />
-                            <h5 className="font-semibold text-sm text-gray-800 truncate">{creative.name}</h5>
+                        All ({selectedETData.creatives.length})
+                      </button>
+                      {selectedETData.campaigns.map((campaign) => {
+                        // Count how many creatives belong to this campaign within this ET
+                        const campaignCreativeCount = selectedETData.creatives.filter(creative => {
+                          // Need to check which campaigns this creative belongs to by looking at the original records
+                          return data.records.some(
+                            record => record.et.toUpperCase() === selectedETData.name.toUpperCase() &&
+                                      record.creative === creative.name &&
+                                      record.campaign === campaign
+                          );
+                        }).length;
+                        
+                        return (
+                          <button
+                            key={campaign}
+                            onClick={() => setSelectedETCreativeFilter(campaign)}
+                            className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap ${
+                              selectedETCreativeFilter === campaign
+                                ? 'bg-purple-600 text-white'
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                          >
+                            {campaign} ({campaignCreativeCount})
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  
+                  {/* Filtered Creatives Display */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                    {selectedETData.creatives
+                      .filter(creative => {
+                        if (selectedETCreativeFilter === 'all') return true;
+                        
+                        // Filter creatives based on selected campaign
+                        return data.records.some(
+                          record => record.et.toUpperCase() === selectedETData.name.toUpperCase() &&
+                                    record.creative === creative.name &&
+                                    record.campaign === selectedETCreativeFilter
+                        );
+                      })
+                      .map((creative, idx) => (
+                        <div
+                          key={creative.name}
+                          className="p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-gradient-to-br from-white to-purple-50/30 border-purple-200 hover:border-purple-300"
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <FileText className="h-4 w-4 text-purple-600 flex-shrink-0" />
+                              <h5 className="font-semibold text-sm text-gray-800 truncate">{creative.name}</h5>
+                            </div>
+                            {idx === 0 && (
+                              <Award className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                            )}
                           </div>
-                          {idx === 0 && (
-                            <Award className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-purple-100">
-                          <div>
-                            <p className="text-lg font-bold text-purple-600">
-                              ${creative.revenue.toLocaleString()}
-                            </p>
-                            <p className="text-xs text-gray-500 font-medium">
-                              {creative.frequency} {creative.frequency === 1 ? 'occurrence' : 'occurrences'}
-                            </p>
+                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-purple-100">
+                            <div>
+                              <p className="text-lg font-bold text-purple-600">
+                                ${creative.revenue.toLocaleString()}
+                              </p>
+                              <p className="text-xs text-gray-500 font-medium">
+                                {creative.frequency} {creative.frequency === 1 ? 'occurrence' : 'occurrences'}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                 </div>
               </div>
