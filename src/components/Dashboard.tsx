@@ -599,8 +599,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     };
 
     // Combine ETs - Add your combinations here
-    // combineETs('JSG20', 'JSG44', 'JSG20+JSG44');
-    // combineETs('JSG38', 'JSG38N', 'JSG38+JSG38N');
+    combineETs('JSG43', 'JSG43MET', 'JSG43+MET');
+    combineETs('JSG30PM', 'JSG30MET', 'JSG30+MET');
     combineETs('JSG36', 'P36', 'JSG36+P36');
     // Example: combineETs('JSG29', 'JSG30PM', 'JSG29+JSG30PM');
 
