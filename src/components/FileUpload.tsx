@@ -88,7 +88,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
     } 
     // Check for XC EXC or XCE before checking for XC (these are different advertisers)
     else if (upperFileName.includes('XC EXC') || upperFileName.includes('XCE')) {
-      return 'XC EXC';
+      return 'XCE';
     } 
     // Check for XC CAMPS or just XC (but not if it's part of XC EXC or XCE)
     else if (upperFileName.includes('XC CAMPS') || upperFileName.includes('XC')) {
@@ -189,8 +189,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
 
             const parenEtParsed = parseParenEtSubid(subid);
             if (parenEtParsed) {
-              // XCE counts under XC EXC (same advertiser)
-              advertiser = parenEtParsed.advertiser.toUpperCase() === 'XCE' ? 'XC EXC' : parenEtParsed.advertiser;
+              advertiser = parenEtParsed.advertiser;
               campaign = parenEtParsed.campaign;     // NADR, JGWDS etc
               creative = parenEtParsed.creative;     // NADR/064IMG, JGWDS/225 etc
               et = parenEtParsed.et;                 // JSG30PM, JSG32 etc (prebuilt ET name)

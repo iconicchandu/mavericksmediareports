@@ -197,7 +197,7 @@ function App() {
             <div className="flex items-center space-x-3">
               <div className="relative">
                 <div className="w-10 pl-1 h-10 bg-gradient-to-br from-blue-600 to-red-600 rounded-lg flex items-center justify-center shadow-lg">
-                  <img src="https://image.s10.sfmc-content.com/lib/fe2b1171706405797d1375/m/1/2fb6e6f2-244e-41a0-b20a-9049947429c9.png" width={30}></img>
+                  <img src="/logo.png" width={30}></img>
                 </div>
               </div>
               <div>

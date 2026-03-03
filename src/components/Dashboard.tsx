@@ -32,10 +32,10 @@ const getAdvertiserAccent = (name: string): string => {
       return '#14B8A6'; // teal for ICO
     case 'GZ':
       return '#8B5CF6'; // purple
-    case 'CM Gmail':
-      return '#EF4444'; // red
     case 'MI':
       return '#3B82F6'; // blue
+    case '7M':
+      return '#0EA5E9';
     case 'ES':
       return '#10B981'; // emerald
     case 'XC':
@@ -223,10 +223,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "P24": { stack: "S1", manager: "Abhay S." },
     "JSG41": { stack: "S1", manager: "Aditya G." },
     "CM41": { stack: "S1", manager: "Aditya G." },
-    "JSG45": { stack: "S1", manager: "Aditya G. | Abhay S." },
+    "CM41MET": { stack: "S1", manager: "Aditya G." },
+    "JSG45": { stack: "S1", manager: "Aditya G." },
+    "JSG41MET": { stack: "S1", manager: "Aditya G." },
+    "JSG48MET": { stack: "S1", manager: "Abhay S." },
 
     // S4
     "JSG34": { stack: "S4", manager: "Satyam S." },
+    "JSG34MET": { stack: "S4", manager: "Satyam S." },
     "C34": { stack: "S4", manager: "Abhay S." },
 
     // S6
@@ -234,11 +238,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "C36": { stack: "S6", manager: "Nikhil T." },
     "P36": { stack: "RGR36 | S6", manager: "Nikhil T." },
     "JSG36+P36": { stack: "S6", manager: "Nikhil T." },
+    "JSG36MET": { stack: "S6", manager: "Nikhil T." },
 
     // S7
     "JSG26": { stack: "S7", manager: "Nikhil T." },
+    "JSG26MET": { stack: "S7", manager: "Nikhil T." },
     "JSG29": { stack: "S7", manager: "Keshav T." },
     "JSG30PM": { stack: "S7", manager: "Aditya S." },
+    "CM30": { stack: "S7", manager: "Aditya S." },
     "JSG47": { stack: "S7", manager: "Keshav T." },
 
     // S10
@@ -254,16 +261,20 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG20": { stack: "S11", manager: "Harsh G." },
     "JSG44": { stack: "S11", manager: "Harsh G." },
     "JSG20+JSG44": { stack: "S11", manager: "Harsh G." },
+    "JSG51MET": { stack: "S11", manager: "Kaif K." },
+    "JSG53MET": { stack: "S11", manager: "Harsh G." },
 
     // S12
     "JSG38": { stack: "S12", manager: "Kaif K." },
     "JSG38N": { stack: "S12", manager: "Kaif K." },
     "JSG38+JSG38N": { stack: "S12", manager: "Kaif K." },
     "JSG40": { stack: "S12", manager: "Keshav T." },
-
+    "JSG52": { stack: "S12", manager: "Keshav T." },
+    
     // S13
     "JSG43": { stack: "S13", manager: "Aditya S." },
     "CM43": { stack: "S13", manager: "Aditya S." },
+    "JSG43+MET": { stack: "S13", manager: "Aditya S." },
   };
 
   // 🔍 Get ET Info (safe helper, case-insensitive)
@@ -295,10 +306,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     // Advertiser stats
     const advertiserStats = new Map<string, AdvertiserStats>();
 
-    // Custom CM Gmail aggregation
-    let cmRevenue = 0;
-    let cmCampaigns: Set<string> = new Set();
-
     // MI: when file name is "MI CAMPS" and subid starts with "MI" (e.g. MI/JGWDS)
     // OR when creative name contains "_MI" (e.g., JG_225_OG2_IMG_MI, VPU_ADV_002_MI)
     const isMIRecord = (r: DataRecord) =>
@@ -308,31 +315,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
     // ICO: records with advertiser 'ICO' (creatives starting with ICO from RGR files)
     const isICORecord = (r: DataRecord) => r.advertiser === 'ICO';
-
-    data.records.forEach(record => {
-      if (
-        record.subid?.toUpperCase().includes("CM") || record.subid?.toUpperCase().includes("JSG36")) {
-        cmRevenue += record.revenue;
-        cmCampaigns.add(record.campaign);
-      }
-    });
-
-    // Calculate CM Gmail frequency
-    let cmFrequency = 0;
-    data.records.forEach(record => {
-      if (record.subid?.toUpperCase().includes("CM") || record.subid?.toUpperCase().includes("JSG36")) {
-        cmFrequency += record.conv ?? 1;
-      }
-    });
-
-    if (cmRevenue > 0) {
-      advertiserStats.set("CM Gmail", {
-        name: "CM Gmail",
-        revenue: cmRevenue,
-        campaigns: Array.from(cmCampaigns) as string[],
-        frequency: cmFrequency,
-      });
-    }
+    const is7MRecord = (r: DataRecord) =>
+      !!r.fileName && r.fileName.toUpperCase().includes('7M');
 
     // Custom MI aggregation: file name "MI CAMPS" + subid starting with MI; sum all such revenue
     let miRevenue = 0;
@@ -359,6 +343,29 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         revenue: miRevenue,
         campaigns: Array.from(miCampaigns) as string[],
         frequency: miFrequency,
+      });
+    }
+
+    let sevenMRevenue = 0;
+    const sevenMCampaigns: Set<string> = new Set();
+    data.records.forEach(record => {
+      if (is7MRecord(record)) {
+        sevenMRevenue += record.revenue;
+        sevenMCampaigns.add(record.campaign);
+      }
+    });
+    let sevenMFrequency = 0;
+    data.records.forEach(record => {
+      if (is7MRecord(record)) {
+        sevenMFrequency += record.conv ?? 1;
+      }
+    });
+    if (sevenMRevenue > 0) {
+      advertiserStats.set("7M", {
+        name: "7M",
+        revenue: sevenMRevenue,
+        campaigns: Array.from(sevenMCampaigns) as string[],
+        frequency: sevenMFrequency,
       });
     }
 
@@ -403,7 +410,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       // Advertiser stats (exclude MI CAMPS + subid starting with MI and ICO records from base advertisers)
       const isMI = isMIRecord(record);
       const isICO = isICORecord(record);
-      if (!isMI && !isICO) {
+      const is7M = is7MRecord(record);
+      if (!isMI && !isICO && !is7M) {
         if (!advertiserStats.has(record.advertiser)) {
           advertiserStats.set(record.advertiser, {
             name: record.advertiser,
@@ -456,7 +464,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         ? 'MI'
         : isICORecord(record)
           ? 'ICO'
-          : record.advertiser;
+          : is7MRecord(record)
+            ? '7M'
+            : record.advertiser;
       if (!et.advertisers.has(advertiserKey)) {
         et.advertisers.set(advertiserKey, 0);
       }
@@ -924,16 +934,18 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       (!!r.creative && r.creative.toUpperCase().includes('_MI'));
     // ICO: records with advertiser 'ICO' (creatives starting with ICO from RGR files)
     const isICORecord = (r: DataRecord) => r.advertiser === 'ICO';
+    const is7MRecord = (r: DataRecord) =>
+      !!r.fileName && r.fileName.toUpperCase().includes('7M');
     if (advertiserName === 'MI') {
       return data.records.filter(isMIRecord);
-    }
-    if (advertiserName === 'CM Gmail') {
-      return data.records.filter(r => r.subid?.toUpperCase().includes('CM') || r.subid?.toUpperCase().includes('JSG36'));
     }
     if (advertiserName === 'ICO') {
       return data.records.filter(isICORecord);
     }
-    return data.records.filter(r => r.advertiser === advertiserName && !isMIRecord(r) && !isICORecord(r));
+    if (advertiserName === '7M') {
+      return data.records.filter(is7MRecord);
+    }
+    return data.records.filter(r => r.advertiser === advertiserName && !isMIRecord(r) && !isICORecord(r) && !is7MRecord(r));
   };
 
   const openAdvertiserPopup = (advertiserName: string) => {
@@ -1249,7 +1261,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             const iconBg = hexToRgba(accent, 0.12);
             // Get first letter(s) of advertiser name
             const getInitials = (name: string): string => {
-              if (name === 'CM Gmail') return 'CM';
               if (name === 'XC EXC') return 'XE';
               if (name === 'NON COMCAST') return 'NC';
               if (name.length <= 3) return name.toUpperCase(); // For short names like GZ, ES, XC, DB, MI, RGR
