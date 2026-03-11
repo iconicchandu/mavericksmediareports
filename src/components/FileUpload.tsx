@@ -121,20 +121,30 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
     }
   };
 
-  /** Map parenthesized ET number to prebuilt ET name: (30)→JSG30PM, (24)→P24, (32)→JSG32, etc. */
-  const parenEtNumberToETName = (num: number): string => {
-    if (num === 30) return 'JSG30PM';
-    if (num === 24) return 'P24'; // Map (24) to P24
-    return 'JSG' + num; // JSG18, JSG32, JSG20, etc.
+  /** Map parenthesized ET number to prebuilt ET name: (30)→JSG30PM, (24)→P24, (32)→JSG32, (36MET)→JSG36MET, etc. */
+  const parenEtNumberToETName = (num: string | number): string => {
+    const numStr = num.toString();
+    
+    // Handle numeric cases
+    if (numStr === '30') return 'JSG30PM';
+    if (numStr === '24') return 'P24'; // Map (24) to P24
+    
+    // Handle alphanumeric cases like '36MET'
+    if (/^\d+[A-Z]+$/i.test(numStr)) {
+      return 'JSG' + numStr.toUpperCase(); // e.g., '36MET' → 'JSG36MET'
+    }
+    
+    // Default numeric case: JSG18, JSG32, JSG20, etc.
+    return 'JSG' + numStr;
   };
 
-  /** Parse subid format: ADVERTISER/CAMPAIGN/CREATIVE(NUM) e.g. XCE/NADR/064IMG(30), MI/JGWDS/225(32) */
+  /** Parse subid format: ADVERTISER/CAMPAIGN/CREATIVE(NUM) e.g. XCE/NADR/064IMG(30), MI/JGWDS/225(32), ICO/JGWDS/025(36MET) */
   const parseParenEtSubid = (subid: string): { advertiser: string; campaign: string; creative: string; et: string } | null => {
-    const m = subid.trim().match(/^([^/]+)\/([^/]+)\/(.+?)\((\d+)\)\s*$/i);
+    // Updated regex to capture alphanumeric values in parentheses (e.g., (30), (32), (36MET))
+    const m = subid.trim().match(/^([^/]+)\/([^/]+)\/(.+?)\(([^)]+)\)\s*$/i);
     if (!m) return null;
     const [, adv, camp, creativeSuffix, numStr] = m;
-    const num = parseInt(numStr, 10);
-    const et = parenEtNumberToETName(num);
+    const et = parenEtNumberToETName(numStr);
     const creative = camp.trim() + '/' + creativeSuffix.trim(); // NADR/064IMG, JGWDS/225
     return {
       advertiser: adv.trim(),

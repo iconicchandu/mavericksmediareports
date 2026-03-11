@@ -227,6 +227,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG45": { stack: "S1", manager: "Aditya G." },
     "JSG41MET": { stack: "S1", manager: "Aditya G." },
     "JSG48MET": { stack: "S1", manager: "Abhay S." },
+    "JSG48": { stack: "S1", manager: "Abhay S." },
 
     // S4
     "JSG34": { stack: "S4", manager: "Satyam S." },
@@ -244,7 +245,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG26": { stack: "S7", manager: "Nikhil T." },
     "JSG26MET": { stack: "S7", manager: "Nikhil T." },
     "JSG29": { stack: "S7", manager: "Keshav T." },
-    "JSG30PM": { stack: "S7", manager: "Aditya S." },
+    "JSG30+MET": { stack: "S7", manager: "Aditya S." },
     "CM30": { stack: "S7", manager: "Aditya S." },
     "JSG47": { stack: "S7", manager: "Keshav T." },
 
@@ -262,7 +263,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG44": { stack: "S11", manager: "Harsh G." },
     "JSG20+JSG44": { stack: "S11", manager: "Harsh G." },
     "JSG51MET": { stack: "S11", manager: "Kaif K." },
+    "JSG51": { stack: "S11", manager: "Kaif K." },
     "JSG53MET": { stack: "S11", manager: "Harsh G." },
+    "JSG53": { stack: "S11", manager: "Harsh G." },
 
     // S12
     "JSG38": { stack: "S12", manager: "Kaif K." },
