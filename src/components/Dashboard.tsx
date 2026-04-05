@@ -273,6 +273,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG38+JSG38N": { stack: "S12", manager: "Kaif K." },
     "JSG40": { stack: "S12", manager: "Keshav T." },
     "JSG52": { stack: "S12", manager: "Keshav T." },
+    "JSG40+52": { stack: "S12", manager: "Keshav T." },
+
     
     // S13
     "JSG43": { stack: "S13", manager: "Aditya S." },
@@ -615,6 +617,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     combineETs('JSG43', 'JSG43MET', 'JSG43+MET');
     combineETs('JSG30PM', 'JSG30MET', 'JSG30+MET');
     combineETs('JSG36', 'P36', 'JSG36+P36');
+    combineETs('JSG40', 'JSG52', 'JSG40+52');
     // Example: combineETs('JSG29', 'JSG30PM', 'JSG29+JSG30PM');
 
     // For Pie and Bar chart
