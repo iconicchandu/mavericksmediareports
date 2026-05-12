@@ -232,7 +232,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     // S4
     "JSG34": { stack: "S4", manager: "Satyam S." },
     "JSG34MET": { stack: "S4", manager: "Satyam S." },
-    "C34": { stack: "S4", manager: "Abhay S." },
+    "C34MET": { stack: "S4", manager: "Abhay S." },
 
     // S6
     "JSG36": { stack: "CM36 | S6", manager: "Nikhil T." },
