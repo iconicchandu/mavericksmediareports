@@ -245,7 +245,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG26": { stack: "S7", manager: "Nikhil T." },
     "JSG26MET": { stack: "S7", manager: "Nikhil T." },
     "JSG29": { stack: "S7", manager: "Keshav T." },
-    "JSG30+MET": { stack: "S7", manager: "Aditya S." },
+    "JSG30MET": { stack: "S7", manager: "Aditya S." },
     "CM30": { stack: "S7", manager: "Aditya S." },
     "JSG47": { stack: "S7", manager: "Keshav T." },
 
@@ -275,11 +275,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG52": { stack: "S12", manager: "Keshav T." },
     "JSG40+52": { stack: "S12", manager: "Keshav T." },
 
-    
+
     // S13
     "JSG43": { stack: "S13", manager: "Aditya S." },
     "CM43": { stack: "S13", manager: "Aditya S." },
-    "JSG43+MET": { stack: "S13", manager: "Aditya S." },
+    "JSG43MET": { stack: "S13", manager: "Aditya S." },
   };
 
   // 🔍 Get ET Info (safe helper, case-insensitive)
@@ -315,7 +315,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     // OR when creative name contains "_MI" (e.g., JG_225_OG2_IMG_MI, VPU_ADV_002_MI)
     const isMIRecord = (r: DataRecord) =>
       (!!r.fileName && r.fileName.toUpperCase().includes('MI CAMPS') &&
-       !!r.subid && /^MI(\/|_|$)/i.test(r.subid.trim())) ||
+        !!r.subid && /^MI(\/|_|$)/i.test(r.subid.trim())) ||
       (!!r.creative && r.creative.toUpperCase().includes('_MI'));
 
     // ICO: records with advertiser 'ICO' (creatives starting with ICO from RGR files)
@@ -614,12 +614,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     };
 
     // Combine ETs - Add your combinations here
-    combineETs('JSG43', 'JSG43MET', 'JSG43+MET');
-    combineETs('JSG30PM', 'JSG30MET', 'JSG30+MET');
+    // combineETs('JSG43', 'JSG43MET', 'JSG43+MET');
+    // combineETs('JSG30PM', 'JSG30MET', 'JSG30+MET');
     combineETs('JSG36', 'P36', 'JSG36+P36');
     combineETs('JSG40', 'JSG52', 'JSG40+52');
-    // Example: combineETs('JSG29', 'JSG30PM', 'JSG29+JSG30PM');
-
     // For Pie and Bar chart
     return {
       totalRevenue,
@@ -936,7 +934,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     // OR creative name contains "_MI" (e.g., JG_225_OG2_IMG_MI, VPU_ADV_002_MI)
     const isMIRecord = (r: DataRecord) =>
       (!!r.fileName && r.fileName.toUpperCase().includes('MI CAMPS') &&
-       !!r.subid && /^MI(\/|_|$)/i.test(r.subid.trim())) ||
+        !!r.subid && /^MI(\/|_|$)/i.test(r.subid.trim())) ||
       (!!r.creative && r.creative.toUpperCase().includes('_MI'));
     // ICO: records with advertiser 'ICO' (creatives starting with ICO from RGR files)
     const isICORecord = (r: DataRecord) => r.advertiser === 'ICO';
@@ -980,149 +978,188 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
 
   return (
-    <div className="space-y-8 relative">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <div className="flex items-center mb-2">
-            <h2 className="text-3xl font-bold">Report & Campaign Management</h2>
+    <div className="space-y-6 relative">
+      {/* Top Performer Golden Bar */}
+      {analytics.etStats.length > 0 && (() => {
+        const topET = analytics.etStats[0];
+        const topInfo = getETInfo(topET.name);
+        return (
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#E6C25B] via-[#C69A38] to-[#D5A943] p-4 sm:p-5 shadow-lg border border-yellow-400/40 mb-2 transition-transform hover:scale-[1.01]">
+            <div className="absolute inset-0 opacity-[0.04] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNMCAwTDQgNFpNMCA0TDQgMFoiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9zdmc+')] pointer-events-none"></div>
+            
+            <div className="relative flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4 w-full sm:w-auto">
+                <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full border border-[#9A731F]/40 bg-[#D4A73D]/30 shadow-inner">
+                  <Crown className="w-6 h-6 text-[#4D390E]" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-2xl font-black text-[#0A192F] tracking-tight leading-none">{topInfo ? topInfo.manager : topET.name}</h3>
+                    <div className="flex items-center text-[10px] font-bold rounded overflow-hidden border border-[#9A731F]/30 bg-[#CD9D2A]/20">
+                      {topInfo && (
+                        <span className="px-2 py-0.5 border-r border-[#9A731F]/30 text-[#0A192F]">
+                          {topInfo.stack}
+                        </span>
+                      )}
+                      <span className="px-2 py-0.5 text-[#5A4310]">
+                        {topET.name}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-[11px] font-black text-[#7A5913] uppercase tracking-widest mt-1.5">
+                    Today's Top Performer
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-right w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-[#9A731F]/20 flex justify-between sm:block items-end">
+                <p className="text-[11px] font-black text-[#7A5913] uppercase tracking-widest mb-1 sm:hidden">Revenue</p>
+                <div>
+                  <p className="text-3xl font-black text-[#0A192F] tracking-tight leading-none">
+                    ${topET.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-[11px] font-black text-[#7A5913] uppercase tracking-widest mt-1.5 hidden sm:block">
+                    Generated Revenue
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-          <p className={`text-sm text-gray-600`}>
+        );
+      })()}
+
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/70 backdrop-blur-xl p-5 rounded-2xl border border-white/80 shadow-sm">
+        <div>
+          <div className="flex items-center mb-1">
+            <h2 className="text-2xl font-bold tracking-tight text-gray-900">Dashboard Overview</h2>
+          </div>
+          <p className="text-sm text-gray-500 font-medium">
             {uploadedFiles.length} file{uploadedFiles.length > 1 ? 's' : ''} processed • {data.records.length} records analyzed
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <button
             onClick={exportFilteredData}
-            className="flex items-center px-4 py-2 rounded-lg font-medium transition-colors bg-blue-600 hover:bg-blue-700 text-white"
+            className="flex items-center px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
           >
             <Download className="h-4 w-4 mr-2" />
             Export Data
           </button>
           <button
             onClick={onReset}
-            className="flex items-center px-4 py-2 rounded-lg font-medium transition-colors bg-gray-200 hover:bg-gray-300"
+            className="flex items-center px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 shadow-sm"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             New Upload
           </button>
         </div>
       </div>
-
       {/* End: Header */}
 
       {/* Search Box */}
-      <div className="p-6 rounded-lg border bg-white/50 backdrop-blur-sm border-gray-200">
-        <div className="flex items-center mb-4">
-          <Search className="h-6 w-6 mr-3 text-blue-500" />
-          <h3 className="text-xl font-bold">Search Creatives</h3>
-        </div>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search for creative names..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className={`w-full pl-10 pr-10 py-3 rounded-lg border transition-colors bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
-          />
-          {searchQuery && (
-            <button
-              onClick={() => onSearchChange('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-200 transition-colors text-gray-500 hover:text-gray-700"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-black" />
+        <input
+          type="text"
+          placeholder="Search for creative names..."
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="w-full pl-12 pr-10 py-3.5 rounded-2xl border border-gray-200 bg-white/80 backdrop-blur-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 shadow-sm transition-all"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => onSearchChange('')}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
-
       {/* End: Search Box */}
 
       {/* Search Results */}
       {searchResults && (
-        <div className="p-6 rounded-xl border-2 shadow-lg bg-gradient-to-br from-white via-blue-50/20 to-white border-blue-200">
+        <div className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm mt-6">
           {/* Header Section */}
-          <div className="mb-6 p-5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm">
-                  <Search className="h-6 w-6" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold mb-1">
-                    Search Results: <span className="text-blue-100">{searchQuery}</span>
-                  </h3>
-                  <p className="text-blue-100 text-sm flex items-center gap-2">
-                    <Star className="h-4 w-4" />
-                    {searchResults.length} creative{searchResults.length > 1 ? 's' : ''} found
-                  </p>
-                </div>
+          <div className="mb-6 p-5 rounded-2xl bg-indigo-600 text-white shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 shadow-inner">
+                <Search className="h-6 w-6 text-white" strokeWidth={2.5} />
               </div>
-              <div className="text-right bg-white/10 backdrop-blur-sm px-4 py-3 rounded-lg border border-white/20">
-                <p className="text-3xl font-bold mb-1">
-                  ${searchResultsTotalRevenue.toLocaleString()}
-                </p>
-                <p className="text-blue-100 text-sm font-medium">
-                  Total Revenue
+              <div>
+                <h3 className="text-2xl font-bold mb-0.5 tracking-tight">
+                  Search Results: <span className="text-indigo-100 font-semibold">{searchQuery}</span>
+                </h3>
+                <p className="text-indigo-100/80 text-sm flex items-center gap-1.5 font-medium">
+                  <Star className="h-3.5 w-3.5" />
+                  {searchResults.length} creative{searchResults.length > 1 ? 's' : ''} found
                 </p>
               </div>
+            </div>
+            <div className="text-center bg-white/10 backdrop-blur-sm px-5 py-3 rounded-xl border border-white/10 shadow-inner min-w-[140px]">
+              <p className="text-3xl font-bold mb-0.5 tracking-tight">
+                ${searchResultsTotalRevenue.toLocaleString()}
+              </p>
+              <p className="text-indigo-100/80 text-[11px] font-medium uppercase tracking-wider">
+                Total Revenue
+              </p>
             </div>
           </div>
 
           {/* Results Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             {searchResults.map((result, index) => (
               <div
                 key={result.creative}
-                className="p-5 rounded-xl border-2 bg-gradient-to-br from-white to-blue-50/30 border-blue-200 shadow-md"
+                className="p-5 rounded-2xl border border-indigo-100 bg-white shadow-sm hover:shadow-md transition-all hover:border-indigo-200"
               >
                 {/* Creative Header */}
-                <div className="flex items-center gap-3 mb-4 pb-4 border-b border-blue-100">
-                  <div className="p-2 rounded-lg bg-blue-100">
-                    <Layers className="h-5 w-5 text-blue-600" />
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="p-2.5 rounded-xl bg-indigo-50/80 border border-indigo-100/50">
+                    <Layers className="h-5 w-5 text-indigo-500" strokeWidth={2} />
                   </div>
-                  <h4 className="font-bold text-lg text-gray-800 truncate flex-1">{result.creative}</h4>
+                  <h4 className="font-bold text-[15px] text-gray-900 truncate flex-1 tracking-tight">{result.creative}</h4>
                 </div>
 
                 {/* Revenue and Frequency */}
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                    <p className="text-xs text-green-700 font-medium mb-1">Revenue</p>
-                    <p className="text-xl font-bold text-green-600">
+                <div className="grid grid-cols-2 gap-3 mb-5 border-b border-gray-100 pb-5">
+                  <div className="bg-emerald-50/50 rounded-xl p-3.5 border border-emerald-100/50">
+                    <p className="text-[10px] text-emerald-600 font-bold mb-1">Revenue</p>
+                    <p className="text-xl font-bold text-emerald-600 tracking-tight">
                       ${result.totalRevenue.toLocaleString()}
                     </p>
                   </div>
-                  <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                    <p className="text-xs text-blue-700 font-medium mb-1">Frequency</p>
-                    <p className="text-xl font-bold text-blue-600">
+                  <div className="bg-blue-50/50 rounded-xl p-3.5 border border-blue-100/50">
+                    <p className="text-[10px] text-blue-600 font-bold mb-1">Frequency</p>
+                    <p className="text-xl font-bold text-blue-600 tracking-tight">
                       {result.frequency}
                     </p>
                   </div>
                 </div>
 
                 {/* Details Section */}
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {/* Campaigns */}
                   <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Target className="h-3.5 w-3.5 text-gray-500" />
-                      <span className="text-xs font-bold text-gray-700">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Target className="h-3.5 w-3.5 text-gray-500" strokeWidth={2.5} />
+                      <span className="text-[11px] font-bold text-gray-800">
                         Campaigns ({result.campaigns.size})
                       </span>
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-1.5 pl-5">
                       {Array.from(result.campaigns).slice(0, 3).map((campaign, idx) => (
                         <span
                           key={idx}
-                          className="px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200"
+                          className="px-2 py-1 rounded bg-blue-50 text-[10px] font-bold text-blue-600 border border-blue-100/50"
                         >
                           {campaign}
                         </span>
                       ))}
                       {result.campaigns.size > 3 && (
-                        <span className="px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
-                          +{result.campaigns.size - 3} more
+                        <span className="px-2 py-1 rounded bg-gray-50 text-[10px] font-bold text-gray-500 border border-gray-100">
+                          +{result.campaigns.size - 3}
                         </span>
                       )}
                     </div>
@@ -1130,17 +1167,17 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
                   {/* ETs */}
                   <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Users className="h-3.5 w-3.5 text-gray-500" />
-                      <span className="text-xs font-bold text-gray-700">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Users className="h-3.5 w-3.5 text-gray-500" strokeWidth={2.5} />
+                      <span className="text-[11px] font-bold text-gray-800">
                         ETs ({result.ets.size})
                       </span>
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-1.5 pl-5">
                       {Array.from(result.ets).map((et, idx) => (
                         <span
                           key={idx}
-                          className="px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200"
+                          className="px-2 py-1 rounded bg-purple-50 text-[10px] font-bold text-purple-600 border border-purple-100/50"
                         >
                           {et}
                         </span>
@@ -1150,24 +1187,24 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
                   {/* Advertisers */}
                   <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Building2 className="h-3.5 w-3.5 text-gray-500" />
-                      <span className="text-xs font-bold text-gray-700">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Building2 className="h-3.5 w-3.5 text-gray-500" strokeWidth={2.5} />
+                      <span className="text-[11px] font-bold text-gray-800">
                         Advertisers ({result.advertisers.size})
                       </span>
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-1.5 pl-5">
                       {Array.from(result.advertisers).slice(0, 2).map((advertiser, idx) => (
                         <span
                           key={idx}
-                          className="px-2 py-1 rounded-md text-xs font-medium bg-emerald-100 text-emerald-700 border border-emerald-200"
+                          className="px-2 py-1 rounded bg-emerald-50 text-[10px] font-bold text-emerald-600 border border-emerald-100/50"
                         >
                           {advertiser}
                         </span>
                       ))}
                       {result.advertisers.size > 2 && (
-                        <span className="px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
-                          +{result.advertisers.size - 2} more
+                        <span className="px-2 py-1 rounded bg-gray-50 text-[10px] font-bold text-gray-500 border border-gray-100">
+                          +{result.advertisers.size - 2}
                         </span>
                       )}
                     </div>
@@ -1178,75 +1215,30 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
           </div>
         </div>
       )}
-
       {/* End: Search Results */}
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        <div className="p-6 rounded-lg border bg-green-400/50 backdrop-blur-sm border-green-400">
-          <div className="flex items-center">
-            <DollarSign className="h-8 w-8 text-green-800" />
-            <div className="ml-4">
-              <p className={`text-sm font-medium text-gray-600`}>
-                Total Revenue
-              </p>
-              <p className="text-2xl font-bold">${analytics.totalRevenue.toLocaleString()}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-6 rounded-lg border bg-blue-600/50 backdrop-blur-sm border-blue-300">
-          <div className="flex items-center">
-            <DollarSign className="h-8 w-8 text-green-400" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-white">
-                Daily Revenue Target
-              </p>
-              <div className="flex items-center">
-                <p className="text-2xl font-bold text-green-400">${displayedTotalTargetRevenue.toLocaleString()}</p>
-                {analytics.totalRevenue > 40000}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        {[
+          { label: "Total Revenue", value: `$${analytics.totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-100/50", border: "border-emerald-200/50" },
+          { label: "Daily Target", value: `$${displayedTotalTargetRevenue.toLocaleString()}`, icon: Target, color: "text-blue-600", bg: "bg-blue-100/50", border: "border-blue-200/50" },
+          { label: "Campaigns", value: analytics.campaignStats.length, icon: Target, color: "text-indigo-600", bg: "bg-indigo-100/50", border: "border-indigo-200/50" },
+          { label: "ETs Active", value: analytics.etStats.length, icon: Users, color: "text-purple-600", bg: "bg-purple-100/50", border: "border-purple-200/50" },
+          { label: "Creatives", value: data.creatives.size, icon: Activity, color: "text-amber-600", bg: "bg-amber-100/50", border: "border-amber-200/50" },
+        ].map((stat, i) => (
+          <div key={i} className={`p-4 rounded-2xl border bg-white/70 backdrop-blur-xl shadow-sm transition-all hover:shadow-md hover:scale-[1.02] ${stat.border}`}>
+            <div className="flex items-center gap-4">
+              <div className={`p-3 rounded-xl ${stat.bg}`}>
+                <stat.icon className={`h-6 w-6 ${stat.color}`} />
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">{stat.label}</p>
+                <p className="text-2xl font-black text-gray-900 leading-none">{stat.value}</p>
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="p-6 rounded-lg border bg-blue-400/50 backdrop-blur-sm border-blue-400">
-          <div className="flex items-center">
-            <Target className="h-8 w-8 text-blue-700" />
-            <div className="ml-4">
-              <p className={`text-sm font-medium text-gray-600`}>
-                Campaigns
-              </p>
-              <p className="text-2xl font-bold">{analytics.campaignStats.length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-6 rounded-lg border bg-red-400/50 backdrop-blur-sm border-red-400">
-          <div className="flex items-center">
-            <Users className="h-8 w-8 text-red-600" />
-            <div className="ml-4">
-              <p className={`text-sm font-medium text-gray-600`}>
-                ETs
-              </p>
-              <p className="text-2xl font-bold">{analytics.etStats.length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-6 rounded-lg border bg-[#fedfca]/50 backdrop-blur-sm border-orange-400">
-          <div className="flex items-center">
-            <Activity className="h-8 w-8 text-blue-500" />
-            <div className="ml-4">
-              <p className={`text-sm font-medium text-gray-600`}>
-                Creatives
-              </p>
-              <p className="text-2xl font-bold">{data.creatives.size}</p>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
-
       {/* End: Summary Cards */}
 
       {/* Advertiser Revenue Breakdown (redesigned cards) */}
@@ -1474,155 +1466,138 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
       {/* Top Revenue ETs Section */}
       {analytics.etStats.length > 0 && (
-        <div className="p-6 rounded-lg border-2 shadow-2xl bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100 border-amber-400">
+        <div className="p-6 rounded-2xl border border-amber-200/50 shadow-sm bg-[#fdfbf6]">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <Award className="h-6 w-6 mr-3 text-amber-500" />
-              <h3 className="text-xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">Top Revenue ETs</h3>
+              <h3 className="text-xl font-bold text-gray-900 tracking-tight">Top Revenue ETs</h3>
             </div>
-            <div className="text-sm px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
-              Top 3 Performing ETs
+            <div className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-amber-100/60 text-amber-800 uppercase tracking-widest border border-amber-200/50">
+              Top 3 Performing
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {analytics.etStats.slice(0, 3).map((et, index) => (
               <div
                 key={et.name}
-                className="pb-4 rounded-xl transition-colors cursor-pointer relative overflow-hidden bg-[url('https://img.freepik.com/free-vector/gold-metal-background_78370-154.jpg?semt=ais_hybrid&w=740&q=80')] bg-cover bg-center">
-                {/* Crown Icon at Top Right */}
+                className="relative rounded-2xl border border-yellow-300/40 shadow-lg transition-all hover:shadow-xl hover:scale-[1.02] overflow-hidden bg-gradient-to-br from-[#FDE08B] via-[#D4AF37] to-[#B5851C]"
+              >
+                {/* Subtle metallic texture overlay */}
+                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-white via-transparent to-black pointer-events-none"></div>
+                <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNMCAwTDQgNFpNMCA0TDQgMFoiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9zdmc+')] pointer-events-none"></div>
 
-                <div className="w-full flex items-center mb-4">
-                  <div className="w-full flex items-center justify-between px-4 py-1 rounded-xl rounded-br-none rounded-bl-none ">
-                    <div className="flex justify-start items-center">
-                      <Crown className="h-8 w-8 text-amber-200 drop-shadow-lg" fill="#f59e0b" />
-                      <h4 className="font-bold text-lg ml-3 text-white">
+                {/* Header Section */}
+                <div className="relative z-10 flex items-center justify-between p-5 pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner border border-white/30">
+                      <Crown className="w-5 h-5 text-yellow-900 drop-shadow-sm" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 text-lg leading-tight drop-shadow-sm">
                         {et.name}
                       </h4>
-                      <span className="ml-2 px-2 py-1 bg-amber-300 text-amber-900 text-xs font-bold rounded">
-                        #{index + 1}
-                      </span>
+                      <div className="flex items-center mt-0.5">
+                        <span className="text-[10px] font-black text-yellow-900 tracking-wider uppercase drop-shadow-sm">
+                          Rank #{index + 1}
+                        </span>
+                      </div>
                     </div>
+                  </div>
 
-                    {(() => {
-                      const info = getETInfo(et.name);
-                      if (!info) return null;
+                  {(() => {
+                    const info = getETInfo(et.name);
+                    if (!info) return null;
+                    return (
+                      <div className="flex items-center text-[10px] font-bold rounded-md overflow-hidden border border-yellow-600/30 bg-white/20 backdrop-blur-sm shadow-sm">
+                        <span className="text-gray-900 px-2.5 py-1 border-r border-yellow-600/30">
+                          {info.stack}
+                        </span>
+                        <span className="text-yellow-900 px-2.5 py-1">
+                          {info.manager}
+                        </span>
+                      </div>
+                    );
+                  })()}
+                </div>
 
-                      return (
-                        <div className="flex items-center space-x-0 bg-yellow-400 rounded-xl border-[2px] border-yellow-200">
-                          {/* Stack */}
-                          <span className="text-[13px] font-bold text-white pl-2 mr-2">
-                            {info.stack}
-                          </span>
+                {/* Main Content Section */}
+                <div className="relative z-10 px-5 pb-5">
+                  <div className="flex justify-between items-start mb-4 mt-2">
+                    <div>
+                      <p className="text-3xl font-black text-gray-900 mb-0.5 leading-none tracking-tight drop-shadow-md">
+                        ${et.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-[10px] font-bold text-yellow-900/80 uppercase tracking-widest mt-1.5">
+                        {et.name.includes('+') ? 'Combined Revenue' : 'Today Revenue'}
+                      </p>
 
-                          {/* Manager */}
-                          <span className="text-[13px] font-bold text-white pr-2">
-                            {info.manager}
-                          </span>
-
-                          {/* Type (optional) */}
-                          {info.type && (
-                            <span
-                              className={`text-[10px] px-1 py-[2px] rounded-xl font-bold ${info.type === "COM"
-                                ? "bg-blue-600 text-white"
-                                : "bg-purple-600 text-white"
-                                }`}
-                            >
-                              {info.type}
+                      {et.name.includes('+') && (
+                        <div className="mt-2 flex flex-col gap-1">
+                          {(et as any).et1Name && (
+                            <span className="text-[10px] font-bold text-yellow-900/80">
+                              {(et as any).et1Name}: <span className="font-black text-gray-900 drop-shadow-sm">${((et as any).et1Revenue ?? 0).toLocaleString()}</span>
+                            </span>
+                          )}
+                          {(et as any).et2Name && (
+                            <span className="text-[10px] font-bold text-yellow-900/80">
+                              {(et as any).et2Name}: <span className="font-black text-gray-900 drop-shadow-sm">${((et as any).et2Revenue ?? 0).toLocaleString()}</span>
                             </span>
                           )}
                         </div>
-                      );
-                    })()}
-                  </div>
-                </div>
-                <div className="mb-4 px-4 flex justify-between items-center">
-                  <div>
-                    <p className="text-xl font-bold mb-1 text-amber-700">
-                      ${et.revenue.toLocaleString()}
-                    </p>
-                    <p className={`text-sm font-medium text-gray-600`}>
-                      {et.name.includes('+') ? 'Combined Revenue' : 'Today Revenue'}
-                    </p>
-                    {et.name.includes('+') && (
-                      <div className="mt-1 flex gap-2 font-bold text-[12px] text-gray-600">
-                        {(et as any).et1Name ? (
-                          <span className="bg-amber-500/50 rounded-xl p-0.5 px-2">{(et as any).et1Name}: ${((et as any).et1Revenue ?? 0).toLocaleString()}</span>
-                        ) : null}
-                        {(et as any).et1Name && (et as any).et2Name ? <span></span> : null}
-                        {(et as any).et2Name ? (
-                          <span className="bg-amber-500/50 rounded-xl p-0.5 px-2">{(et as any).et2Name}: ${((et as any).et2Revenue ?? 0).toLocaleString()}</span>
-                        ) : null}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <div className='bg-yellow-400 py-[3px] rounded-md rounded-br-none rounded-bl-none'>
-                      <p className='text-center uppercase text-[10px] font-bold text-white'>{currentDate}</p>
+                      )}
                     </div>
-                    <div className="bg-yellow-300 px-2 py-1 rounded-md rounded-tr-none rounded-tl-none">
-                      <p className="text-xl font-bold text-yellow-600 mb-1">
+
+                    <div className="text-right">
+                      <p className="text-xl font-black text-gray-900 mb-0.5 leading-none drop-shadow-sm">
                         {displayTargetRevenue(et.name, analytics.totalRevenue)}
                       </p>
-                      <p className={`text-[12px] font-medium text-gray-600`}>
+                      <p className="text-[10px] font-bold text-yellow-900/80 uppercase tracking-widest mt-1.5">
                         Daily Target
                       </p>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center justify-between px-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center">
-                      <Layers className="h-4 w-4 mr-1 text-red-500" />
-                      <span className={`text-sm font-medium text-gray-600`}>
-                        {et.creatives.length}
+                  <div className="flex items-center gap-4 py-4 mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <Layers className="h-4 w-4 text-gray-900" />
+                      <span className="text-[11px] font-black text-gray-900 drop-shadow-sm">
+                        {et.creatives.length} <span className="text-yellow-900/80 font-bold">Creatives</span>
                       </span>
                     </div>
-                    <div className="flex items-center">
-                      <Target className="h-4 w-4 mr-1 text-blue-500" />
-                      <span className={`text-sm font-medium text-gray-600`}>
-                        {et.campaigns.length}
+                    <div className="flex items-center gap-1.5">
+                      <Target className="h-4 w-4 text-gray-900" />
+                      <span className="text-[11px] font-black text-gray-900 drop-shadow-sm">
+                        {et.campaigns.length} <span className="text-yellow-900/80 font-bold">Campaigns</span>
                       </span>
                     </div>
                   </div>
-                </div>
-                {/* Toggle button */}
-                <button
-                  onClick={() => toggleET(et.name)}
-                  className="mt-3 flex items-center gap-1 text-sm font-medium px-4 text-amber-600 hover:underline"
-                >
-                  {expandedETs.has(et.name) ? (
-                    <>
-                      <ChevronUp className="w-4 h-4" />
-                      Hide Advertiser Revenue
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="w-4 h-4" />
-                      View Advertiser Revenue
-                    </>
-                  )}
-                </button>
 
-                {/* Advertiser Breakdown with Transition */}
-                <div
-                  className={`overflow-hidden transition-colors rounded-xl text-sm font-medium '}
-                  ${expandedETs.has(et.name) ? 'max-h-96 p-0 opacity-100 mt-2' : 'max-h-0 p-0 opacity-0'}`}>
-                  <ul className="text-xs flex flex-wrap gap-2 justify-start items-center px-4">
-                    {et.advertisersArray?.map(ad => (
-                      <li
-                        key={ad.name}
-                        className="flex justify-center items-center gap-2 rounded-[50px] p-1 px-2 bg-amber-500/50"
-                      >
-                        <span className="font-medium">{ad.name}</span>
-                        <span
-                          className="text-xs font-medium text-green-600"
-                        >
-                          ${ad.revenue.toFixed(2)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                  {/* Toggle button */}
+                  <button
+                    onClick={() => toggleET(et.name)}
+                    className="flex items-center gap-1.5 text-[10px] font-black text-gray-900 hover:text-black uppercase tracking-wider drop-shadow-sm transition-colors"
+                  >
+                    {expandedETs.has(et.name) ? (
+                      <><ChevronUp className="w-3.5 h-3.5" /> View Advertisers</>
+                    ) : (
+                      <><ChevronDown className="w-3.5 h-3.5" /> View Advertisers</>
+                    )}
+                  </button>
+
+                  {/* Advertiser Breakdown */}
+                  <div
+                    className={`overflow-hidden transition-all duration-300 ease-in-out
+                    ${expandedETs.has(et.name) ? 'max-h-96 opacity-100 mt-3' : 'max-h-0 opacity-0'}`}
+                  >
+                    <div className="flex flex-wrap gap-2">
+                      {et.advertisersArray?.map(ad => (
+                        <div key={ad.name} className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/20 border border-white/30 backdrop-blur-sm shadow-sm">
+                          <span className="text-[10px] font-bold text-gray-900">{ad.name}</span>
+                          <span className="text-[10px] font-black text-gray-800">${ad.revenue.toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -1641,140 +1616,119 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             All ETs by revenue
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {analytics.etStats.slice(3, 100).map((et, index) => (
             <div
               key={et.name}
-              className={`pb-4 rounded-xl border transition-colors cursor-pointer ${et.name.includes('+') ? 'bg-gradient-to-br from-purple-50 to-white border-purple-300' : 'bg-gradient-to-br from-blue-50 to-white border-blue-300'} group`}>
-              <div className="w-full flex items-center mb-4">
-                <div className={`w-full flex items-center justify-between px-4 py-1 rounded-xl rounded-br-none rounded-bl-none ${et.name.includes('+') ? 'bg-purple-800' : 'bg-blue-800'}`}>
-                  <div className="flex justify-start items-center">
-                    <Users className={`h-6 w-6 p-1 rounded-md ${et.name.includes('+') ? 'text-purple-300 bg-purple-600' : 'text-blue-300 bg-blue-600'}`} />
-                    <h4 className={`font-bold ml-3 text-white ${et.name.includes('+') ? 'text-base truncate' : 'text-lg'}`}>
+              className={`rounded-2xl border bg-white/80 backdrop-blur-md shadow-sm transition-all hover:shadow-md hover:scale-[1.01] overflow-hidden ${et.name.includes('+') ? 'border-purple-200/60' : 'border-blue-200/60'}`}
+            >
+              {/* Header Section */}
+              <div className={`flex items-center justify-between p-3 border-b ${et.name.includes('+') ? 'bg-purple-50/50 border-purple-100/50' : 'bg-blue-50/50 border-blue-100/50'}`}>
+                <div className="flex items-center gap-2.5">
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center ${et.name.includes('+') ? 'bg-purple-100' : 'bg-blue-100'}`}>
+                    <Users className={`w-3.5 h-3.5 ${et.name.includes('+') ? 'text-purple-500' : 'text-blue-500'}`} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900 leading-tight text-sm">
                       {et.name}
                     </h4>
                   </div>
+                </div>
 
-                  {(() => {
-                    const info = getETInfo(et.name);
-                    if (!info) return null;
+                {(() => {
+                  const info = getETInfo(et.name);
+                  if (!info) return null;
+                  return (
+                    <div className="flex items-center text-[9px] font-bold">
+                      <span className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-l-md border border-gray-200 border-r-0">
+                        {info.stack}
+                      </span>
+                      <span className="bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded-r-md border border-gray-200">
+                        {info.manager}
+                      </span>
+                    </div>
+                  );
+                })()}
+              </div>
 
-                    return (
-                      <div className="flex items-center space-x-0 bg-red-500 rounded-xl">
-                        {/* Stack */}
-                        <span className="text-[13px] font-bold text-white pl-2 mr-2">
-                          {info.stack}
-                        </span>
+              {/* Main Content Section */}
+              <div className="p-3.5">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <p className={`text-xl font-black mb-0.5 leading-none ${et.name.includes('+') ? 'text-purple-600' : 'text-blue-600'}`}>
+                      ${et.revenue.toLocaleString()}
+                    </p>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                      {et.name.includes('+') ? 'Combined Revenue' : 'Today Revenue'}
+                    </p>
 
-                        {/* Manager */}
-                        <span className="text-[13px] font-bold text-white pr-2">
-                          {info.manager}
-                        </span>
-
-                        {/* Type (optional) */}
-                        {info.type && (
-                          <span
-                            className={`text-[10px] px-1 py-[2px] rounded-xl font-bold ${info.type === "COM"
-                              ? "bg-blue-600 text-white"
-                              : "bg-purple-600 text-white"
-                              }`}
-                          >
-                            {info.type}
+                    {et.name.includes('+') && (
+                      <div className="mt-1.5 flex flex-col gap-0.5">
+                        {(et as any).et1Name && (
+                          <span className="text-[9px] font-medium text-gray-500">
+                            {(et as any).et1Name}: <span className="font-bold">${((et as any).et1Revenue ?? 0).toLocaleString()}</span>
+                          </span>
+                        )}
+                        {(et as any).et2Name && (
+                          <span className="text-[9px] font-medium text-gray-500">
+                            {(et as any).et2Name}: <span className="font-bold">${((et as any).et2Revenue ?? 0).toLocaleString()}</span>
                           </span>
                         )}
                       </div>
-                    );
-                  })()}
-                </div>
-              </div>
-              <div className="mb-4 px-4 flex justify-between items-center">
-                <div>
-                  <p className={`text-xl font-bold mb-1 ${et.name.includes('+') ? 'text-purple-500' : 'text-blue-500'}`}>
-                    ${et.revenue.toLocaleString()}
-                  </p>
-                  <p className={`text-xs font-medium text-gray-600`}>
-                    {et.name.includes('+') ? 'Combined Revenue' : 'Today Revenue'}
-                  </p>
-                  {et.name.includes('+') && (
-                    <div className="mt-1 flex gap-2 text-[10px] text-gray-500">
-                      {(et as any).et1Name ? (
-                        <span>{(et as any).et1Name}: ${((et as any).et1Revenue ?? 0).toLocaleString()}</span>
-                      ) : null}
-                      {(et as any).et1Name && (et as any).et2Name ? <span>|</span> : null}
-                      {(et as any).et2Name ? (
-                        <span>{(et as any).et2Name}: ${((et as any).et2Revenue ?? 0).toLocaleString()}</span>
-                      ) : null}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <div className='bg-green-400 py-[3px] rounded-md rounded-br-none rounded-bl-none'>
-                    <p className='text-center uppercase text-[10px] font-bold text-white'>{currentDate}</p>
+                    )}
                   </div>
-                  <div className="bg-green-100 px-2 py-1 rounded-md rounded-tr-none rounded-tl-none">
-                    <p className="text-xl font-bold text-green-500 mb-1">
+
+                  <div className="text-right">
+                    <p className="text-base font-bold text-gray-900 mb-0.5 leading-none">
                       {displayTargetRevenue(et.name, analytics.totalRevenue)}
                     </p>
-                    <p className={`text-[12px] font-medium text-gray-600`}>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                       Daily Target
                     </p>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex items-center justify-between px-4">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center">
-                    <Layers className="h-4 w-4 mr-1 text-red-500" />
-                    <span className={`text-sm font-medium text-gray-600`}>
-                      {et.creatives.length}
+                <div className="flex items-center gap-3 py-2 border-y border-gray-100 mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <Layers className="h-3.5 w-3.5 text-emerald-500" />
+                    <span className="text-[11px] font-semibold text-gray-600">
+                      {et.creatives.length} <span className="text-gray-400 font-normal">Cr</span>
                     </span>
                   </div>
-                  <div className="flex items-center">
-                    <Target className="h-4 w-4 mr-1 text-blue-500" />
-                    <span className={`text-sm font-medium text-gray-600`}>
-                      {et.campaigns.length}
+                  <div className="flex items-center gap-1.5">
+                    <Target className="h-3.5 w-3.5 text-blue-500" />
+                    <span className="text-[11px] font-semibold text-gray-600">
+                      {et.campaigns.length} <span className="text-gray-400 font-normal">Camp</span>
                     </span>
                   </div>
                 </div>
-              </div>
-              {/* Toggle button */}
-              <button
-                onClick={() => toggleET(et.name)}
-                className={`mt-3 flex items-center gap-1 text-sm font-medium px-4 hover:underline ${et.name.includes('+') ? 'text-purple-600' : 'text-blue-600'}`}
-              >
-                {expandedETs.has(et.name) ? (
-                  <>
-                    <ChevronUp className="w-4 h-4" />
-                    Hide Advertiser Revenue
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="w-4 h-4" />
-                    View Advertiser Revenue
-                  </>
-                )}
-              </button>
 
-              {/* Advertiser Breakdown with Transition */}
-              <div
-                className={`overflow-hidden transition-colors rounded-xl text-sm font-medium '}
-                ${expandedETs.has(et.name) ? 'max-h-96 p-0 opacity-100 mt-2' : 'max-h-0 p-0 opacity-0'}`}>
-                <ul className="text-xs flex flex-wrap gap-2 justify-start items-center px-4">
-                  {et.advertisersArray?.map(ad => (
-                    <li
-                      key={ad.name}
-                      className="flex justify-center items-center gap-2 bg-blue-500/10 rounded-[50px] p-1 px-2"
-                    >
-                      <span className="font-medium">{ad.name}</span>
-                      <span
-                        className="text-xs font-medium text-green-600"
-                      >
-                        ${ad.revenue.toFixed(2)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                {/* Toggle button */}
+                <button
+                  onClick={() => toggleET(et.name)}
+                  className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider hover:opacity-80 ${et.name.includes('+') ? 'text-purple-600' : 'text-blue-600'}`}
+                >
+                  {expandedETs.has(et.name) ? (
+                    <><ChevronUp className="w-3 h-3" /> Hide Advertisers</>
+                  ) : (
+                    <><ChevronDown className="w-3 h-3" /> View Advertisers</>
+                  )}
+                </button>
+
+                {/* Advertiser Breakdown */}
+                <div
+                  className={`overflow-hidden transition-all duration-300 ease-in-out
+                  ${expandedETs.has(et.name) ? 'max-h-96 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}
+                >
+                  <div className="flex flex-wrap gap-1.5">
+                    {et.advertisersArray?.map(ad => (
+                      <div key={ad.name} className={`flex items-center gap-1 px-2 py-0.5 rounded-md border ${et.name.includes('+') ? 'bg-purple-50 border-purple-100/50' : 'bg-blue-50 border-blue-100/50'}`}>
+                        <span className={`text-[9px] font-bold ${et.name.includes('+') ? 'text-purple-800' : 'text-blue-800'}`}>{ad.name}</span>
+                        <span className={`text-[9px] font-medium ${et.name.includes('+') ? 'text-purple-600' : 'text-blue-600'}`}>${ad.revenue.toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           ))}
@@ -1784,20 +1738,18 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       {/* End: ET Revenue Breakdown */}
 
       {/* Campaign Revenue Breakdown */}
-      <div className="p-6 rounded-xl border-2 shadow-lg bg-gradient-to-br from-white via-blue-50/20 to-white border-blue-200">
+      <div className="p-5 rounded-2xl border bg-white/70 backdrop-blur-xl shadow-sm border-white/80">
         {/* Header Section */}
-        <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm">
-                <Target className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold mb-1">Campaign-Wise Revenue</h3>
-                <p className="text-blue-100 text-sm">
-                  {analytics.campaignStats.length} campaigns • Click any campaign for detailed view
-                </p>
-              </div>
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-indigo-100/50">
+              <Target className="h-6 w-6 text-indigo-600" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 tracking-tight">Campaign-Wise Revenue</h3>
+              <p className="text-gray-500 text-sm font-medium">
+                {analytics.campaignStats.length} campaigns • Click any campaign for detailed view
+              </p>
             </div>
           </div>
         </div>
@@ -1842,45 +1794,42 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             .sort((a, b) => b.revenue - a.revenue);
 
           return (
-            <div className="mb-6 p-5 rounded-2xl bg-gradient-to-br from-amber-500 via-yellow-500 to-amber-600 shadow-2xl border-4 border-amber-300/50 relative overflow-hidden">
-              {/* Animated background effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse"></div>
-              
+            <div className="mb-6 p-5 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50/50 border border-amber-200/60 relative overflow-hidden shadow-sm">
               {/* Content */}
               <div className="relative z-10">
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-2xl bg-white/25 backdrop-blur-md flex items-center justify-center shadow-lg border-2 border-white/30">
-                      <Crown className="h-8 w-8 text-white" fill="white" />
+                    <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center border border-amber-200">
+                      <Crown className="h-7 w-7 text-amber-500" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-white/95 uppercase tracking-wider mb-2 flex items-center gap-2">
-                        <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                        Top Performing Creative of the day
+                      <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-1 flex items-center gap-2">
+                        <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+                        Top Performing Creative
                       </p>
-                      <h4 className="text-2xl font-bold text-white mb-1 drop-shadow-lg">{creativeName}</h4>
-                      <p className="text-sm text-white/90 font-medium">Campaign: {campaignName}</p>
+                      <h4 className="text-xl font-bold text-gray-900 mb-0.5">{creativeName}</h4>
+                      <p className="text-xs text-gray-500 font-medium">Campaign: <span className="text-gray-700">{campaignName}</span></p>
                     </div>
 
                   </div>
-                  <div className="text-right bg-white/20 backdrop-blur-sm px-4 py-3 rounded-xl border-2 border-white/30">
-                    <p className="text-xs font-bold text-white/95 uppercase tracking-wider mb-1">Total Revenue</p>
-                    <p className="text-3xl font-bold text-white drop-shadow-lg">${Number(totalRevenue).toLocaleString()}</p>
+                  <div className="text-right sm:text-right bg-white/60 px-4 py-2.5 rounded-xl border border-amber-100/50 shadow-sm">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Total Revenue</p>
+                    <p className="text-2xl font-black text-amber-600">${Number(totalRevenue).toLocaleString()}</p>
                   </div>
                 </div>
 
                 {/* ET Revenue Breakdown */}
                 {etRevenueList.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-white/30">
-                    <p className="text-xs font-bold text-white/95 uppercase tracking-wider mb-3">Revenue by ET</p>
+                  <div className="mt-4 pt-4 border-t border-amber-100">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Revenue by ET</p>
                     <div className="flex flex-wrap gap-2">
                       {etRevenueList.map(({ et, revenue }) => (
                         <div
                           key={et}
-                          className="px-3 py-2 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 flex items-center gap-2 hover:bg-white/30 transition-all"
+                          className="px-2.5 py-1.5 rounded-lg bg-white/80 border border-amber-100 flex items-center gap-2 shadow-sm"
                         >
-                          <span className="text-sm font-bold text-white">{et}</span>
-                          <span className="text-xs font-semibold text-white/90">${revenue.toLocaleString()}</span>
+                          <span className="text-[11px] font-bold text-gray-700">{et}</span>
+                          <span className="text-[11px] font-semibold text-amber-600">${revenue.toLocaleString()}</span>
                         </div>
                       ))}
                     </div>
@@ -1940,14 +1889,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             <div
               key={campaign.name}
               onClick={() => openCampaignPopup(campaign)}
-              className="p-5 rounded-xl border-2 cursor-pointer bg-gradient-to-br from-white to-blue-50/30 border-blue-200 hover:border-blue-400 hover:shadow-md"
+              className="p-4 rounded-2xl border bg-white/80 backdrop-blur-md shadow-sm transition-all hover:shadow-md hover:scale-[1.01] hover:border-indigo-200 cursor-pointer flex flex-col justify-between border-gray-200"
             >
               {/* Campaign Header */}
-              <div className="flex items-center gap-3 mb-4 pb-4 border-b border-blue-100">
-                <div className="p-2 rounded-lg bg-blue-100 flex-shrink-0">
-                  <Target className="h-5 w-5 text-blue-600" />
+              <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+                <div className="p-2.5 rounded-xl bg-indigo-50 flex-shrink-0">
+                  <Target className="h-4 w-4 text-indigo-500" />
                 </div>
-                <h4 className="font-bold text-base text-gray-800 truncate flex-1">
+                <h4 className="font-bold text-sm text-gray-900 truncate flex-1">
                   {campaign.name}
                 </h4>
                 <Eye className="h-4 w-4 text-gray-400 flex-shrink-0" />
@@ -1955,33 +1904,29 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
               {/* Revenue Display */}
               <div className="mb-4">
-                <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                  <p className="text-xs text-green-700 font-medium mb-1">Total Revenue</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    ${campaign.revenue.toLocaleString()}
-                  </p>
-                </div>
+                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Total Revenue</p>
+                <p className="text-xl font-black text-indigo-600">
+                  ${campaign.revenue.toLocaleString()}
+                </p>
               </div>
 
               {/* Stats Footer */}
-              <div className="flex items-center justify-between pt-3 border-t border-blue-100">
+              <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1.5">
-                    <Layers className="h-4 w-4 text-red-500" />
-                    <span className="text-sm font-semibold text-gray-700">
+                    <Layers className="h-3.5 w-3.5 text-emerald-500" />
+                    <span className="text-xs font-bold text-gray-700">
                       {campaign.creatives.length}
                     </span>
-                    <span className="text-xs text-gray-500">creatives</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Users className="h-4 w-4 text-blue-500" />
-                    <span className="text-sm font-semibold text-gray-700">
+                    <Users className="h-3.5 w-3.5 text-blue-500" />
+                    <span className="text-xs font-bold text-gray-700">
                       {campaign.ets.length}
                     </span>
-                    <span className="text-xs text-gray-500">ETs</span>
                   </div>
                 </div>
-                <div className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
+                <div className="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-600 text-[10px] font-bold uppercase tracking-wider hover:bg-indigo-100 transition-colors">
                   View
                 </div>
               </div>
@@ -2483,17 +2428,16 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                       </div>
                       <h4 className="text-lg font-bold text-gray-800">All Creatives ({etData.creatives.length})</h4>
                     </div>
-                    
+
                     {/* Campaign Tabs for Filtering */}
                     <div className="mb-4 overflow-x-auto">
                       <div className="flex space-x-1 pb-2">
                         <button
                           onClick={() => setSelectedETCreativeFilter('all')}
-                          className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap ${
-                            selectedETCreativeFilter === 'all'
-                              ? 'bg-purple-600 text-white'
-                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                          }`}
+                          className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap ${selectedETCreativeFilter === 'all'
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
                         >
                           All ({etData.creatives.length})
                         </button>
@@ -2503,20 +2447,19 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                             // Need to check which campaigns this creative belongs to by looking at the original records
                             return data.records.some(
                               record => record.et.toUpperCase() === etData.name.toUpperCase() &&
-                                        record.creative === creative.name &&
-                                        record.campaign === campaign
+                                record.creative === creative.name &&
+                                record.campaign === campaign
                             );
                           }).length;
-                          
+
                           return (
                             <button
                               key={campaign}
                               onClick={() => setSelectedETCreativeFilter(campaign)}
-                              className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap ${
-                                selectedETCreativeFilter === campaign
-                                  ? 'bg-purple-600 text-white'
-                                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                              }`}
+                              className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap ${selectedETCreativeFilter === campaign
+                                ? 'bg-purple-600 text-white'
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                }`}
                             >
                               {campaign} ({campaignCreativeCount})
                             </button>
@@ -2524,18 +2467,18 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                         })}
                       </div>
                     </div>
-                    
+
                     {/* Filtered Creatives Display */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                       {etData.creatives
                         .filter(creative => {
                           if (selectedETCreativeFilter === 'all') return true;
-                          
+
                           // Filter creatives based on selected campaign
                           return data.records.some(
                             record => record.et.toUpperCase() === etData.name.toUpperCase() &&
-                                      record.creative === creative.name &&
-                                      record.campaign === selectedETCreativeFilter
+                              record.creative === creative.name &&
+                              record.campaign === selectedETCreativeFilter
                           );
                         })
                         .map((creative, idx) => (
@@ -2722,17 +2665,16 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                     </div>
                     <h4 className="text-lg font-bold text-gray-800">All Creatives ({selectedETData.creatives.length})</h4>
                   </div>
-                  
+
                   {/* Campaign Tabs for Filtering */}
                   <div className="mb-4 overflow-x-auto">
                     <div className="flex space-x-1 pb-2">
                       <button
                         onClick={() => setSelectedETCreativeFilter('all')}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap ${
-                          selectedETCreativeFilter === 'all'
-                            ? 'bg-purple-600 text-white'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
+                        className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap ${selectedETCreativeFilter === 'all'
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          }`}
                       >
                         All ({selectedETData.creatives.length})
                       </button>
@@ -2742,20 +2684,19 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                           // Need to check which campaigns this creative belongs to by looking at the original records
                           return data.records.some(
                             record => record.et.toUpperCase() === selectedETData.name.toUpperCase() &&
-                                      record.creative === creative.name &&
-                                      record.campaign === campaign
+                              record.creative === creative.name &&
+                              record.campaign === campaign
                           );
                         }).length;
-                        
+
                         return (
                           <button
                             key={campaign}
                             onClick={() => setSelectedETCreativeFilter(campaign)}
-                            className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap ${
-                              selectedETCreativeFilter === campaign
-                                ? 'bg-purple-600 text-white'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
+                            className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap ${selectedETCreativeFilter === campaign
+                              ? 'bg-purple-600 text-white'
+                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                              }`}
                           >
                             {campaign} ({campaignCreativeCount})
                           </button>
@@ -2763,18 +2704,18 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                       })}
                     </div>
                   </div>
-                  
+
                   {/* Filtered Creatives Display */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                     {selectedETData.creatives
                       .filter(creative => {
                         if (selectedETCreativeFilter === 'all') return true;
-                        
+
                         // Filter creatives based on selected campaign
                         return data.records.some(
                           record => record.et.toUpperCase() === selectedETData.name.toUpperCase() &&
-                                    record.creative === creative.name &&
-                                    record.campaign === selectedETCreativeFilter
+                            record.creative === creative.name &&
+                            record.campaign === selectedETCreativeFilter
                         );
                       })
                       .map((creative, idx) => (

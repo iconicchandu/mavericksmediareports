@@ -2,22 +2,16 @@ import React, { useState, useCallback } from 'react';
 import { ProcessedData, DataRecord } from '../types';
 
 import {
-  Upload,
   FileText,
   X,
   AlertCircle,
   Sparkles,
   Database,
   Zap,
-  BarChart3,
-  TrendingUp,
-  Target,
-  Shield,
-  Users,
-  ArrowRight,
-  Play,
-  Heart,
-  CheckCircle
+  UploadCloud,
+  FilePlus2,
+  ShieldCheck,
+  Cpu,
 } from 'lucide-react';
 
 
@@ -30,147 +24,107 @@ interface FileUploadProps {
   onFilesUploaded: (files: UploadedFile[]) => void;
 }
 
+
+
+// ─── Main Component ─────────────────────────────────────────────────────────────
 const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [successPulse, setSuccessPulse] = useState(false);
 
+  // ── Drag handlers ──
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
+    if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true);
+    else if (e.type === 'dragleave') setDragActive(false);
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-
-    const files = Array.from(e.dataTransfer.files).filter(file =>
-      file.type === 'text/csv' || file.name.endsWith('.csv')
+    const files = Array.from(e.dataTransfer.files).filter(
+      f => f.type === 'text/csv' || f.name.endsWith('.csv')
     );
-
     if (files.length > 0) {
-      setSelectedFiles(prev => [...prev, ...files]);
+      setError(null);
+      setSelectedFiles(prev => {
+        const names = new Set(prev.map(f => f.name));
+        return [...prev, ...files.filter(f => !names.has(f.name))];
+      });
     } else {
-      setError('Please select only CSV files');
+      setError('Please drop only CSV files.');
     }
   }, []);
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setSelectedFiles(prev => [...prev, ...files]);
+    setError(null);
+    setSelectedFiles(prev => {
+      const names = new Set(prev.map(f => f.name));
+      return [...prev, ...files.filter(f => !names.has(f.name))];
+    });
   };
 
-  const removeFile = (index: number) => {
+  const removeFile = (index: number) =>
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-  };
 
+  // ── CSV parsing (unchanged logic) ──
   const determineAdvertiser = (fileName: string, campaign: string, creative: string): string => {
-    const upperFileName = fileName.toUpperCase();
-    const upperCampaign = campaign.toUpperCase();
-    const upperCreative = creative.toUpperCase();
-
-    // Check for MI in creative name first (highest priority for MI routing)
-    // e.g., JG_225_OG2_IMG_MI, VPU_ADV_002_MI
-    if (upperCreative.includes('_MI')) {
-      return 'MI';
-    }
-
-    // Check for DB in filename first (takes priority)
-    if (upperFileName.includes('DB')) {
-      return 'DB';
-    } 
-    // Check for XC EXC or XCE before checking for XC (these are different advertisers)
-    else if (upperFileName.includes('XC EXC') || upperFileName.includes('XCE')) {
-      return 'XCE';
-    } 
-    // Check for XC CAMPS or just XC (but not if it's part of XC EXC or XCE)
-    else if (upperFileName.includes('XC CAMPS') || upperFileName.includes('XC')) {
-      return 'XC';
-    } else if (upperFileName.includes('NON COMCAST')) {
-      return 'NON COMCAST';
-    } else if (upperFileName.includes('COMCAST')) {
-      return 'COMCAST';
-    } else if (upperFileName.includes('BRANDED')) {
-      return 'Branded';
-    } else if (upperFileName.includes('GZ')) {
-      return 'GZ';
-    } else if (upperFileName.includes('RGR')) {
-      // If creative starts with ICO, treat as ICO advertiser (separate from RGR)
-      if (upperCreative.startsWith('ICO')) {
-        return 'ICO';
-      }
-      // Filename-based RGR first so a file named "RGR" is always RGR (even with multiple files)
-      return 'RGR';
-    } else if (upperFileName.includes('ES') || upperCampaign.includes('ES')) {
-      return 'ES';
-    } else if (upperCampaign === 'RGR' || upperCampaign === 'RAH') {
-      // If creative starts with ICO, treat as ICO advertiser (separate from RGR)
-      if (upperCreative.startsWith('ICO')) {
-        return 'ICO';
-      }
-      return 'RGR';
-    } else {
-      return 'Other';
-    }
+    const uF = fileName.toUpperCase();
+    const uCa = campaign.toUpperCase();
+    const uCr = creative.toUpperCase();
+    if (uCr.includes('_MI')) return 'MI';
+    if (uF.includes('DB')) return 'DB';
+    if (uF.includes('XC EXC') || uF.includes('XCE')) return 'XCE';
+    if (uF.includes('XC CAMPS') || uF.includes('XC')) return 'XC';
+    if (uF.includes('NON COMCAST')) return 'NON COMCAST';
+    if (uF.includes('COMCAST')) return 'COMCAST';
+    if (uF.includes('BRANDED')) return 'Branded';
+    if (uF.includes('GZ')) return 'GZ';
+    if (uF.includes('RGR')) return uCr.startsWith('ICO') ? 'ICO' : 'RGR';
+    if (uF.includes('ES') || uCa.includes('ES')) return 'ES';
+    if (uCa === 'RGR' || uCa === 'RAH') return uCr.startsWith('ICO') ? 'ICO' : 'RGR';
+    return 'Other';
   };
 
-  /** Map parenthesized ET number to prebuilt ET name: (30)→JSG30PM, (24)→P24, (32)→JSG32, (36MET)→JSG36MET, etc. */
   const parenEtNumberToETName = (num: string | number): string => {
-    const numStr = num.toString();
-    
-    // Handle numeric cases
-    if (numStr === '30') return 'JSG30PM';
-    if (numStr === '24') return 'P24'; // Map (24) to P24
-    
-    // Handle alphanumeric cases like '36MET'
-    if (/^\d+[A-Z]+$/i.test(numStr)) {
-      return 'JSG' + numStr.toUpperCase(); // e.g., '36MET' → 'JSG36MET'
-    }
-    
-    // Default numeric case: JSG18, JSG32, JSG20, etc.
-    return 'JSG' + numStr;
+    const s = num.toString();
+    if (s === '30') return 'JSG30PM';
+    if (s === '24') return 'P24';
+    if (/^\d+[A-Z]+$/i.test(s)) return 'JSG' + s.toUpperCase();
+    return 'JSG' + s;
   };
 
-  /** Parse subid format: ADVERTISER/CAMPAIGN/CREATIVE(NUM) e.g. XCE/NADR/064IMG(30), MI/JGWDS/225(32), ICO/JGWDS/025(36MET) */
-  const parseParenEtSubid = (subid: string): { advertiser: string; campaign: string; creative: string; et: string } | null => {
-    // Updated regex to capture alphanumeric values in parentheses (e.g., (30), (32), (36MET))
+  const parseParenEtSubid = (subid: string) => {
     const m = subid.trim().match(/^([^/]+)\/([^/]+)\/(.+?)\(([^)]+)\)\s*$/i);
     if (!m) return null;
     const [, adv, camp, creativeSuffix, numStr] = m;
-    const et = parenEtNumberToETName(numStr);
-    const creative = camp.trim() + '/' + creativeSuffix.trim(); // NADR/064IMG, JGWDS/225
     return {
       advertiser: adv.trim(),
       campaign: camp.trim(),
-      creative,
-      et,
+      creative: camp.trim() + '/' + creativeSuffix.trim(),
+      et: parenEtNumberToETName(numStr),
     };
   };
 
-  const parseCSV = async (file: File): Promise<ProcessedData> => {
-    return new Promise((resolve, reject) => {
+  const parseCSV = async (file: File): Promise<ProcessedData> =>
+    new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         try {
           const text = e.target?.result as string;
-          const lines = text.split('\n').filter(line => line.trim());
+          const lines = text.split('\n').filter(l => l.trim());
           const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-
           const subidIndex = headers.findIndex(h => h.includes('subid'));
           const revIndex = headers.findIndex(h => h.includes('rev'));
-          const convIndex = headers.findIndex(h => h.includes('conv')); // Optional CONV column
-
-          if (subidIndex === -1 || revIndex === -1) {
-            reject(new Error(`Invalid CSV format in ${file.name}. Required columns: SUBID, REV`));
-            return;
-          }
+          const convIndex = headers.findIndex(h => h.includes('conv'));
+          if (subidIndex === -1 || revIndex === -1)
+            return reject(new Error(`Invalid CSV format in ${file.name}. Required: SUBID, REV`));
 
           const records: DataRecord[] = [];
           const campaigns = new Set<string>();
@@ -181,126 +135,66 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
           for (let i = 1; i < lines.length; i++) {
             const values = lines[i].split(',').map(v => v.trim());
             if (values.length < Math.max(subidIndex, revIndex) + 1) continue;
-
             const subid = values[subidIndex];
             const revenue = parseFloat(values[revIndex]) || 0;
-            // Parse CONV column if it exists (0 is a valid value, undefined means column doesn't exist)
-            let conv: number | undefined = undefined;
+            let conv: number | undefined;
             if (convIndex !== -1 && values.length > convIndex && values[convIndex].trim() !== '') {
-              const parsed = parseFloat(values[convIndex]);
-              conv = isNaN(parsed) ? undefined : parsed;
+              const p = parseFloat(values[convIndex]);
+              conv = isNaN(p) ? undefined : p;
             }
-
             if (!subid || revenue === 0) continue;
 
-            // Parse SUBID format: Advertiser/Campaign/Creative(NUM) e.g. XCE/NADR/064IMG(30), MI/JGWDS/225(32)
-            let campaign = '', creative = '', et = '';
-            let advertiser: string;
-
-            const parenEtParsed = parseParenEtSubid(subid);
-            if (parenEtParsed) {
-              advertiser = parenEtParsed.advertiser;
-              campaign = parenEtParsed.campaign;     // NADR, JGWDS etc
-              creative = parenEtParsed.creative;     // NADR/064IMG, JGWDS/225 etc
-              et = parenEtParsed.et;                 // JSG30PM, JSG32 etc (prebuilt ET name)
-            } else {
-              // Parse SUBID format: Campaign_Creative_ET or Campaign/AC2/ET (forward slash format)
-              // Check for forward slash format (e.g., SQLI/AC2/JSG43, ABC/XY/Z123, etc.)
-              if (subid.includes('/')) {
-                const parts = subid.split('/').filter(part => part.trim() !== ''); // Filter out empty parts
-                if (parts.length >= 2) {
-                  campaign = parts[0].trim(); // First part = campaign
-                  et = parts[parts.length - 1].trim(); // Last part = ET name
-                  creative = parts.slice(0, -1).join('/').trim(); // All parts except last = template name
-                } else if (parts.length === 1) {
-                  // Only one valid part found
-                  campaign = parts[0].trim();
-                  creative = subid.trim();
-                  et = parts[0].trim();
-                } else {
-                  // No valid parts, use full subid
-                  campaign = subid.trim();
-                  creative = subid.trim();
-                  et = subid.trim();
-                }
+            let campaign = '', creative = '', et = '', advertiser: string;
+            const paren = parseParenEtSubid(subid);
+            if (paren) {
+              ({ advertiser, campaign, creative, et } = paren);
+            } else if (subid.includes('/')) {
+              const parts = subid.split('/').filter(p => p.trim());
+              if (parts.length >= 2) {
+                campaign = parts[0].trim();
+                et = parts[parts.length - 1].trim();
+                creative = parts.slice(0, -1).join('/').trim();
               } else {
-                // Parse SUBID format: Campaign_Creative_ET (underscore format)
-                const parts = subid.split('_');
-                if (parts.length >= 3) {
-                  campaign = parts[0];
-                  et = parts[parts.length - 1];
-                  creative = parts.slice(0, -1).join('_');
-                } else if (parts.length === 2) {
-                  campaign = parts[0];
-                  creative = parts[0];
-                  et = parts[1];
-                } else {
-                  campaign = subid;
-                  creative = subid;
-                  et = subid;
-                }
+                campaign = creative = et = (parts[0] || subid).trim();
               }
-
-              // Handle special cases
-              if (campaign === 'RAH') {
-                campaign = 'RGR';
-              }
-
+              if (campaign === 'RAH') campaign = 'RGR';
+              advertiser = determineAdvertiser(file.name, campaign, creative);
+            } else {
+              const parts = subid.split('_');
+              if (parts.length >= 3) { campaign = parts[0]; et = parts[parts.length - 1]; creative = parts.slice(0, -1).join('_'); }
+              else if (parts.length === 2) { campaign = creative = parts[0]; et = parts[1]; }
+              else { campaign = creative = et = subid; }
+              if (campaign === 'RAH') campaign = 'RGR';
               advertiser = determineAdvertiser(file.name, campaign, creative);
             }
 
-            const record: DataRecord = {
-              subid,
-              revenue,
-              campaign,
-              creative,
-              et,
-              advertiser,
-              fileName: file.name,
-              conv // Include CONV value if available
-            };
-
-            records.push(record);
-            campaigns.add(campaign);
-            ets.add(et);
-            creatives.add(creative);
-            advertisers.add(advertiser);
+            records.push({ subid, revenue, campaign, creative, et, advertiser, fileName: file.name, conv });
+            campaigns.add(campaign); ets.add(et); creatives.add(creative); advertisers.add(advertiser);
           }
-
-          resolve({
-            records,
-            campaigns,
-            ets,
-            creatives,
-            advertisers
-          });
-        } catch (error) {
-          reject(error);
-        }
+          resolve({ records, campaigns, ets, creatives, advertisers });
+        } catch (err) { reject(err); }
       };
       reader.onerror = () => reject(new Error(`Failed to read ${file.name}`));
       reader.readAsText(file);
     });
-  };
 
   const processFiles = async () => {
     if (selectedFiles.length === 0) return;
-
     setUploading(true);
     setError(null);
-
+    setUploadProgress(0);
     try {
-      const processedFiles: UploadedFile[] = [];
-
-      for (const file of selectedFiles) {
-        const data = await parseCSV(file);
-        processedFiles.push({
-          name: file.name,
-          data
-        });
+      const result: UploadedFile[] = [];
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const data = await parseCSV(selectedFiles[i]);
+        result.push({ name: selectedFiles[i].name, data });
+        setUploadProgress(Math.round(((i + 1) / selectedFiles.length) * 100));
       }
-
-      onFilesUploaded(processedFiles);
+      setSuccessPulse(true);
+      setTimeout(() => {
+        onFilesUploaded(result);
+        setSuccessPulse(false);
+      }, 600);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to process files');
     } finally {
@@ -308,187 +202,202 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
     }
   };
 
+  const formatSize = (bytes: number) =>
+    bytes < 1024 * 1024
+      ? `${(bytes / 1024).toFixed(1)} KB`
+      : `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+
   return (
-    <div className="relative mb-8">
-      <div
-        className={`max-w-3xl mx-auto group relative overflow-hidden border-2 border-dashed rounded-3xl p-12 text-center transition-all duration-500 cursor-pointer ${dragActive
-          ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-red-50 scale-[1.02] shadow-2xl'
-          : 'border-red-500 bg-white/0 backdrop-blur-[10px] hover:border-blue-400 hover:shadow-xl hover:scale-[1.01]'
-          }`}
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
-      >
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-4 left-4 w-8 h-8 bg-blue-400 rounded-full animate-pulse"></div>
-          <div className="absolute top-8 right-8 w-6 h-6 bg-red-400 rounded-full animate-pulse delay-1000"></div>
-          <div className="absolute bottom-6 left-1/3 w-4 h-4 bg-emerald-400 rounded-full animate-pulse delay-2000"></div>
-          <div className="absolute bottom-4 right-1/4 w-5 h-5 bg-blue-400 rounded-full animate-pulse delay-3000"></div>
-        </div>
+    <div className="fu-root">
+      {/* ── Content ── */}
+      <div className="fu-content">
 
-        <div className="relative z-10">
-          <div className={`w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center transition-all duration-500 ${dragActive
-            ? 'bg-gradient-to-br from-blue-500 to-red-600 scale-110 shadow-lg'
-            : 'bg-gradient-to-br from-gray-200 to-gray-300 group-hover:from-blue-500 group-hover:to-red-600'
-            }`}>
-            <Upload className={`w-10 h-10 transition-all duration-500 ${dragActive ? 'text-white' : 'text-gray-600 group-hover:text-white'
-              }`} />
-          </div>
+        {/* ── Drop Zone ── */}
+        <div
+          className={`fu-dropzone${dragActive ? ' fu-dropzone--active' : ''}${successPulse ? ' fu-dropzone--success' : ''}`}
+          onDragEnter={handleDrag}
+          onDragLeave={handleDrag}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
+        >
+          <input
+            type="file"
+            multiple
+            accept=".csv"
+            onChange={handleFileInput}
+            className="fu-file-input"
+          />
 
-          <h3 className="text-2xl font-bold mb-3 transition-colors duration-300 text-gray-900">
-            Drop your CSV files here
-          </h3>
+          {/* Corner accents */}
+          <span className="fu-corner fu-corner-tl" />
+          <span className="fu-corner fu-corner-tr" />
+          <span className="fu-corner fu-corner-bl" />
+          <span className="fu-corner fu-corner-br" />
 
-          <p className="text-lg mb-6 transition-colors duration-300 text-gray-600">
-            or <span className="text-blue-600 font-semibold">click to browse</span> from your device
-          </p>
+          {/* Scanning line animation when drag active */}
+          {dragActive && <div className="fu-scan-line" />}
 
-          <div className="flex flex-wrap justify-center gap-3 mb-6">
-            <div className="flex items-center space-x-2 px-4 py-2 rounded-full border transition-all duration-300 bg-white/10 border-gray-200 text-gray-700">
-              <Database className="w-4 h-4 text-blue-500" />
-              <span className="text-sm font-medium">CSV Format</span>
-            </div>
-            <div className="flex items-center space-x-2 px-4 py-2 rounded-full border transition-all duration-300 bg-white/10 border-gray-200 text-gray-700">
-              <Zap className="w-4 h-4 text-emerald-500" />
-              <span className="text-sm font-medium">Multiple Files</span>
-            </div>
-            <div className="flex items-center space-x-2 px-4 py-2 rounded-full border transition-all duration-300 bg-white/10 border-gray-200 text-gray-700">
-              <Sparkles className="w-4 h-4 text-red-500" />
-              <span className="text-sm font-medium">Auto-Processing</span>
-            </div>
-          </div>
-
-          <div className="text-sm text-gray-500">
-            Required columns: <span className="font-mono font-semibold text-blue-600">SUBID</span> and <span className="font-mono font-semibold text-emerald-600">REV</span>
-          </div>
-        </div>
-
-        <input
-          type="file"
-          multiple
-          accept=".csv"
-          onChange={handleFileInput}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30"
-        />
-      </div>
-
-      {/* Error Message */}
-      {
-        error && (
-          <div className={`mb-8 p-6 rounded-2xl border-l-4 border-red-500 transition-all duration-300 bg-gradient-to-r from-red-50 to-red-25 border-red-200 shadow-lg`}>
-            <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                <AlertCircle className="h-6 w-6 text-red-500 mt-0.5" />
-              </div>
-              <div>
-                <h4 className={`font-semibold mb-1 text-red-800`}>
-                  Upload Error
-                </h4>
-                <p className={`text-red-700`}>
-                  {error}
-                </p>
+          <div className="fu-dropzone-inner">
+            {/* Icon */}
+            <div className={`fu-icon-wrap${dragActive ? ' fu-icon-wrap--active' : ''}`}>
+              <div className="fu-icon-glow" />
+              <div className="fu-icon-ring fu-icon-ring-1" />
+              <div className="fu-icon-ring fu-icon-ring-2" />
+              <div className="fu-icon-core">
+                <UploadCloud className="fu-icon" />
               </div>
             </div>
-          </div>
-        )
-      }
 
-      {
-        selectedFiles.length > 0 && (
-          <div className={` mt-4 rounded-3xl p-8 transition-all duration-500 bg-gray/20 backdrop-blur-sm border border-gray-200/50 shadow-xl`}>
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-red-600 rounded-xl flex items-center justify-center">
+            {/* Text */}
+            <div className="fu-dropzone-text">
+              {dragActive ? (
+                <>
+                  <h3 className="fu-title fu-title--active">Release to Upload</h3>
+                  <p className="fu-subtitle fu-subtitle--active">Drop your CSV files here</p>
+                </>
+              ) : (
+                <>
+                  <h3 className="fu-title">Drag & Drop CSV Files</h3>
+                  <p className="fu-subtitle">
+                    or <span className="fu-browse-link">click to browse</span> from your device
+                  </p>
+                </>
+              )}
+            </div>
+
+            {/* Feature pills */}
+            <div className="fu-pills">
+              <div className="fu-pill">
+                <Database className="fu-pill-icon fu-pill-icon--blue" />
+                <span>CSV Format</span>
+              </div>
+              <div className="fu-pill">
+                <FilePlus2 className="fu-pill-icon fu-pill-icon--violet" />
+                <span>Multiple Files</span>
+              </div>
+              <div className="fu-pill">
+                <Cpu className="fu-pill-icon fu-pill-icon--emerald" />
+                <span>Auto-Processing</span>
+              </div>
+              <div className="fu-pill">
+                <ShieldCheck className="fu-pill-icon fu-pill-icon--amber" />
+                <span>100% Local</span>
+              </div>
+            </div>
+
+            {/* Required columns hint */}
+            <div className="fu-hint">
+              Required columns:&nbsp;
+              <code className="fu-code fu-code--blue">SUBID</code>
+              &nbsp;&amp;&nbsp;
+              <code className="fu-code fu-code--emerald">REV</code>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Error Banner ── */}
+        {error && (
+          <div className="fu-error">
+            <AlertCircle className="fu-error-icon" />
+            <div>
+              <p className="fu-error-title">Upload Error</p>
+              <p className="fu-error-msg">{error}</p>
+            </div>
+            <button className="fu-error-close" onClick={() => setError(null)}>
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* ── Selected Files Panel ── */}
+        {selectedFiles.length > 0 && (
+          <div className="fu-panel">
+            {/* Panel header */}
+            <div className="fu-panel-header">
+              <div className="fu-panel-title-wrap">
+                <div className="fu-panel-icon">
                   <FileText className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className={`text-xl font-bold text-gray-900`}>
-                    Selected Files
-                  </h3>
-                  <p className={`text-sm text-gray-600`}>
-                    {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''} ready for processing
+                  <h3 className="fu-panel-title">Selected Files</h3>
+                  <p className="fu-panel-sub">
+                    {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''} queued for processing
                   </p>
                 </div>
               </div>
-
-              <div className={`px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200`}>
-                {selectedFiles.length} files
+              <div className="fu-badge">
+                <Sparkles className="w-3 h-3 mr-1" />
+                {selectedFiles.length} Ready
               </div>
             </div>
 
-            <div className="flex justify-center flex-wrap gap-2 mb-8">
+            {/* File list */}
+            <div className="fu-file-list">
               {selectedFiles.map((file, index) => (
-                <div
-                  key={index}
-                  className="group relative overflow-hidden rounded-2xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-white/20 border-none backdrop-blur-[100px]"
-                >
-                  <div className="flex items-center justify-between p-3">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 bg-gradient-to-br from-blue-100 to-red-100 group-hover:from-blue-200 group-hover:to-red-200">
-                        <FileText className="w-6 h-6 text-blue-600" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h4 className="font-semibold truncate text-gray-900">
-                          {file.name}
-                        </h4>
-                        <div className="flex items-center space-x-4 mt-1">
-                          <span className="text-sm text-gray-500">
-                            {(file.size / 1024).toFixed(1)} KB
-                          </span>
-                          <span className="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">
-                            CSV
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => removeFile(index)}
-                      className="cursor-pointer z-40 p-2 rounded-xl transition-all duration-300 text-gray-400 hover:text-red-500 hover:bg-red-50"
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
+                <div key={index} className="fu-file-item" style={{ animationDelay: `${index * 60}ms` }}>
+                  <div className="fu-file-icon-wrap">
+                    <FileText className="w-5 h-5 text-blue-400" />
                   </div>
-
-                  {/* Subtle gradient overlay */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-blue-50/50 to-red-50/50"></div>
+                  <div className="fu-file-info">
+                    <p className="fu-file-name">{file.name}</p>
+                    <div className="fu-file-meta">
+                      <span className="fu-file-size">{formatSize(file.size)}</span>
+                      <span className="fu-file-tag">CSV</span>
+                    </div>
+                  </div>
+                  <button
+                    className="fu-remove-btn"
+                    onClick={() => removeFile(index)}
+                    title="Remove file"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               ))}
             </div>
 
-            {/* Process Button */}
-            <div className="text-center">
+            {/* Progress bar (visible while uploading) */}
+            {uploading && (
+              <div className="fu-progress-wrap">
+                <div className="fu-progress-bar">
+                  <div
+                    className="fu-progress-fill"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+                <span className="fu-progress-label">{uploadProgress}%</span>
+              </div>
+            )}
+
+            {/* Process button */}
+            <div className="fu-actions">
               <button
                 onClick={processFiles}
                 disabled={uploading}
-                className={`group relative inline-flex items-center px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 ${uploading
-                  ? 'bg-gray-400 cursor-not-allowed text-white'
-                  : 'bg-gradient-to-r from-blue-600 to-red-600 hover:from-blue-700 hover:to-red-700 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95'
-                  }`}
+                className={`fu-process-btn${uploading ? ' fu-process-btn--loading' : ''}`}
               >
                 {uploading ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3"></div>
-                    Processing Files...
+                    <div className="fu-spinner" />
+                    <span>Processing files…</span>
                   </>
                 ) : (
                   <>
-                    <Zap className="w-5 h-5 mr-3 group-hover:rotate-12 transition-transform duration-300" />
-                    Process {selectedFiles.length} File{selectedFiles.length > 1 ? 's' : ''}
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                    <Zap className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-300" />
+                    <span>Process {selectedFiles.length} File{selectedFiles.length > 1 ? 's' : ''}</span>
+                    {/* Shimmer overlay */}
+                    <div className="fu-btn-shimmer" />
                   </>
                 )}
               </button>
-
-              <p className="mt-4 text-sm text-gray-500">
-                Files are processed locally in your browser for maximum security
+              <p className="fu-security-note">
+                <ShieldCheck className="w-3.5 h-3.5 mr-1 text-emerald-400" />
+                Files are processed locally · never uploaded to any server
               </p>
             </div>
           </div>
-        )
-      }
+        )}
+      </div>
     </div>
   );
 };
