@@ -243,7 +243,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG40": { stack: "S12", manager: "Keshav T." },
 
     // S13
-    "JSG43MET": { stack: "S13", manager: "Harsh G." },
+    "JSG43MET": { stack: "S13", manager: "Vaibhav G." },
   };
 
   // 🔍 Get ET Info (safe helper, case-insensitive)
