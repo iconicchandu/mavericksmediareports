@@ -218,68 +218,32 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     { stack: string; manager: string; type?: string }
   > = {
     // S1
-    "JSG21": { stack: "S1", manager: "Aditya G." },
-    "24MC": { stack: "S1", manager: "Abhay S.", type: "COM" },
-    "P24": { stack: "S1", manager: "Abhay S." },
-    "JSG41": { stack: "S1", manager: "Aditya G." },
-    "CM41": { stack: "S1", manager: "Aditya G." },
-    "CM41MET": { stack: "S1", manager: "Aditya G." },
     "JSG45": { stack: "S1", manager: "Aditya G." },
-    "JSG41MET": { stack: "S1", manager: "Aditya G." },
+    "JSG41MET": { stack: "S1", manager: "Satyam S." },
     "JSG48MET": { stack: "S1", manager: "Abhay S." },
-    "JSG48": { stack: "S1", manager: "Abhay S." },
+    "JSG55": { stack: "S1", manager: "Kaif K." },
 
     // S4
-    "JSG34": { stack: "S4", manager: "Satyam S." },
-    "JSG34MET": { stack: "S4", manager: "Satyam S." },
     "C34MET": { stack: "S4", manager: "Abhay S." },
 
     // S6
-    "JSG36": { stack: "CM36 | S6", manager: "Nikhil T." },
-    "C36": { stack: "S6", manager: "Nikhil T." },
-    "P36": { stack: "RGR36 | S6", manager: "Nikhil T." },
-    "JSG36+P36": { stack: "S6", manager: "Nikhil T." },
-    "JSG36MET": { stack: "S6", manager: "Nikhil T." },
+    "JSG36MET": { stack: "S6", manager: "Aditya G." },
 
     // S7
-    "JSG26": { stack: "S7", manager: "Nikhil T." },
-    "JSG26MET": { stack: "S7", manager: "Nikhil T." },
-    "JSG29": { stack: "S7", manager: "Keshav T." },
+    "JSG26MET": { stack: "S7", manager: "Aman P." },
     "JSG30MET": { stack: "S7", manager: "Aditya S." },
-    "CM30": { stack: "S7", manager: "Aditya S." },
     "JSG47": { stack: "S7", manager: "Keshav T." },
 
-    // S10
-    "C18": { stack: "S10", manager: "Aditya S.", type: "COM" },
-    "22MB": { stack: "S10", manager: "Keshav T.", type: "N-C" },
-    "22mb": { stack: "S10", manager: "Keshav T.", type: "N-C" },
-    "JSG22": { stack: "S10", manager: "Kaif K." },
-    "JSG18": { stack: "S10", manager: "Aditya S." },
-
     // S11
-    "JSG32": { stack: "S11", manager: "Kaif K." },
-    "EX32": { stack: "S11", manager: "Kaif K." },
-    "JSG20": { stack: "S11", manager: "Harsh G." },
     "JSG44": { stack: "S11", manager: "Harsh G." },
-    "JSG20+JSG44": { stack: "S11", manager: "Harsh G." },
-    "JSG51MET": { stack: "S11", manager: "Kaif K." },
-    "JSG51": { stack: "S11", manager: "Kaif K." },
     "JSG53MET": { stack: "S11", manager: "Harsh G." },
-    "JSG53": { stack: "S11", manager: "Harsh G." },
 
     // S12
-    "JSG38": { stack: "S12", manager: "Kaif K." },
     "JSG38N": { stack: "S12", manager: "Kaif K." },
-    "JSG38+JSG38N": { stack: "S12", manager: "Kaif K." },
     "JSG40": { stack: "S12", manager: "Keshav T." },
-    "JSG52": { stack: "S12", manager: "Keshav T." },
-    "JSG40+52": { stack: "S12", manager: "Keshav T." },
-
 
     // S13
-    "JSG43": { stack: "S13", manager: "Aditya S." },
-    "CM43": { stack: "S13", manager: "Aditya S." },
-    "JSG43MET": { stack: "S13", manager: "Aditya S." },
+    "JSG43MET": { stack: "S13", manager: "Harsh G." },
   };
 
   // 🔍 Get ET Info (safe helper, case-insensitive)
@@ -615,9 +579,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
     // Combine ETs - Add your combinations here
     // combineETs('JSG43', 'JSG43MET', 'JSG43+MET');
-    // combineETs('JSG30PM', 'JSG30MET', 'JSG30+MET');
-    combineETs('JSG36', 'P36', 'JSG36+P36');
-    combineETs('JSG40', 'JSG52', 'JSG40+52');
     // For Pie and Bar chart
     return {
       totalRevenue,
@@ -986,7 +947,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         return (
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#E6C25B] via-[#C69A38] to-[#D5A943] p-4 sm:p-5 shadow-lg border border-yellow-400/40 mb-2 transition-transform hover:scale-[1.01]">
             <div className="absolute inset-0 opacity-[0.04] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNMCAwTDQgNFpNMCA0TDQgMFoiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9zdmc+')] pointer-events-none"></div>
-            
+
             <div className="relative flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4 w-full sm:w-auto">
                 <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full border border-[#9A731F]/40 bg-[#D4A73D]/30 shadow-inner">
@@ -1658,7 +1619,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                     <p className={`text-xl font-black mb-0.5 leading-none ${et.name.includes('+') ? 'text-purple-600' : 'text-blue-600'}`}>
                       ${et.revenue.toLocaleString()}
                     </p>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pt-2">
                       {et.name.includes('+') ? 'Combined Revenue' : 'Today Revenue'}
                     </p>
 
@@ -1682,7 +1643,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                     <p className="text-base font-bold text-gray-900 mb-0.5 leading-none">
                       {displayTargetRevenue(et.name, analytics.totalRevenue)}
                     </p>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pt-2">
                       Daily Target
                     </p>
                   </div>
