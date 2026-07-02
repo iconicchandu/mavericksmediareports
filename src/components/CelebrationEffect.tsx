@@ -83,11 +83,17 @@ const CelebrationEffect: React.FC<CelebrationEffectProps> = ({ isActive, onCompl
   if (!isActive) return null;
 
   return (
-    <div className="fixed inset-0 z-50 pointer-events-none overflow-hidden">
+    <div className="fixed inset-0 z-50 pointer-events-none overflow-hidden select-none">
       {/* Celebration message */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 text-white px-8 py-4 rounded-2xl shadow-2xl animate-bounce text-2xl font-bold">
-          🎉 Congratulations! MM team! 🎉
+      <div className="absolute inset-0 flex items-center justify-center bg-transparent">
+        <div className="celebration-text-container">
+          <div className="text-5xl md:text-6xl mb-4 animate-bounce">🎉🏆🎉</div>
+          <h1 className="celebration-text">
+            Congratulations! MM team!
+          </h1>
+          <div className="celebration-subtitle">
+            Mavericks Media Excellence
+          </div>
         </div>
       </div>
 

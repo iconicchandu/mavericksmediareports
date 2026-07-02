@@ -78,6 +78,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
     const uF = fileName.toUpperCase();
     const uCa = campaign.toUpperCase();
     const uCr = creative.toUpperCase();
+    if (uF.includes('CM AD') || uF.includes('CMAD')) return 'CMAD';
     if (uCr.includes('_MI')) return 'MI';
     if (uF.includes('DB')) return 'DB';
     if (uF.includes('XC EXC') || uF.includes('XCE')) return 'XCE';

@@ -36,6 +36,8 @@ const getAdvertiserAccent = (name: string): string => {
       return '#3B82F6'; // blue
     case '7M':
       return '#0EA5E9';
+    case 'CMAD':
+      return '#F97316'; // orange
     case 'ES':
       return '#10B981'; // emerald
     case 'XC':
@@ -991,7 +993,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       })()}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/70 backdrop-blur-xl p-5 rounded-2xl border border-white/80 shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
         <div>
           <div className="flex items-center mb-1">
             <h2 className="text-2xl font-bold tracking-tight text-gray-900">Dashboard Overview</h2>
@@ -1027,7 +1029,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
           placeholder="Search for creative names..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-12 pr-10 py-3.5 rounded-2xl border border-gray-200 bg-white/80 backdrop-blur-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 shadow-sm transition-all"
+          className="w-full pl-12 pr-10 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 shadow-sm transition-all"
         />
         {searchQuery && (
           <button
@@ -1188,7 +1190,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
           { label: "ETs Active", value: analytics.etStats.length, icon: Users, color: "text-purple-600", bg: "bg-purple-100/50", border: "border-purple-200/50" },
           { label: "Creatives", value: data.creatives.size, icon: Activity, color: "text-amber-600", bg: "bg-amber-100/50", border: "border-amber-200/50" },
         ].map((stat, i) => (
-          <div key={i} className={`p-4 rounded-2xl border bg-white/70 backdrop-blur-xl shadow-sm transition-all hover:shadow-md hover:scale-[1.02] ${stat.border}`}>
+          <div key={i} className={`p-4 rounded-2xl border bg-white shadow-sm transition-all hover:shadow-md hover:scale-[1.02] ${stat.border}`}>
             <div className="flex items-center gap-4">
               <div className={`p-3 rounded-xl ${stat.bg}`}>
                 <stat.icon className={`h-6 w-6 ${stat.color}`} />
@@ -1204,7 +1206,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       {/* End: Summary Cards */}
 
       {/* Advertiser Revenue Breakdown (redesigned cards) */}
-      <div className={`p-4 rounded-xl border shadow-sm bg-white/70 backdrop-blur-xl border-white/80`}>
+      <div className={`p-4 rounded-xl border shadow-sm bg-white border-gray-100`}>
         <div className="flex items-center mb-4 justify-between">
           <div className="flex items-center">
             <Building2 className="h-5 w-5 mr-2 text-red-500" />
@@ -1393,7 +1395,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       )}
 
       {/* ET Revenue Charts */}
-      <div className="p-6 rounded-lg border bg-white/70 backdrop-blur-xs border-white/80">
+      <div className="p-6 rounded-lg border border-gray-100 bg-white">
         <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
           <BarChart3 className="w-5 h-5 text-blue-500" />
           ET Revenue Charts
@@ -1568,7 +1570,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       )}
 
       {/* ET Revenue Breakdown */}
-      <div className="p-6 rounded-lg border bg-white/70 backdrop-blur-xs border-white/80">
+      <div className="p-6 rounded-lg border bg-white border-gray-100">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
             <Users className="h-6 w-6 mr-3 text-blue-500" />
@@ -1582,7 +1584,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
           {analytics.etStats.slice(3, 100).map((et, index) => (
             <div
               key={et.name}
-              className={`rounded-2xl border bg-white/80 backdrop-blur-md shadow-sm transition-all hover:shadow-md hover:scale-[1.01] overflow-hidden ${et.name.includes('+') ? 'border-purple-200/60' : 'border-blue-200/60'}`}
+              className={`rounded-2xl border bg-white shadow-sm transition-all hover:shadow-md hover:scale-[1.01] overflow-hidden ${et.name.includes('+') ? 'border-purple-200/60' : 'border-blue-200/60'}`}
             >
               {/* Header Section */}
               <div className={`flex items-center justify-between p-3 border-b ${et.name.includes('+') ? 'bg-purple-50/50 border-purple-100/50' : 'bg-blue-50/50 border-blue-100/50'}`}>
@@ -1700,7 +1702,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       {/* End: ET Revenue Breakdown */}
 
       {/* Campaign Revenue Breakdown */}
-      <div className="p-5 rounded-2xl border bg-white/70 backdrop-blur-xl shadow-sm border-white/80">
+      <div className="p-5 rounded-2xl border bg-white shadow-sm border-gray-100">
         {/* Header Section */}
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -1851,7 +1853,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             <div
               key={campaign.name}
               onClick={() => openCampaignPopup(campaign)}
-              className="p-4 rounded-2xl border bg-white/80 backdrop-blur-md shadow-sm transition-all hover:shadow-md hover:scale-[1.01] hover:border-indigo-200 cursor-pointer flex flex-col justify-between border-gray-200"
+              className="p-4 rounded-2xl border bg-white shadow-sm transition-all hover:shadow-md hover:scale-[1.01] hover:border-indigo-200 cursor-pointer flex flex-col justify-between border-gray-200"
             >
               {/* Campaign Header */}
               <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
@@ -1902,7 +1904,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-        <div className="p-6 rounded-lg border bg-white/70 backdrop-blur-xs border-white/80">
+        <div className="p-6 rounded-lg border bg-white border-gray-100">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <Target className="h-5 w-5 mr-2 text-blue-500" />
@@ -2162,7 +2164,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
       {/* Filters 2 */}
       <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-        <div className="p-6 rounded-lg border bg-white/70 backdrop-blur-xs border-white/80">
+        <div className="p-6 rounded-lg border bg-white border-gray-100">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <Users className="h-5 w-5 mr-2 text-blue-500" />
