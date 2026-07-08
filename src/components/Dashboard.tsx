@@ -69,9 +69,47 @@ const hexToRgba = (hex: string, alpha: number): string => {
   const b = bigint & 255;
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
-// ----------------------- END: UI Accent Helpers -----------------------
+// Custom Tooltip for ET Revenue Charts
+interface ETCustomTooltipProps {
+  active?: boolean;
+  payload?: any[];
+}
 
+const ETCustomTooltip: React.FC<ETCustomTooltipProps> = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-slate-900/95 backdrop-blur-sm text-white px-3.5 py-2.5 rounded-xl shadow-xl border border-slate-800 text-xs">
+        <p className="font-semibold text-slate-400 mb-0.5">{data.name}</p>
+        <p className="text-sm font-black text-emerald-400">
+          ${payload[0].value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
+// Custom Tooltip for Campaign Revenue Chart
+interface CampaignCustomTooltipProps {
+  active?: boolean;
+  payload?: any[];
+}
+
+const CampaignCustomTooltip: React.FC<CampaignCustomTooltipProps> = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-slate-900/95 backdrop-blur-sm text-white px-3.5 py-2.5 rounded-xl shadow-xl border border-slate-800 text-xs">
+        <p className="font-semibold text-slate-400 mb-0.5">{data.fullName}</p>
+        <p className="text-sm font-black text-blue-400">
+          ${payload[0].value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
 const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery, onSearchChange, onReset }) => {
   const [selectedCampaign, setSelectedCampaign] = useState('');
@@ -1234,31 +1272,32 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
               <div
                 key={advertiser.name}
                 onClick={() => openAdvertiserPopup(advertiser.name)}
-                className={`relative p-3 rounded-xl shadow-sm transition-all hover:shadow-md bg-white border cursor-pointer hover:scale-[1.02]`}
-                style={{ borderColor: accent, backgroundColor: iconBg }}
+                className="relative py-2.5 px-3 rounded-xl border border-gray-200 cursor-pointer transition-all duration-100 ease-in-out bg-white shadow-[3px_3px_0px_0px_var(--accent-color)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[4px_4px_0px_0px_var(--accent-color)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_0px_var(--accent-color)]"
+                style={{
+                  '--accent-color': accent
+                } as React.CSSProperties}
               >
-                {/* colored indicator */}
-                <div className="absolute top-2 right-2 w-2 h-2 rounded-full" style={{ backgroundColor: accent }} />
-
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2.5">
                   <div
-                    className={`flex items-center justify-center rounded-lg w-10 h-10 flex-shrink-0 font-bold text-sm`}
+                    className="flex items-center justify-center rounded-lg w-8 h-8 flex-shrink-0 font-extrabold text-xs shadow-sm"
                     style={{ backgroundColor: accent, color: '#FFFFFF' }}
                   >
                     {initials}
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-sm truncate">{advertiser.name}</h4>
-                    <p className="text-xl font-bold mt-0.5" style={{ color: accent }}>
-                      ${advertiser.revenue.toLocaleString()}
-                    </p>
-                    <p className="text-xs font-medium mt-1 text-gray-600">
-                      {advertiser.name === 'RGR' || advertiser.name === 'ICO'
-                        ? `${advertiser.frequency || 0} count`
-                        : `${advertiser.campaigns.length} campaign${advertiser.campaigns.length !== 1 ? 's' : ''}`
-                      }
-                    </p>
+                    <h4 className="font-bold text-sm text-gray-800 truncate leading-tight">{advertiser.name}</h4>
+                    <div className="flex items-baseline justify-between mt-0.5">
+                      <span className="text-base font-extrabold tracking-tight" style={{ color: accent }}>
+                        ${advertiser.revenue.toLocaleString()}
+                      </span>
+                      <span className="text-[10px] font-semibold text-gray-500 whitespace-nowrap ml-2">
+                        {advertiser.name === 'RGR' || advertiser.name === 'ICO'
+                          ? `${advertiser.frequency || 0} count`
+                          : `${advertiser.campaigns.length} campaign${advertiser.campaigns.length !== 1 ? 's' : ''}`
+                        }
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1395,30 +1434,75 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       )}
 
       {/* ET Revenue Charts */}
-      <div className="p-6 rounded-lg border border-gray-100 bg-white">
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-blue-500" />
-          ET Revenue Charts
-        </h2>
+      <div className="p-6 rounded-2xl border border-gray-200/60 bg-white shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900">
+            <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+              <BarChart3 className="w-5 h-5" />
+            </div>
+            ET Revenue Breakdown
+          </h2>
+          <div className="flex items-center gap-4 text-xs font-semibold text-gray-500 bg-gray-50 px-3 py-1.5 rounded-xl border border-gray-100">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#FBBF24] to-[#F59E0B]" />
+              <span>Top 3 ETs</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#60A5FA] to-[#2563EB]" />
+              <span>Other ETs</span>
+            </div>
+          </div>
+        </div>
 
-        <div className="W-[100%]">
+        <div className="w-[100%]">
           {/* Bar Chart */}
           <div className="h-80">
-            <ResponsiveContainer>
-              <BarChart data={analytics.etChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" className='text-[10px]' />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={analytics.etChartData}
+                margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
+              >
+                <defs>
+                  <linearGradient id="topEtGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#FBBF24" />
+                    <stop offset="100%" stopColor="#F59E0B" />
+                  </linearGradient>
+                  <linearGradient id="otherEtGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#60A5FA" />
+                    <stop offset="100%" stopColor="#2563EB" />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis
+                  dataKey="name"
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fill: '#64748b', fontSize: 9, fontWeight: 600 }}
+                  dy={8}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fill: '#64748b', fontSize: 10, fontWeight: 500 }}
+                  tickFormatter={(value) => `$${value.toLocaleString()}`}
+                  dx={-8}
+                />
+                <Tooltip
+                  content={<ETCustomTooltip />}
+                  cursor={{ fill: 'rgba(0, 0, 0, 0.02)', radius: 6 }}
+                />
+                <Bar
+                  dataKey="value"
+                  radius={[5, 5, 0, 0]}
+                  maxBarSize={20}
+                >
                   {analytics.etChartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={index < 3 ? TOP_ET_COLOR : OTHER_ET_COLOR}
+                      fill={index < 3 ? "url(#topEtGrad)" : "url(#otherEtGrad)"}
                     />
                   ))}
                 </Bar>
-
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -1805,8 +1889,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         })()}
 
         {/* Campaign Revenue Bar Chart */}
-        <div className="mb-6 p-4 rounded-xl bg-white border border-gray-200">
-          <h4 className="text-lg font-bold text-gray-800 mb-4">Campaign Revenue</h4>
+        <div className="mb-6 p-6 rounded-2xl bg-white border border-gray-200/60 shadow-sm">
+          <h4 className="text-lg font-bold text-gray-900 mb-4">Campaign Revenue</h4>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
@@ -1819,28 +1903,41 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                   }))
                   .sort((a: { revenue: number }, b: { revenue: number }) => b.revenue - a.revenue)
                 }
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                <defs>
+                  <linearGradient id="campaignGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3B82F6" />
+                    <stop offset="100%" stopColor="#6366F1" />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis
                   dataKey="name"
                   angle={-45}
                   textAnchor="end"
                   height={80}
-                  tick={{ fontSize: 11 }}
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fill: '#64748b', fontSize: 10, fontWeight: 500 }}
+                  dy={8}
                 />
                 <YAxis
-                  tick={{ fontSize: 11 }}
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fill: '#64748b', fontSize: 10, fontWeight: 500 }}
                   tickFormatter={(value) => `$${value.toLocaleString()}`}
+                  dx={-8}
                 />
                 <Tooltip
-                  formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']}
-                  labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label}
+                  content={<CampaignCustomTooltip />}
+                  cursor={{ fill: 'rgba(0, 0, 0, 0.02)', radius: 6 }}
                 />
                 <Bar
                   dataKey="revenue"
-                  fill="#3B82F6"
-                  radius={[8, 8, 0, 0]}
+                  fill="url(#campaignGrad)"
+                  radius={[5, 5, 0, 0]}
+                  maxBarSize={20}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -1921,30 +2018,32 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             )}
           </div>
 
-          <div className="p-4 rounded-lg mb-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center">
-                <div className="p-2 rounded-lg bg-green-100 mr-2">
-                  <Search className="h-5 w-5 text-green-600" />
+          <div className="p-5 rounded-2xl mb-4 bg-slate-50 border border-slate-200/80 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100/60 shadow-sm">
+                  <Search className="h-5 w-5" />
                 </div>
-                <label className="block text-sm font-bold text-green-700">Select Campaign for Detailed Analysis</label>
+                <div>
+                  <label className="block text-sm font-bold text-slate-800">Select Campaign for Detailed Analysis</label>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Click on any campaign below to view ET-wise performance and export creative data
+                  </p>
+                </div>
               </div>
               {selectedCampaign && (
                 <button
                   onClick={() => setSelectedCampaign('')}
-                  className="px-3 py-1.5 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 border-2 border-gray-300 hover:border-gray-400 transition-colors text-gray-700 font-semibold text-xs flex items-center gap-1.5"
+                  className="self-start sm:self-center px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 transition-colors font-bold text-xs flex items-center gap-1.5 shadow-sm"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <X className="h-3.5 w-3.5 text-slate-400" />
                   Clear Selection
                 </button>
               )}
             </div>
-            <p className="text-xs text-green-600 ml-11 mb-3">
-              Click on any campaign below to view ET-wise performance and export creative data
-            </p>
 
             {/* Campaign Capsules - Always Visible Selection */}
-            <div className="flex flex-wrap gap-2 p-2 ">
+            <div className="flex flex-wrap gap-2 pt-1">
               {analytics.campaignStats.map(campaign => {
                 const isSelected = selectedCampaign === campaign.name;
 
@@ -1952,15 +2051,15 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                   <button
                     key={campaign.name}
                     onClick={() => setSelectedCampaign(campaign.name)}
-                    className={`px-4 py-1 rounded-full transition-colors whitespace-nowrap ${isSelected
-                      ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md ring-2 ring-green-300'
-                      : 'bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 hover:border-green-400 text-green-700 hover:shadow-md'
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border flex items-center gap-1.5 ${isSelected
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-[0_4px_12px_rgba(16,185,129,0.15)] scale-[1.01]'
+                      : 'bg-white hover:bg-emerald-50/40 border-slate-200 hover:border-emerald-200/60 text-slate-700 hover:text-emerald-700 shadow-sm'
                       }`}
                   >
-                    <span className={`font-bold text-sm ${isSelected ? 'text-white' : ''}`}>
+                    <span className={isSelected ? 'text-white' : 'text-slate-500'}>
                       {campaign.name}:
                     </span>
-                    <span className={`font-semibold text-sm ml-1 ${isSelected ? 'text-white' : 'text-gray-700'}`}>
+                    <span className={isSelected ? 'text-white font-extrabold' : 'text-slate-800 font-extrabold'}>
                       ${campaign.revenue.toLocaleString()}
                     </span>
                   </button>
@@ -1971,28 +2070,38 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         </div>
         {/* Campaign Analysis */}
         {selectedCampaignData && (
-          <div className="p-6 rounded-xl border-2 shadow-xl bg-gradient-to-br from-white via-green-50/30 to-white border-green-200">
+          <div className="p-6 rounded-3xl border border-slate-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             {/* Header Section */}
-            <div className="mb-6 p-5 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg">
-              <div className="flex justify-between items-start">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm">
-                    <Target className="h-6 w-6" />
+            <div className="mb-6 p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 text-white shadow-md border border-slate-800/80 relative overflow-hidden">
+              {/* Subtle decorative background light */}
+              <div className="absolute right-0 top-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute left-1/3 bottom-0 w-32 h-32 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
+
+              <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-400/20 backdrop-blur-md">
+                    <Target className="h-6 w-6 text-emerald-300" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold mb-1">Campaign: {selectedCampaignData.name}</h3>
-                    <p className="text-green-100 text-sm flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      {selectedCampaignData.creatives.length} creatives • {selectedCampaignData.ets.length} ETs
-                    </p>
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Campaign Detailed Profile</span>
+                    <h3 className="text-2xl font-black mb-1 tracking-tight text-white">Campaign: {selectedCampaignData.name}</h3>
+                    <div className="flex items-center gap-3 text-slate-300 text-xs font-semibold mt-1">
+                      <span className="flex items-center gap-1">
+                        <FileText className="h-3.5 w-3.5 text-emerald-400" />
+                        {selectedCampaignData.creatives.length} creatives
+                      </span>
+                      <span className="w-1 h-1 rounded-full bg-slate-600" />
+                      <span className="flex items-center gap-1">
+                        <Users className="h-3.5 w-3.5 text-emerald-400" />
+                        {selectedCampaignData.ets.length} ETs
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div className="text-right bg-white/10 backdrop-blur-sm px-4 py-3 rounded-lg border border-white/20">
-                  <p className="text-3xl font-bold mb-1">
-                    ${selectedCampaignData.revenue.toLocaleString()}
-                  </p>
-                  <p className="text-green-100 text-sm font-medium">
-                    Total Revenue
+                <div className="w-full sm:w-auto text-left sm:text-right bg-white/5 backdrop-blur-md px-5 py-3 rounded-xl border border-white/10 shadow-inner">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Total Revenue</p>
+                  <p className="text-3xl font-black text-emerald-400 tracking-tight">
+                    ${selectedCampaignData.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </div>
               </div>
@@ -2000,25 +2109,27 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
             {/* Top Performing Creative */}
             {selectedCampaignData.creatives.length > 0 && (
-              <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200 shadow-md">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-amber-100">
-                      <Award className="h-5 w-5 text-amber-600" />
+              <div className="mb-6 p-4.5 rounded-2xl bg-amber-50/40 border border-amber-200/60 shadow-sm relative overflow-hidden p-3">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-amber-200/20 rounded-full blur-xl pointer-events-none" />
+                <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                  <div className="flex items-center gap-3.5">
+                    <div className="p-2.5 rounded-xl bg-amber-100/80 text-amber-600 border border-amber-200/50 shadow-sm flex-shrink-0">
+                      <Crown className="h-5 w-5" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-amber-900 mb-1">Top Performing Creative</h4>
-                      <p className="text-sm font-medium text-amber-700">{selectedCampaignData.creatives[0].name}</p>
-                      <p className="text-xs text-amber-600 mt-1">
+                      <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-0.5">Top Performing Creative</p>
+                      <h4 className="text-sm font-bold text-slate-800 break-all">{selectedCampaignData.creatives[0].name}</h4>
+                      <p className="text-[10px] font-semibold text-amber-700/80 mt-1 flex items-center gap-1">
+                        <Users className="w-3 h-3" />
                         ETs: {selectedCampaignData.creatives[0].ets.join(', ')}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-amber-700">
-                      ${selectedCampaignData.creatives[0].revenue.toLocaleString()}
+                  <div className="w-full sm:w-auto flex sm:flex-col justify-between sm:text-right items-baseline sm:items-end border-t sm:border-t-0 pt-2 sm:pt-0 border-amber-100/50">
+                    <p className="text-xl font-extrabold text-amber-700">
+                      ${selectedCampaignData.creatives[0].revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
-                    <p className="text-xs text-amber-600 font-medium">
+                    <p className="text-[11px] font-semibold text-amber-600/90 ml-2 sm:ml-0">
                       {selectedCampaignData.creatives[0].frequency} occurrences
                     </p>
                   </div>
@@ -2028,13 +2139,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
             {/* ET Revenue for Selected Campaign */}
             <div className="mb-6">
-              <div className="flex items-center mb-4 gap-2">
-                <div className="p-2 rounded-lg bg-green-100">
-                  <Users className="h-5 w-5 text-green-600" />
+              <div className="flex items-center mb-4 gap-3">
+                <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+                  <Users className="h-5 w-5" />
                 </div>
-                <h4 className="text-lg font-bold text-gray-800">ET-Wise Revenue Breakdown</h4>
+                <h4 className="text-lg font-bold text-gray-900">ET-Wise Revenue Breakdown</h4>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {selectedCampaignData.ets
                   .map(etName => {
                     const etRevenue = data.records
@@ -2046,12 +2157,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                         if (!acc.find(c => c.name === r.creative)) {
                           acc.push({
                             name: r.creative,
-                            frequency: r.conv ?? 1, // Use CONV value if available, otherwise 1
+                            frequency: r.conv ?? 1,
                             revenue: r.revenue
                           });
                         } else {
                           const existing = acc.find(c => c.name === r.creative)!;
-                          existing.frequency += r.conv ?? 1; // Use CONV value if available, otherwise 1
+                          existing.frequency += r.conv ?? 1;
                           existing.revenue += r.revenue;
                         }
                         return acc;
@@ -2060,52 +2171,56 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                   })
                   .sort((a, b) => b.etRevenue - a.etRevenue)
                   .map((etData) => {
+                    const etFrequency = etData.creatives.reduce((sum, c) => sum + c.frequency, 0);
                     return (
                       <div
                         key={etData.etName}
-                        className="p-4 rounded-xl border-2 transition-colors bg-gradient-to-br from-white to-green-50/50 border-green-200 hover:border-green-300"
+                        className="p-4 rounded-2xl border border-slate-200/80 bg-white hover:border-emerald-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
                       >
-                        {/* ET Header */}
-                        <div className="flex items-center gap-2 mb-3 pb-3 border-b border-green-100">
-                          <Users className="h-4 w-4 text-green-600 flex-shrink-0" />
-                          <h4 className="text-base font-bold text-gray-800 truncate">{etData.etName}</h4>
-                        </div>
-
-                        {/* Revenue and Frequency - Compact */}
-                        <div className="grid grid-cols-2 gap-3 mb-3">
-                          <div className="bg-green-50 rounded-lg p-2 border border-green-200">
-                            <p className="text-xs text-green-700 font-medium mb-1">Revenue</p>
-                            <p className="text-lg font-bold text-green-600">
-                              ${etData.etRevenue.toFixed(1)}
-                            </p>
-                          </div>
-                          <div className="bg-blue-50 rounded-lg p-2 border border-blue-200">
-                            <p className="text-xs text-blue-700 font-medium mb-1">Frequency</p>
-                            <p className="text-lg font-bold text-blue-600">
-                              {etData.creatives.reduce((sum, c) => sum + c.frequency, 0)}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Active Creatives - Compact */}
                         <div>
-                          <div className="flex items-center gap-1 mb-2">
-                            <FileText className="h-3 w-3 text-gray-500" />
-                            <span className="text-xs font-medium text-gray-600">
+                          {/* ET Header */}
+                          <div className="flex items-center gap-2 mb-3 pb-2.5 border-b border-slate-100">
+                            <Users className="h-4 w-4 text-emerald-500 flex-shrink-0" />
+                            <h4 className="text-sm font-bold text-slate-800 truncate">{etData.etName}</h4>
+                          </div>
+
+                          {/* Revenue & Frequency - Clean & Aligned */}
+                          <div className="grid grid-cols-2 gap-2 mb-4">
+                            <div className="bg-slate-50/50 p-2 rounded-xl border border-slate-100">
+                              <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Revenue</p>
+                              <p className="text-base font-extrabold text-emerald-600">
+                                ${etData.etRevenue.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                              </p>
+                            </div>
+                            <div className="bg-slate-50/50 p-2 rounded-xl border border-slate-100">
+                              <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Frequency</p>
+                              <p className="text-base font-extrabold text-slate-700">
+                                {etFrequency}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Active Creatives Chips */}
+                        <div>
+                          <div className="flex items-center gap-1 mb-1.5">
+                            <FileText className="h-3 w-3 text-slate-400" />
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                               Creatives ({etData.creatives.length})
                             </span>
                           </div>
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex flex-wrap gap-1">
                             {etData.creatives.slice(0, 4).map((creative, idx) => (
                               <span
                                 key={idx}
-                                className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-green-100 text-green-700 border border-green-200"
+                                className="px-2 py-0.5 rounded-lg text-[9.5px] font-semibold bg-emerald-50/60 text-emerald-600 border border-emerald-100/50"
+                                title={creative.name}
                               >
-                                {creative.name.length > 15 ? creative.name.substring(0, 15) + '...' : creative.name}
+                                {creative.name.length > 12 ? creative.name.substring(0, 12) + '...' : creative.name}
                               </span>
                             ))}
                             {etData.creatives.length > 4 && (
-                              <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                              <span className="px-1.5 py-0.5 rounded-lg text-[9.5px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
                                 +{etData.creatives.length - 4}
                               </span>
                             )}
@@ -2118,38 +2233,54 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             </div>
 
             {/* All Creatives */}
-            <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="mt-6 pt-6 border-t border-slate-200">
               <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 rounded-lg bg-emerald-100">
-                  <FileText className="h-5 w-5 text-emerald-600" />
+                <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+                  <FileText className="h-5 w-5" />
                 </div>
-                <h4 className="text-lg font-bold text-gray-800">All Creatives ({selectedCampaignData.creatives.length})</h4>
+                <h4 className="text-lg font-bold text-gray-900">All Creatives ({selectedCampaignData.creatives.length})</h4>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {selectedCampaignData.creatives.map((creative, idx) => (
                   <div
                     key={creative.name}
-                    className="p-3 rounded-xl border-2 transition-colors bg-gradient-to-br from-white to-emerald-50/30 border-emerald-200 hover:border-emerald-300"
+                    className="p-3.5 rounded-2xl border border-slate-200/80 bg-white hover:border-emerald-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <FileText className="h-4 w-4 text-emerald-600 flex-shrink-0" />
-                        <h5 className="font-semibold text-sm text-gray-800 truncate">{creative.name}</h5>
+                    <div>
+                      <div className="flex items-start justify-between mb-3 gap-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <FileText className="h-4 w-4 text-emerald-500 flex-shrink-0" />
+                          <h5 className="font-semibold text-xs text-slate-800 truncate" title={creative.name}>{creative.name}</h5>
+                        </div>
+                        {idx === 0 && (
+                          <span className="p-0.5 rounded-md bg-amber-50 text-amber-500 border border-amber-200 flex-shrink-0" title="Top Performing">
+                            <Crown className="h-3 w-3" />
+                          </span>
+                        )}
                       </div>
-                      {idx === 0 && (
-                        <Award className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                      )}
                     </div>
-                    <div className="mt-2 pt-2 border-t border-emerald-100">
-                      <p className="text-lg font-bold text-emerald-600 mb-1">
-                        ${creative.revenue.toLocaleString()}
-                      </p>
-                      <p className="text-xs text-gray-500 font-medium mb-1">
-                        {creative.frequency} {creative.frequency === 1 ? 'occurrence' : 'occurrences'}
-                      </p>
-                      <p className="text-xs text-gray-600 font-medium">
-                        ETs: {creative.ets.join(', ')}
-                      </p>
+                    <div className="flex items-center justify-between mt-2 pt-2.5 border-t border-slate-100">
+                      <div>
+                        <p className="text-base font-extrabold text-emerald-600">
+                          ${creative.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                        <p className="text-[10px] font-semibold text-slate-400 mt-0.5">
+                          {creative.frequency} {creative.frequency === 1 ? 'occurrence' : 'occurrences'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-slate-100/50">
+                      <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-1">Associated ETs</p>
+                      <div className="flex flex-wrap gap-1">
+                        {creative.ets.map((et, etIdx) => (
+                          <span
+                            key={etIdx}
+                            className="px-1.5 py-0.5 rounded bg-slate-50 border border-slate-200 text-slate-600 text-[9px] font-medium"
+                          >
+                            {et}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -2181,30 +2312,32 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             )}
           </div>
 
-          <div className="p-4 rounded-lg mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center">
-                <div className="p-2 rounded-lg bg-blue-100 mr-2">
-                  <Search className="h-5 w-5 text-blue-600" />
+          <div className="p-5 rounded-2xl mb-4 bg-slate-50 border border-slate-200/80 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-blue-50 text-blue-600 border border-blue-100/60 shadow-sm">
+                  <Search className="h-5 w-5" />
                 </div>
-                <label className="block text-sm font-bold text-blue-700">Select ET for Detailed Analysis</label>
+                <div>
+                  <label className="block text-sm font-bold text-slate-800">Select ET for Detailed Analysis</label>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Click on any ET below to view campaign-wise performance and export creative data
+                  </p>
+                </div>
               </div>
               {selectedET && (
                 <button
                   onClick={() => setSelectedET('')}
-                  className="px-3 py-1.5 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 border-2 border-gray-300 hover:border-gray-400 transition-colors text-gray-700 font-semibold text-xs flex items-center gap-1.5"
+                  className="self-start sm:self-center px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 transition-colors font-bold text-xs flex items-center gap-1.5 shadow-sm"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <X className="h-3.5 w-3.5 text-slate-400" />
                   Clear Selection
                 </button>
               )}
             </div>
-            <p className="text-xs text-blue-600 ml-11 mb-3">
-              Click on any ET below to view campaign-wise performance and export creative data
-            </p>
 
             {/* ET Capsules - Always Visible Selection */}
-            <div className="flex flex-wrap gap-2 p-2 ">
+            <div className="flex flex-wrap gap-2 pt-1">
               {analytics.etStats.map(et => {
                 const isSelected = selectedET === et.name;
                 const isCombined = et.name.includes('+');
@@ -2213,19 +2346,19 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                   <button
                     key={et.name}
                     onClick={() => setSelectedET(et.name)}
-                    className={`px-4 py-1 rounded-full transition-colors whitespace-nowrap ${isSelected
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border flex items-center gap-1.5 ${isSelected
                       ? isCombined
-                        ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md ring-2 ring-purple-300'
-                        : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md ring-2 ring-blue-300'
+                        ? 'bg-purple-600 text-white border-purple-600 shadow-[0_4px_12px_rgba(139,92,246,0.15)] scale-[1.01]'
+                        : 'bg-blue-600 text-white border-blue-600 shadow-[0_4px_12px_rgba(59,130,246,0.15)] scale-[1.01]'
                       : isCombined
-                        ? 'bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-300 hover:border-purple-400 text-purple-700 hover:shadow-md'
-                        : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 hover:border-blue-400 text-blue-700 hover:shadow-md'
+                        ? 'bg-white hover:bg-purple-50/40 border-slate-200 hover:border-purple-200/60 text-slate-700 hover:text-purple-700 shadow-sm'
+                        : 'bg-white hover:bg-blue-50/40 border-slate-200 hover:border-blue-200/60 text-slate-700 hover:text-blue-700 shadow-sm'
                       }`}
                   >
-                    <span className={`font-bold text-sm ${isSelected ? 'text-white' : ''}`}>
+                    <span className={isSelected ? 'text-white' : 'text-slate-500'}>
                       {et.name}:
                     </span>
-                    <span className={`font-semibold text-sm ml-1 ${isSelected ? 'text-white' : 'text-gray-700'}`}>
+                    <span className={isSelected ? 'text-white font-extrabold' : 'text-slate-800 font-extrabold'}>
                       ${et.revenue.toLocaleString()}
                     </span>
                   </button>
@@ -2241,28 +2374,38 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             {/* Show individual ETs separately if combined ET is selected */}
             {individualETsData ? (
               individualETsData.map((etData, idx) => (
-                <div key={etData.name} className="p-6 rounded-xl border-2 shadow-xl bg-gradient-to-br from-white via-blue-50/30 to-white border-blue-200">
+                <div key={etData.name} className="p-6 rounded-3xl border border-slate-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                   {/* Header Section */}
-                  <div className="mb-6 p-5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm">
-                          <Users className="h-6 w-6" />
+                  <div className="mb-6 p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white shadow-md border border-slate-800/80 relative overflow-hidden">
+                    {/* Subtle decorative background light */}
+                    <div className="absolute right-0 top-0 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute left-1/3 bottom-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
+
+                    <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 rounded-xl bg-indigo-500/20 border border-indigo-400/20 backdrop-blur-md">
+                          <Users className="h-6 w-6 text-indigo-300" />
                         </div>
                         <div>
-                          <h3 className="text-2xl font-bold mb-1">ET: {etData.name}</h3>
-                          <p className="text-blue-100 text-sm flex items-center gap-2">
-                            <FileText className="h-4 w-4" />
-                            {etData.creatives.length} creatives • {etData.campaigns.length} campaigns
-                          </p>
+                          <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">ET Detailed Profile</span>
+                          <h3 className="text-2xl font-black mb-1 tracking-tight text-white">ET: {etData.name}</h3>
+                          <div className="flex items-center gap-3 text-slate-300 text-xs font-semibold mt-1">
+                            <span className="flex items-center gap-1">
+                              <FileText className="h-3.5 w-3.5 text-indigo-400" />
+                              {etData.creatives.length} creatives
+                            </span>
+                            <span className="w-1 h-1 rounded-full bg-slate-600" />
+                            <span className="flex items-center gap-1">
+                              <Target className="h-3.5 w-3.5 text-indigo-400" />
+                              {etData.campaigns.length} campaigns
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right bg-white/10 backdrop-blur-sm px-4 py-3 rounded-lg border border-white/20">
-                        <p className="text-3xl font-bold mb-1">
-                          ${etData.revenue.toLocaleString()}
-                        </p>
-                        <p className="text-blue-100 text-sm font-medium">
-                          Total Revenue
+                      <div className="w-full sm:w-auto text-left sm:text-right bg-white/5 backdrop-blur-md px-5 py-3 rounded-xl border border-white/10 shadow-inner">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Total Revenue</p>
+                        <p className="text-3xl font-black text-emerald-400 tracking-tight">
+                          ${etData.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                       </div>
                     </div>
@@ -2270,22 +2413,23 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
                   {/* Top Performing Creative for ET */}
                   {etData.creatives.length > 0 && (
-                    <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200 shadow-md">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-amber-100">
-                            <Award className="h-5 w-5 text-amber-600" />
+                    <div className="mb-6 p-4.5 rounded-2xl bg-amber-50/40 border border-amber-200/60 shadow-sm relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-amber-200/20 rounded-full blur-xl pointer-events-none" />
+                      <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div className="flex items-center gap-3.5">
+                          <div className="p-2.5 rounded-xl bg-amber-100/80 text-amber-600 border border-amber-200/50 shadow-sm flex-shrink-0">
+                            <Crown className="h-5 w-5" />
                           </div>
                           <div>
-                            <h4 className="font-bold text-amber-900 mb-1">Top Performing Creative</h4>
-                            <p className="text-sm font-medium text-amber-700">{etData.creatives[0].name}</p>
+                            <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-0.5">Top Performing Creative</p>
+                            <h4 className="text-sm font-bold text-slate-800 break-all">{etData.creatives[0].name}</h4>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-amber-700">
-                            ${etData.creatives[0].revenue.toLocaleString()}
+                        <div className="w-full sm:w-auto flex sm:flex-col justify-between sm:text-right items-baseline sm:items-end border-t sm:border-t-0 pt-2 sm:pt-0 border-amber-100/50">
+                          <p className="text-xl font-extrabold text-amber-700">
+                            ${etData.creatives[0].revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
-                          <p className="text-xs text-amber-600 font-medium">
+                          <p className="text-[11px] font-semibold text-amber-600/90 ml-2 sm:ml-0">
                             {etData.creatives[0].frequency} occurrences
                           </p>
                         </div>
@@ -2295,13 +2439,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
                   {/* Campaign Revenue for Selected ET */}
                   <div className="mb-6">
-                    <div className="flex items-center mb-4 gap-2">
-                      <div className="p-2 rounded-lg bg-blue-100">
-                        <Target className="h-5 w-5 text-blue-600" />
+                    <div className="flex items-center mb-4 gap-3">
+                      <div className="p-2 rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
+                        <Target className="h-5 w-5" />
                       </div>
-                      <h4 className="text-lg font-bold text-gray-800">Campaign-Wise Revenue Breakdown</h4>
+                      <h4 className="text-lg font-bold text-gray-900">Campaign-Wise Revenue Breakdown</h4>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                       {etData.campaigns
                         .map(campaignName => {
                           const campaignRevenue = data.records
@@ -2313,12 +2457,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                               if (!acc.find(c => c.name === r.creative)) {
                                 acc.push({
                                   name: r.creative,
-                                  frequency: r.conv ?? 1, // Use CONV value if available, otherwise 1
+                                  frequency: r.conv ?? 1,
                                   revenue: r.revenue
                                 });
                               } else {
                                 const existing = acc.find(c => c.name === r.creative)!;
-                                existing.frequency += r.conv ?? 1; // Use CONV value if available, otherwise 1
+                                existing.frequency += r.conv ?? 1;
                                 existing.revenue += r.revenue;
                               }
                               return acc;
@@ -2327,52 +2471,56 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                         })
                         .sort((a, b) => b.campaignRevenue - a.campaignRevenue)
                         .map((campaignData) => {
+                          const campaignFrequency = campaignData.creatives.reduce((sum, c) => sum + c.frequency, 0);
                           return (
                             <div
                               key={campaignData.campaignName}
-                              className="p-4 rounded-xl border-2 transition-colors bg-gradient-to-br from-white to-blue-50/50 border-blue-200 hover:border-blue-300"
+                              className="p-4 rounded-2xl border border-slate-200/80 bg-white hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
                             >
-                              {/* Campaign Header */}
-                              <div className="flex items-center gap-2 mb-3 pb-3 border-b border-blue-100">
-                                <Target className="h-4 w-4 text-blue-600 flex-shrink-0" />
-                                <h4 className="text-base font-bold text-gray-800 truncate">{campaignData.campaignName}</h4>
-                              </div>
-
-                              {/* Revenue and Frequency - Compact */}
-                              <div className="grid grid-cols-2 gap-3 mb-3">
-                                <div className="bg-green-50 rounded-lg p-2 border border-green-200">
-                                  <p className="text-xs text-green-700 font-medium mb-1">Revenue</p>
-                                  <p className="text-lg font-bold text-green-600">
-                                    ${campaignData.campaignRevenue.toFixed(1)}
-                                  </p>
-                                </div>
-                                <div className="bg-blue-50 rounded-lg p-2 border border-blue-200">
-                                  <p className="text-xs text-blue-700 font-medium mb-1">Frequency</p>
-                                  <p className="text-lg font-bold text-blue-600">
-                                    {campaignData.creatives.reduce((sum, c) => sum + c.frequency, 0)}
-                                  </p>
-                                </div>
-                              </div>
-
-                              {/* Active Creatives - Compact */}
                               <div>
-                                <div className="flex items-center gap-1 mb-2">
-                                  <Users className="h-3 w-3 text-gray-500" />
-                                  <span className="text-xs font-medium text-gray-600">
+                                {/* Campaign Header */}
+                                <div className="flex items-center gap-2 mb-3 pb-2.5 border-b border-slate-100">
+                                  <Target className="h-4 w-4 text-indigo-500 flex-shrink-0" />
+                                  <h4 className="text-sm font-bold text-slate-800 truncate">{campaignData.campaignName}</h4>
+                                </div>
+
+                                {/* Revenue & Frequency - Clean & Aligned */}
+                                <div className="grid grid-cols-2 gap-2 mb-4">
+                                  <div className="bg-slate-50/50 p-2 rounded-xl border border-slate-100">
+                                    <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Revenue</p>
+                                    <p className="text-base font-extrabold text-emerald-600">
+                                      ${campaignData.campaignRevenue.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                                    </p>
+                                  </div>
+                                  <div className="bg-slate-50/50 p-2 rounded-xl border border-slate-100">
+                                    <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Frequency</p>
+                                    <p className="text-base font-extrabold text-slate-700">
+                                      {campaignFrequency}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Active Creatives Chips */}
+                              <div>
+                                <div className="flex items-center gap-1 mb-1.5">
+                                  <Users className="h-3 w-3 text-slate-400" />
+                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                                     Creatives ({campaignData.creatives.length})
                                   </span>
                                 </div>
-                                <div className="flex flex-wrap gap-1.5">
+                                <div className="flex flex-wrap gap-1">
                                   {campaignData.creatives.slice(0, 4).map((creative, idx) => (
                                     <span
                                       key={idx}
-                                      className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-blue-100 text-blue-700 border border-blue-200"
+                                      className="px-2 py-0.5 rounded-lg text-[9.5px] font-semibold bg-indigo-50/60 text-indigo-600 border border-indigo-100/50"
+                                      title={creative.name}
                                     >
-                                      {creative.name.length > 15 ? creative.name.substring(0, 15) + '...' : creative.name}
+                                      {creative.name.length > 12 ? creative.name.substring(0, 12) + '...' : creative.name}
                                     </span>
                                   ))}
                                   {campaignData.creatives.length > 4 && (
-                                    <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                                    <span className="px-1.5 py-0.5 rounded-lg text-[9.5px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
                                       +{campaignData.creatives.length - 4}
                                     </span>
                                   )}
@@ -2385,30 +2533,28 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                   </div>
 
                   {/* All Creatives for ET */}
-                  <div className="mt-6 pt-6 border-t border-gray-200">
+                  <div className="mt-6 pt-6 border-t border-slate-200">
                     <div className="flex items-center gap-2 mb-4">
-                      <div className="p-2 rounded-lg bg-purple-100">
-                        <FileText className="h-5 w-5 text-purple-600" />
+                      <div className="p-2 rounded-xl bg-purple-50 text-purple-600 border border-purple-100">
+                        <FileText className="h-5 w-5" />
                       </div>
-                      <h4 className="text-lg font-bold text-gray-800">All Creatives ({etData.creatives.length})</h4>
+                      <h4 className="text-lg font-bold text-gray-900">All Creatives ({etData.creatives.length})</h4>
                     </div>
 
                     {/* Campaign Tabs for Filtering */}
-                    <div className="mb-4 overflow-x-auto">
-                      <div className="flex space-x-1 pb-2">
+                    <div className="mb-5 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
+                      <div className="flex space-x-1.5 pb-2">
                         <button
                           onClick={() => setSelectedETCreativeFilter('all')}
-                          className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap ${selectedETCreativeFilter === 'all'
-                            ? 'bg-purple-600 text-white'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          className={`px-3 py-1.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all border ${selectedETCreativeFilter === 'all'
+                            ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                            : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200/80'
                             }`}
                         >
                           All ({etData.creatives.length})
                         </button>
                         {etData.campaigns.map((campaign) => {
-                          // Count how many creatives belong to this campaign within this ET
                           const campaignCreativeCount = etData.creatives.filter(creative => {
-                            // Need to check which campaigns this creative belongs to by looking at the original records
                             return data.records.some(
                               record => record.et.toUpperCase() === etData.name.toUpperCase() &&
                                 record.creative === creative.name &&
@@ -2420,9 +2566,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                             <button
                               key={campaign}
                               onClick={() => setSelectedETCreativeFilter(campaign)}
-                              className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap ${selectedETCreativeFilter === campaign
-                                ? 'bg-purple-600 text-white'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                              className={`px-3 py-1.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all border ${selectedETCreativeFilter === campaign
+                                ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                                : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200/80'
                                 }`}
                             >
                               {campaign} ({campaignCreativeCount})
@@ -2433,12 +2579,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                     </div>
 
                     {/* Filtered Creatives Display */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                       {etData.creatives
                         .filter(creative => {
                           if (selectedETCreativeFilter === 'all') return true;
 
-                          // Filter creatives based on selected campaign
                           return data.records.some(
                             record => record.et.toUpperCase() === etData.name.toUpperCase() &&
                               record.creative === creative.name &&
@@ -2448,23 +2593,27 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                         .map((creative, idx) => (
                           <div
                             key={creative.name}
-                            className="p-3 rounded-xl border-2 transition-colors bg-gradient-to-br from-white to-purple-50/30 border-purple-200 hover:border-purple-300"
+                            className="p-3.5 rounded-2xl border border-slate-200/80 bg-white hover:border-purple-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
                           >
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <FileText className="h-4 w-4 text-purple-600 flex-shrink-0" />
-                                <h5 className="font-semibold text-sm text-gray-800 truncate">{creative.name}</h5>
+                            <div>
+                              <div className="flex items-start justify-between mb-3 gap-2">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  <FileText className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                                  <h5 className="font-semibold text-xs text-slate-800 truncate" title={creative.name}>{creative.name}</h5>
+                                </div>
+                                {idx === 0 && (
+                                  <span className="p-0.5 rounded-md bg-amber-50 text-amber-500 border border-amber-200 flex-shrink-0" title="Top Performing">
+                                    <Crown className="h-3 w-3" />
+                                  </span>
+                                )}
                               </div>
-                              {idx === 0 && (
-                                <Award className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                              )}
                             </div>
-                            <div className="flex items-center justify-between mt-2 pt-2 border-t border-purple-100">
+                            <div className="flex items-center justify-between mt-2 pt-2.5 border-t border-slate-100">
                               <div>
-                                <p className="text-lg font-bold text-purple-600">
-                                  ${creative.revenue.toLocaleString()}
+                                <p className="text-base font-extrabold text-purple-600">
+                                  ${creative.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </p>
-                                <p className="text-xs text-gray-500 font-medium">
+                                <p className="text-[10px] font-semibold text-slate-400 mt-0.5">
                                   {creative.frequency} {creative.frequency === 1 ? 'occurrence' : 'occurrences'}
                                 </p>
                               </div>
@@ -2477,28 +2626,38 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
               ))
             ) : (
               /* Original single ET display for non-combined ETs */
-              <div className="p-6 rounded-xl border-2 shadow-xl bg-gradient-to-br from-white via-blue-50/30 to-white border-blue-200">
+              <div className="p-6 rounded-3xl border border-slate-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                 {/* Header Section */}
-                <div className="mb-6 p-5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm">
-                        <Users className="h-6 w-6" />
+                <div className="mb-6 p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white shadow-md border border-slate-800/80 relative overflow-hidden">
+                  {/* Subtle decorative background light */}
+                  <div className="absolute right-0 top-0 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+                  <div className="absolute left-1/3 bottom-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
+
+                  <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 rounded-xl bg-indigo-500/20 border border-indigo-400/20 backdrop-blur-md">
+                        <Users className="h-6 w-6 text-indigo-300" />
                       </div>
                       <div>
-                        <h3 className="text-2xl font-bold mb-1">ET: {selectedETData.name}</h3>
-                        <p className="text-blue-100 text-sm flex items-center gap-2">
-                          <FileText className="h-4 w-4" />
-                          {selectedETData.creatives.length} creatives • {selectedETData.campaigns.length} campaigns
-                        </p>
+                        <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">ET Detailed Profile</span>
+                        <h3 className="text-2xl font-black mb-1 tracking-tight text-white">ET: {selectedETData.name}</h3>
+                        <div className="flex items-center gap-3 text-slate-300 text-xs font-semibold mt-1">
+                          <span className="flex items-center gap-1">
+                            <FileText className="h-3.5 w-3.5 text-indigo-400" />
+                            {selectedETData.creatives.length} creatives
+                          </span>
+                          <span className="w-1 h-1 rounded-full bg-slate-600" />
+                          <span className="flex items-center gap-1">
+                            <Target className="h-3.5 w-3.5 text-indigo-400" />
+                            {selectedETData.campaigns.length} campaigns
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <div className="text-right bg-white/10 backdrop-blur-sm px-4 py-3 rounded-lg border border-white/20">
-                      <p className="text-3xl font-bold mb-1">
-                        ${selectedETData.revenue.toLocaleString()}
-                      </p>
-                      <p className="text-blue-100 text-sm font-medium">
-                        Total Revenue
+                    <div className="w-full sm:w-auto text-left sm:text-right bg-white/5 backdrop-blur-md px-5 py-3 rounded-xl border border-white/10 shadow-inner">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Total Revenue</p>
+                      <p className="text-3xl font-black text-emerald-400 tracking-tight">
+                        ${selectedETData.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
                   </div>
@@ -2506,22 +2665,23 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
                 {/* Top Performing Creative for ET */}
                 {selectedETData.creatives.length > 0 && (
-                  <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200 shadow-md">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-amber-100">
-                          <Award className="h-5 w-5 text-amber-600" />
+                  <div className="mb-6 p-4.5 rounded-2xl bg-amber-50/40 border border-amber-200/60 shadow-sm relative overflow-hidden p-3">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-amber-200/20 rounded-full blur-xl pointer-events-none" />
+                    <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                      <div className="flex items-center gap-3.5">
+                        <div className="p-2.5 rounded-xl bg-amber-100/80 text-amber-600 border border-amber-200/50 shadow-sm flex-shrink-0">
+                          <Crown className="h-5 w-5" />
                         </div>
                         <div>
-                          <h4 className="font-bold text-amber-900 mb-1">Top Performing Creative</h4>
-                          <p className="text-sm font-medium text-amber-700">{selectedETData.creatives[0].name}</p>
+                          <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-0.5">Top Performing Creative</p>
+                          <h4 className="text-sm font-bold text-slate-800 break-all">{selectedETData.creatives[0].name}</h4>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-amber-700">
-                          ${selectedETData.creatives[0].revenue.toLocaleString()}
+                      <div className="w-full sm:w-auto flex sm:flex-col justify-between sm:text-right items-baseline sm:items-end border-t sm:border-t-0 pt-2 sm:pt-0 border-amber-100/50">
+                        <p className="text-xl font-extrabold text-amber-700">
+                          ${selectedETData.creatives[0].revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
-                        <p className="text-xs text-amber-600 font-medium">
+                        <p className="text-[11px] font-semibold text-amber-600/90 ml-2 sm:ml-0">
                           {selectedETData.creatives[0].frequency} occurrences
                         </p>
                       </div>
@@ -2531,13 +2691,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
                 {/* Campaign Revenue for Selected ET */}
                 <div className="mb-6">
-                  <div className="flex items-center mb-4 gap-2">
-                    <div className="p-2 rounded-lg bg-blue-100">
-                      <Target className="h-5 w-5 text-blue-600" />
+                  <div className="flex items-center mb-4 gap-3">
+                    <div className="p-2 rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
+                      <Target className="h-5 w-5" />
                     </div>
-                    <h4 className="text-lg font-bold text-gray-800">Campaign-Wise Revenue Breakdown</h4>
+                    <h4 className="text-lg font-bold text-gray-900">Campaign-Wise Revenue Breakdown</h4>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {selectedETData.campaigns
                       .map(campaignName => {
                         const etNames = getETNamesForFilter(selectedETData.name);
@@ -2550,12 +2710,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                             if (!acc.find(c => c.name === r.creative)) {
                               acc.push({
                                 name: r.creative,
-                                frequency: r.conv ?? 1, // Use CONV value if available, otherwise 1
+                                frequency: r.conv ?? 1,
                                 revenue: r.revenue
                               });
                             } else {
                               const existing = acc.find(c => c.name === r.creative)!;
-                              existing.frequency += r.conv ?? 1; // Use CONV value if available, otherwise 1
+                              existing.frequency += r.conv ?? 1;
                               existing.revenue += r.revenue;
                             }
                             return acc;
@@ -2564,52 +2724,56 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                       })
                       .sort((a, b) => b.campaignRevenue - a.campaignRevenue)
                       .map((campaignData) => {
+                        const campaignFrequency = campaignData.creatives.reduce((sum, c) => sum + c.frequency, 0);
                         return (
                           <div
                             key={campaignData.campaignName}
-                            className="p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br from-white to-blue-50/50 border-blue-200 hover:border-blue-300"
+                            className="p-4 rounded-2xl border border-slate-200/80 bg-white hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
                           >
-                            {/* Campaign Header */}
-                            <div className="flex items-center gap-2 mb-3 pb-3 border-b border-blue-100">
-                              <Target className="h-4 w-4 text-blue-600 flex-shrink-0" />
-                              <h4 className="text-base font-bold text-gray-800 truncate">{campaignData.campaignName}</h4>
-                            </div>
-
-                            {/* Revenue and Frequency - Compact */}
-                            <div className="grid grid-cols-2 gap-3 mb-3">
-                              <div className="bg-green-50 rounded-lg p-2 border border-green-200">
-                                <p className="text-xs text-green-700 font-medium mb-1">Revenue</p>
-                                <p className="text-lg font-bold text-green-600">
-                                  ${campaignData.campaignRevenue.toFixed(1)}
-                                </p>
-                              </div>
-                              <div className="bg-blue-50 rounded-lg p-2 border border-blue-200">
-                                <p className="text-xs text-blue-700 font-medium mb-1">Frequency</p>
-                                <p className="text-lg font-bold text-blue-600">
-                                  {campaignData.creatives.reduce((sum, c) => sum + c.frequency, 0)}
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Active Creatives - Compact */}
                             <div>
-                              <div className="flex items-center gap-1 mb-2">
-                                <Users className="h-3 w-3 text-gray-500" />
-                                <span className="text-xs font-medium text-gray-600">
+                              {/* Campaign Header */}
+                              <div className="flex items-center gap-2 mb-3 pb-2.5 border-b border-slate-100">
+                                <Target className="h-4 w-4 text-indigo-500 flex-shrink-0" />
+                                <h4 className="text-sm font-bold text-slate-800 truncate">{campaignData.campaignName}</h4>
+                              </div>
+
+                              {/* Revenue & Frequency - Clean & Aligned */}
+                              <div className="grid grid-cols-2 gap-2 mb-4">
+                                <div className="bg-slate-50/50 p-2 rounded-xl border border-slate-100">
+                                  <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Revenue</p>
+                                  <p className="text-base font-extrabold text-emerald-600">
+                                    ${campaignData.campaignRevenue.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                                  </p>
+                                </div>
+                                <div className="bg-slate-50/50 p-2 rounded-xl border border-slate-100">
+                                  <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Frequency</p>
+                                  <p className="text-base font-extrabold text-slate-700">
+                                    {campaignFrequency}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Active Creatives Chips */}
+                            <div>
+                              <div className="flex items-center gap-1 mb-1.5">
+                                <Users className="h-3 w-3 text-slate-400" />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                                   Creatives ({campaignData.creatives.length})
                                 </span>
                               </div>
-                              <div className="flex flex-wrap gap-1.5">
+                              <div className="flex flex-wrap gap-1">
                                 {campaignData.creatives.slice(0, 4).map((creative, idx) => (
                                   <span
                                     key={idx}
-                                    className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-blue-100 text-blue-700 border border-blue-200"
+                                    className="px-2 py-0.5 rounded-lg text-[9.5px] font-semibold bg-indigo-50/60 text-indigo-600 border border-indigo-100/50"
+                                    title={creative.name}
                                   >
-                                    {creative.name.length > 15 ? creative.name.substring(0, 15) + '...' : creative.name}
+                                    {creative.name.length > 12 ? creative.name.substring(0, 12) + '...' : creative.name}
                                   </span>
                                 ))}
                                 {campaignData.creatives.length > 4 && (
-                                  <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                                  <span className="px-1.5 py-0.5 rounded-lg text-[9.5px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
                                     +{campaignData.creatives.length - 4}
                                   </span>
                                 )}
@@ -2622,30 +2786,28 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                 </div>
 
                 {/* All Creatives for ET */}
-                <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="mt-6 pt-6 border-t border-slate-200">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="p-2 rounded-lg bg-purple-100">
-                      <FileText className="h-5 w-5 text-purple-600" />
+                    <div className="p-2 rounded-xl bg-purple-50 text-purple-600 border border-purple-100">
+                      <FileText className="h-5 w-5" />
                     </div>
-                    <h4 className="text-lg font-bold text-gray-800">All Creatives ({selectedETData.creatives.length})</h4>
+                    <h4 className="text-lg font-bold text-gray-900">All Creatives ({selectedETData.creatives.length})</h4>
                   </div>
 
                   {/* Campaign Tabs for Filtering */}
-                  <div className="mb-4 overflow-x-auto">
-                    <div className="flex space-x-1 pb-2">
+                  <div className="mb-5 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
+                    <div className="flex space-x-1.5 pb-2">
                       <button
                         onClick={() => setSelectedETCreativeFilter('all')}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap ${selectedETCreativeFilter === 'all'
-                          ? 'bg-purple-600 text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        className={`px-3 py-1.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all border ${selectedETCreativeFilter === 'all'
+                          ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                          : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200/80'
                           }`}
                       >
                         All ({selectedETData.creatives.length})
                       </button>
                       {selectedETData.campaigns.map((campaign) => {
-                        // Count how many creatives belong to this campaign within this ET
                         const campaignCreativeCount = selectedETData.creatives.filter(creative => {
-                          // Need to check which campaigns this creative belongs to by looking at the original records
                           return data.records.some(
                             record => record.et.toUpperCase() === selectedETData.name.toUpperCase() &&
                               record.creative === creative.name &&
@@ -2657,9 +2819,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                           <button
                             key={campaign}
                             onClick={() => setSelectedETCreativeFilter(campaign)}
-                            className={`px-3 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap ${selectedETCreativeFilter === campaign
-                              ? 'bg-purple-600 text-white'
-                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            className={`px-3 py-1.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all border ${selectedETCreativeFilter === campaign
+                              ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                              : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200/80'
                               }`}
                           >
                             {campaign} ({campaignCreativeCount})
@@ -2670,12 +2832,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                   </div>
 
                   {/* Filtered Creatives Display */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {selectedETData.creatives
                       .filter(creative => {
                         if (selectedETCreativeFilter === 'all') return true;
 
-                        // Filter creatives based on selected campaign
                         return data.records.some(
                           record => record.et.toUpperCase() === selectedETData.name.toUpperCase() &&
                             record.creative === creative.name &&
@@ -2685,23 +2846,27 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                       .map((creative, idx) => (
                         <div
                           key={creative.name}
-                          className="p-3 rounded-xl border-2 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-gradient-to-br from-white to-purple-50/30 border-purple-200 hover:border-purple-300"
+                          className="p-3.5 rounded-2xl border border-slate-200/80 bg-white hover:border-purple-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
                         >
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <FileText className="h-4 w-4 text-purple-600 flex-shrink-0" />
-                              <h5 className="font-semibold text-sm text-gray-800 truncate">{creative.name}</h5>
+                          <div>
+                            <div className="flex items-start justify-between mb-3 gap-2">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <FileText className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                                <h5 className="font-semibold text-xs text-slate-800 truncate" title={creative.name}>{creative.name}</h5>
+                              </div>
+                              {idx === 0 && (
+                                <span className="p-0.5 rounded-md bg-amber-50 text-amber-500 border border-amber-200 flex-shrink-0" title="Top Performing">
+                                  <Crown className="h-3 w-3" />
+                                </span>
+                              )}
                             </div>
-                            {idx === 0 && (
-                              <Award className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                            )}
                           </div>
-                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-purple-100">
+                          <div className="flex items-center justify-between mt-2 pt-2.5 border-t border-slate-100">
                             <div>
-                              <p className="text-lg font-bold text-purple-600">
-                                ${creative.revenue.toLocaleString()}
+                              <p className="text-base font-extrabold text-purple-600">
+                                ${creative.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </p>
-                              <p className="text-xs text-gray-500 font-medium">
+                              <p className="text-[10px] font-semibold text-slate-400 mt-0.5">
                                 {creative.frequency} {creative.frequency === 1 ? 'occurrence' : 'occurrences'}
                               </p>
                             </div>
