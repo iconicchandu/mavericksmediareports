@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -1450,3 +1450,101 @@ body {
     opacity: 1;
   }
 }
+
+/* ════════════════════════════════════
+   6TH ANNIVERSARY CELEBRATION STYLES
+   ════════════════════════════════════ */
+
+/* Shifting Gold Metallic Text */
+.gold-shimmer-text {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  background: linear-gradient(
+    135deg, 
+    #ffe259 0%, 
+    #ffa751 25%, 
+    #ffd700 50%, 
+    #b38728 75%, 
+    #ffe259 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine-gold 4s linear infinite;
+  filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.4));
+}
+
+/* Glassmorphic Anniversary Card Overlay */
+.glass-anniversary-card {
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  box-shadow: 
+    0 30px 100px rgba(0, 0, 0, 0.8), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 0 50px rgba(251, 191, 36, 0.15);
+}
+
+/* Wobble & recoil animation for party bombers */
+@keyframes bomber-wobble-left {
+  0%, 100% { transform: scale(1) rotate(-15deg); }
+  50% { transform: scale(1.1) rotate(-22deg); }
+}
+
+@keyframes bomber-wobble-right {
+  0%, 100% { transform: scale(1) rotate(15deg); }
+  50% { transform: scale(1.1) rotate(22deg); }
+}
+
+@keyframes bomber-fire-left {
+  0% { transform: scale(1) rotate(-15deg) translate(0, 0); }
+  20% { transform: scale(0.85) rotate(-5deg) translate(-25px, 25px); }
+  100% { transform: scale(1) rotate(-15deg) translate(0, 0); }
+}
+
+@keyframes bomber-fire-right {
+  0% { transform: scale(1) rotate(15deg) translate(0, 0); }
+  20% { transform: scale(0.85) rotate(5deg) translate(25px, 25px); }
+  100% { transform: scale(1) rotate(15deg) translate(0, 0); }
+}
+
+.bomber-btn-left {
+  transform: rotate(-15deg);
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bomber-btn-left:hover {
+  animation: bomber-wobble-left 0.8s ease-in-out infinite;
+}
+
+.bomber-btn-left.firing {
+  animation: bomber-fire-left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bomber-btn-right {
+  transform: rotate(15deg);
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bomber-btn-right:hover {
+  animation: bomber-wobble-right 0.8s ease-in-out infinite;
+}
+
+.bomber-btn-right.firing {
+  animation: bomber-fire-right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Custom premium badge */
+.anniversary-badge {
+  font-family: 'Outfit', sans-serif;
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  color: #fbbf24;
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.1);
+}
+
+/* Premium text */
+.font-outfit {
+  font-family: 'Outfit', sans-serif;
+}
