@@ -243,7 +243,10 @@ export const AnniversaryCelebration: React.FC<AnniversaryCelebrationProps> = ({ 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden font-outfit">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden font-outfit cursor-pointer"
+      onClick={onClose}
+    >
       {/* Dark Background */}
       <div
         className="absolute inset-0"
@@ -251,7 +254,7 @@ export const AnniversaryCelebration: React.FC<AnniversaryCelebrationProps> = ({ 
       />
 
       {/* Subtle center glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-amber-500/8 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[280px] sm:w-[600px] sm:h-[380px] lg:w-[800px] lg:h-[500px] bg-amber-500/8 rounded-full blur-[100px] pointer-events-none" />
 
       {/* ════════════════════════════════ CANVAS SPRINKLER LAYER ════════════════════ */}
       <canvas
@@ -336,21 +339,24 @@ export const AnniversaryCelebration: React.FC<AnniversaryCelebrationProps> = ({ 
       </div>
 
       {/* ════════════════════════════════ MAIN CONTENT ══════════════════════════════ */}
-      <div className="relative z-20 w-full max-w-2xl mx-auto px-6 text-center text-white select-none">
+      <div
+        className="relative z-20 w-full max-w-xs sm:max-w-md lg:max-w-2xl mx-auto px-4 sm:px-6 text-center text-white select-none cursor-default"
+        onClick={(e) => e.stopPropagation()}
+      >
 
         {/* Badge */}
-        <div className="flex justify-center mb-5" style={{ animation: 'blur-reveal 0.8s ease-out both', animationDelay: '0.1s' }}>
-          <div className="relative w-16 h-16 rounded-2xl border border-amber-400/30 bg-slate-900/70 flex items-center justify-center shadow-xl">
-            <Award className="w-8 h-8 text-amber-400" strokeWidth={1.5} />
+        <div className="flex justify-center mb-3 sm:mb-4" style={{ animation: 'blur-reveal 0.8s ease-out both', animationDelay: '0.1s' }}>
+          <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border border-amber-400/30 bg-slate-900/70 flex items-center justify-center shadow-xl">
+            <Award className="w-6 h-6 sm:w-7 sm:h-7 text-amber-400" strokeWidth={1.5} />
             <div className="absolute -top-1.5 -right-1.5 text-amber-300 animate-pulse">
-              <Star className="w-5 h-5" fill="currentColor" />
+              <Star className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" />
             </div>
           </div>
         </div>
 
         {/* COMPANY MILESTONE Pill */}
         <div
-          className="inline-block mb-4 px-4 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-amber-500/10 border border-amber-500/25 text-amber-400"
+          className="inline-block mb-2 sm:mb-3 px-3 py-0.5 rounded-full text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest bg-amber-500/10 border border-amber-500/25 text-amber-400"
           style={{ animation: 'blur-reveal 0.8s ease-out both', animationDelay: '0.35s' }}
         >
           Company Milestone
@@ -358,7 +364,7 @@ export const AnniversaryCelebration: React.FC<AnniversaryCelebrationProps> = ({ 
 
         {/* Main Headline */}
         <h1
-          className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-5"
+          className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-3 sm:mb-4"
           style={{
             fontFamily: "'Cinzel', serif",
             background: 'linear-gradient(135deg, #ffe259 0%, #ffa751 30%, #ffd700 55%, #b38728 80%, #ffe259 100%)',
@@ -367,7 +373,7 @@ export const AnniversaryCelebration: React.FC<AnniversaryCelebrationProps> = ({ 
             WebkitTextFillColor: 'transparent',
             animation: 'shine-gold 4s linear infinite, blur-reveal 1s ease-out both',
             animationDelay: '0s, 0.6s',
-            filter: 'drop-shadow(0 0 20px rgba(251,191,36,0.35))'
+            filter: 'drop-shadow(0 0 16px rgba(251,191,36,0.35))'
           }}
         >
           Happy 6th <br />
@@ -377,7 +383,7 @@ export const AnniversaryCelebration: React.FC<AnniversaryCelebrationProps> = ({ 
 
         {/* Date Pill */}
         <div
-          className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold text-amber-300/90 border border-amber-500/20 bg-amber-500/5 mb-7"
+          className="inline-block px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold text-amber-300/90 border border-amber-500/20 bg-amber-500/5 mb-3 sm:mb-5"
           style={{ animation: 'blur-reveal 0.8s ease-out both', animationDelay: '0.95s' }}
         >
           July 9, 2020 – July 9, 2026
@@ -385,13 +391,13 @@ export const AnniversaryCelebration: React.FC<AnniversaryCelebrationProps> = ({ 
 
         {/* Divider */}
         <div
-          className="w-full h-px bg-gradient-to-r from-transparent via-amber-500/25 to-transparent mb-6"
+          className="w-full h-px bg-gradient-to-r from-transparent via-amber-500/25 to-transparent mb-3 sm:mb-4"
           style={{ animation: 'blur-reveal 0.8s ease-out both', animationDelay: '1.15s' }}
         />
 
         {/* Description */}
         <p
-          className="text-[#a1a1aa] text-xs sm:text-sm leading-relaxed max-w-lg mx-auto px-2"
+          className="text-[#a1a1aa] text-[11px] sm:text-xs leading-relaxed max-w-xs sm:max-w-md mx-auto px-1"
           style={{ animation: 'blur-reveal 0.9s ease-out both', animationDelay: '1.35s' }}
         >
           Our heartfelt congratulations and deepest gratitude to{' '}
@@ -426,10 +432,10 @@ export const AnniversaryCelebration: React.FC<AnniversaryCelebrationProps> = ({ 
         {/* CTA Button */}
         <button
           onClick={onClose}
-          className="mt-8 px-8 py-3.5 rounded-full font-black text-sm uppercase tracking-wider text-slate-950 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 mx-auto"
+          className="mt-4 sm:mt-6 px-6 sm:px-8 py-2.5 sm:py-3 rounded-full font-black text-xs sm:text-sm uppercase tracking-wider text-slate-950 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 mx-auto"
           style={{
             background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-            boxShadow: '0 6px 30px rgba(245, 158, 11, 0.5)',
+            boxShadow: '0 4px 20px rgba(245, 158, 11, 0.5)',
             animation: 'blur-reveal 0.8s ease-out both',
             animationDelay: '1.65s',
           }}
@@ -442,9 +448,9 @@ export const AnniversaryCelebration: React.FC<AnniversaryCelebrationProps> = ({ 
 
       {/* Left Popper */}
       <button
-        onClick={() => handleManualBlast('left')}
+        onClick={(e) => { e.stopPropagation(); handleManualBlast('left'); }}
         title="Blast Left!"
-        className="fixed bottom-5 left-5 z-40 w-20 h-20 rounded-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-90 outline-none border border-amber-400/30 shadow-2xl"
+        className="fixed bottom-3 left-3 sm:bottom-5 sm:left-5 z-40 w-14 h-14 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-90 outline-none border border-amber-400/30 shadow-2xl"
         style={{
           background: 'linear-gradient(135deg, #1e293b, #0f172a)',
           boxShadow: '0 0 20px rgba(251,191,36,0.15)',
@@ -454,23 +460,23 @@ export const AnniversaryCelebration: React.FC<AnniversaryCelebrationProps> = ({ 
         {isBlasting && (
           <div className="absolute -inset-1 rounded-2xl opacity-50 blur-md bg-amber-500/30 animate-pulse" />
         )}
-        <svg viewBox="0 0 80 80" className="w-14 h-14">
+        <svg viewBox="0 0 80 80" className="w-10 h-10 sm:w-14 sm:h-14">
           {/* Popper body */}
           <path d="M12 68 L30 30 C32 27,36 27,38 30 L48 44 C50 47,50 51,48 54 L12 68Z"
             fill="url(#pGold)" stroke="#0f172a" strokeWidth="2" />
-          <path d="M18 55 L30 44" stroke="#f43f5e" strokeWidth="2.5" strokeLinecap="round"/>
-          <path d="M21 62 L35 50" stroke="#60a5fa" strokeWidth="2.5" strokeLinecap="round"/>
+          <path d="M18 55 L30 44" stroke="#f43f5e" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M21 62 L35 50" stroke="#60a5fa" strokeWidth="2.5" strokeLinecap="round" />
           {/* Nozzle */}
-          <ellipse cx="43" cy="38" rx="6" ry="9" fill="#f43f5e" transform="rotate(-40,43,38)" stroke="#0f172a" strokeWidth="1.5"/>
+          <ellipse cx="43" cy="38" rx="6" ry="9" fill="#f43f5e" transform="rotate(-40,43,38)" stroke="#0f172a" strokeWidth="1.5" />
           {/* Sparks */}
-          <path d="M52 24 L62 10 M60 30 L74 21 M50 16 L58 5" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round"/>
-          <circle cx="65" cy="8" r="2" fill="#fde68a"/>
-          <circle cx="76" cy="22" r="1.5" fill="#fde68a"/>
+          <path d="M52 24 L62 10 M60 30 L74 21 M50 16 L58 5" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+          <circle cx="65" cy="8" r="2" fill="#fde68a" />
+          <circle cx="76" cy="22" r="1.5" fill="#fde68a" />
           <defs>
             <linearGradient id="pGold" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#b45309"/>
-              <stop offset="50%" stopColor="#f59e0b"/>
-              <stop offset="100%" stopColor="#fef08a"/>
+              <stop offset="0%" stopColor="#b45309" />
+              <stop offset="50%" stopColor="#f59e0b" />
+              <stop offset="100%" stopColor="#fef08a" />
             </linearGradient>
           </defs>
         </svg>
@@ -483,9 +489,9 @@ export const AnniversaryCelebration: React.FC<AnniversaryCelebrationProps> = ({ 
 
       {/* Right Popper (mirrored) */}
       <button
-        onClick={() => handleManualBlast('right')}
+        onClick={(e) => { e.stopPropagation(); handleManualBlast('right'); }}
         title="Blast Right!"
-        className="fixed bottom-5 right-5 z-40 w-20 h-20 rounded-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-90 outline-none border border-amber-400/30 shadow-2xl"
+        className="fixed bottom-3 right-3 sm:bottom-5 sm:right-5 z-40 w-14 h-14 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-90 outline-none border border-amber-400/30 shadow-2xl"
         style={{
           background: 'linear-gradient(135deg, #1e293b, #0f172a)',
           boxShadow: '0 0 20px rgba(251,191,36,0.15)',
@@ -494,15 +500,15 @@ export const AnniversaryCelebration: React.FC<AnniversaryCelebrationProps> = ({ 
         {isBlasting && (
           <div className="absolute -inset-1 rounded-2xl opacity-50 blur-md bg-amber-500/30 animate-pulse" />
         )}
-        <svg viewBox="0 0 80 80" className="w-14 h-14" style={{ transform: 'scaleX(-1)' }}>
+        <svg viewBox="0 0 80 80" className="w-10 h-10 sm:w-14 sm:h-14" style={{ transform: 'scaleX(-1)' }}>
           <path d="M12 68 L30 30 C32 27,36 27,38 30 L48 44 C50 47,50 51,48 54 L12 68Z"
             fill="url(#pGold)" stroke="#0f172a" strokeWidth="2" />
-          <path d="M18 55 L30 44" stroke="#f43f5e" strokeWidth="2.5" strokeLinecap="round"/>
-          <path d="M21 62 L35 50" stroke="#60a5fa" strokeWidth="2.5" strokeLinecap="round"/>
-          <ellipse cx="43" cy="38" rx="6" ry="9" fill="#f43f5e" transform="rotate(-40,43,38)" stroke="#0f172a" strokeWidth="1.5"/>
-          <path d="M52 24 L62 10 M60 30 L74 21 M50 16 L58 5" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round"/>
-          <circle cx="65" cy="8" r="2" fill="#fde68a"/>
-          <circle cx="76" cy="22" r="1.5" fill="#fde68a"/>
+          <path d="M18 55 L30 44" stroke="#f43f5e" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M21 62 L35 50" stroke="#60a5fa" strokeWidth="2.5" strokeLinecap="round" />
+          <ellipse cx="43" cy="38" rx="6" ry="9" fill="#f43f5e" transform="rotate(-40,43,38)" stroke="#0f172a" strokeWidth="1.5" />
+          <path d="M52 24 L62 10 M60 30 L74 21 M50 16 L58 5" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+          <circle cx="65" cy="8" r="2" fill="#fde68a" />
+          <circle cx="76" cy="22" r="1.5" fill="#fde68a" />
         </svg>
         <div className="absolute -top-2 -left-2 w-5 h-5 flex items-center justify-center">
           <div className="absolute inset-0 bg-amber-400/40 rounded-full blur-sm animate-ping" />
