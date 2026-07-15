@@ -8,7 +8,6 @@ import {
 import FileUpload from "./components/FileUpload"
 import Dashboard from "./components/Dashboard"
 import CelebrationEffect from "./components/CelebrationEffect"
-import AnniversaryCelebration from "./components/AnniversaryCelebration"
 import type { ProcessedData } from "./types"
 
 interface UploadedFile {
@@ -301,7 +300,6 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("")
   const [showCelebration, setShowCelebration] = useState(false)
   const [hasTriggeredCelebration, setHasTriggeredCelebration] = useState(false)
-  const [showAnniversary, setShowAnniversary] = useState(false)
 
   const handleFilesUploaded = (files: UploadedFile[]) => {
     setUploadedFiles(files)
@@ -337,7 +335,6 @@ function App() {
       <PasswordScreen
         onAuth={() => {
           setIsAuthenticated(true)
-          setShowAnniversary(true)
         }}
       />
     )
@@ -496,7 +493,6 @@ function App() {
       </main>
 
       <CelebrationEffect isActive={showCelebration} onComplete={() => setShowCelebration(false)} />
-      <AnniversaryCelebration isOpen={showAnniversary} onClose={() => setShowAnniversary(false)} />
 
       {/* ── Footer ── */}
       {!combinedData && (

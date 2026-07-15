@@ -273,7 +273,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG26MET": { stack: "S7", manager: "Aman P." },
     "JSG30MET": { stack: "S7", manager: "Aditya S." },
     "JSG47": { stack: "S7", manager: "Keshav T." },
-    "JSG50": { stack: "S7", manager: "Harsh G." },
+    "JSG50": { stack: "S7", manager: "Vaibhav G." },
 
     // S11
     "JSG44": { stack: "S11", manager: "Harsh G." },

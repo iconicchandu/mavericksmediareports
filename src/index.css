@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Dancing+Script:wght@700&family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -1346,52 +1346,35 @@ body {
 }
 
 .celebration-text {
-  font-family: 'Outfit', 'Montserrat', 'Inter', sans-serif;
-  font-size: 3.5rem; /* Huge and bold */
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-family: 'Dancing Script', cursive;
+  font-size: 5rem;
+  font-weight: 700;
   text-align: center;
   margin: 0;
+  color: #4f46e5; /* Premium solid Indigo */
   
-  /* Premium moving metallic gold gradient */
-  background: linear-gradient(
-    135deg, 
-    #ffe259 0%, 
-    #ffa751 25%, 
-    #ffd700 50%, 
-    #b38728 75%, 
-    #ffe259 100%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  
-  /* Solid Black Stroke (Outline) */
-  -webkit-text-stroke: 2px #000000;
-  
-  /* Multiple shadow layers for ultimate legibility & glow */
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.8)) 
-          drop-shadow(0 0 20px rgba(212, 175, 55, 0.5));
-  
-  animation: shine-gold 4s linear infinite, text-pop 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s both;
+  /* Remove gold gradient outlines, animations and glows */
+  -webkit-text-stroke: 0px;
+  filter: none;
 }
 
 @media (max-width: 768px) {
   .celebration-text {
-    font-size: 2.2rem;
-    -webkit-text-stroke: 1.5px #000000;
+    font-size: 3.5rem;
   }
 }
 
 .celebration-subtitle {
-  color: #e2e8f0;
-  font-size: 1.2rem;
-  font-weight: 600;
-  letter-spacing: 0.25em;
+  color: #6366f1; /* Indigo 500 */
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
-  animation: fade-in-up 0.6s ease-out 0.5s both;
+  text-align: center;
+  margin-top: 0.5rem;
+  text-shadow: none;
+  animation: fade-in-up 0.6s ease-out 1.2s both;
 }
 
 @keyframes banner-entrance {
@@ -1451,100 +1434,4 @@ body {
   }
 }
 
-/* ════════════════════════════════════
-   6TH ANNIVERSARY CELEBRATION STYLES
-   ════════════════════════════════════ */
-
-/* Shifting Gold Metallic Text */
-.gold-shimmer-text {
-  font-family: 'Cinzel', serif;
-  font-weight: 900;
-  background: linear-gradient(
-    135deg, 
-    #ffe259 0%, 
-    #ffa751 25%, 
-    #ffd700 50%, 
-    #b38728 75%, 
-    #ffe259 100%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shine-gold 4s linear infinite;
-  filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.4));
-}
-
-/* Glassmorphic Anniversary Card Overlay */
-.glass-anniversary-card {
-  background: rgba(15, 23, 42, 0.72);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  box-shadow: 
-    0 30px 100px rgba(0, 0, 0, 0.8), 
-    inset 0 1px 0 rgba(255, 255, 255, 0.15),
-    0 0 50px rgba(251, 191, 36, 0.15);
-}
-
-/* Wobble & recoil animation for party bombers */
-@keyframes bomber-wobble-left {
-  0%, 100% { transform: scale(1) rotate(-15deg); }
-  50% { transform: scale(1.1) rotate(-22deg); }
-}
-
-@keyframes bomber-wobble-right {
-  0%, 100% { transform: scale(1) rotate(15deg); }
-  50% { transform: scale(1.1) rotate(22deg); }
-}
-
-@keyframes bomber-fire-left {
-  0% { transform: scale(1) rotate(-15deg) translate(0, 0); }
-  20% { transform: scale(0.85) rotate(-5deg) translate(-25px, 25px); }
-  100% { transform: scale(1) rotate(-15deg) translate(0, 0); }
-}
-
-@keyframes bomber-fire-right {
-  0% { transform: scale(1) rotate(15deg) translate(0, 0); }
-  20% { transform: scale(0.85) rotate(5deg) translate(25px, 25px); }
-  100% { transform: scale(1) rotate(15deg) translate(0, 0); }
-}
-
-.bomber-btn-left {
-  transform: rotate(-15deg);
-  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.bomber-btn-left:hover {
-  animation: bomber-wobble-left 0.8s ease-in-out infinite;
-}
-
-.bomber-btn-left.firing {
-  animation: bomber-fire-left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.bomber-btn-right {
-  transform: rotate(15deg);
-  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.bomber-btn-right:hover {
-  animation: bomber-wobble-right 0.8s ease-in-out infinite;
-}
-
-.bomber-btn-right.firing {
-  animation: bomber-fire-right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-/* Custom premium badge */
-.anniversary-badge {
-  font-family: 'Outfit', sans-serif;
-  background: linear-gradient(90deg, rgba(251, 191, 36, 0.1) 0%, rgba(239, 68, 68, 0.1) 100%);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  color: #fbbf24;
-  box-shadow: 0 0 15px rgba(251, 191, 36, 0.1);
-}
-
-/* Premium text */
-.font-outfit {
-  font-family: 'Outfit', sans-serif;
-}
+
