@@ -396,7 +396,7 @@ function App() {
 
       {/* ── Main ── */}
       <main className="relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-2 py-10 sm:py-12">
+        <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-2 py-10 sm:py-12">
 
           {!combinedData ? (
             <div className="space-y-10">
