@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react"
 import {
   Heart, TrendingUp, ShieldCheck, Zap, Lock,
-  BarChart3, Clock, Sparkles, ArrowRight
+  BarChart3, Clock, Sparkles, ArrowRight, Eye, EyeOff, RefreshCw,
+  Database, FileSpreadsheet
 } from "lucide-react"
 import FileUpload from "./components/FileUpload"
 import Dashboard from "./components/Dashboard"
@@ -30,21 +31,12 @@ const QUOTES = [
 ]
 
 // ─── DateTime widget ─────────────────────────────────────────────────────────
-const DateTimeWidget: React.FC = () => {
+const CompactClockNavbar: React.FC<{ isLanding?: boolean }> = ({ isLanding }) => {
   const [now, setNow] = useState(new Date())
-  const [quoteIdx, setQuoteIdx] = useState(() => Math.floor(Math.random() * QUOTES.length))
 
   useEffect(() => {
     const tick = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(tick)
-  }, [])
-
-  // Rotate quote every 30 s
-  useEffect(() => {
-    const rotator = setInterval(() => {
-      setQuoteIdx(i => (i + 1) % QUOTES.length)
-    }, 30_000)
-    return () => clearInterval(rotator)
   }, [])
 
   const pad = (n: number) => String(n).padStart(2, "0")
@@ -54,56 +46,33 @@ const DateTimeWidget: React.FC = () => {
   const ss = pad(now.getSeconds())
   const ampm = h24 < 12 ? "AM" : "PM"
 
-  const dateStr = now.toLocaleDateString("en-IN", {
-    weekday: "long", year: "numeric", month: "long", day: "numeric",
-  })
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  const dayName = days[now.getDay()]
+  const monthName = months[now.getMonth()]
+  const dateNum = now.getDate()
+  const year = now.getFullYear()
 
-  const greeting = h24 < 12 ? "Good Morning" : h24 < 17 ? "Good Afternoon" : "Good Evening"
-  const greetEmoji = h24 < 12 ? "🌅" : h24 < 17 ? "☀️" : "🌙"
-
-  const q = QUOTES[quoteIdx]
+  const dayStr = `${dayName}, `
+  const dateStr = `${monthName} ${dateNum}, ${year}`
 
   return (
-    <div className="dt-widget">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-        {/* Clock section */}
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="dt-live-dot" />
-            <span className="dt-date">{dateStr}</span>
-          </div>
-          <div className="flex items-end">
-            <span className="dt-time">{pad(h12)}:{mm}:{ss}</span>
-            <span className="dt-ampm">{ampm}</span>
-          </div>
-          <div className="dt-day">{greetEmoji} {greeting}, MM Media Team!</div>
-        </div>
-
-        {/* Divider */}
-        <div className="hidden sm:block w-px h-16 bg-gradient-to-b from-transparent via-indigo-200 to-transparent" />
-
-        {/* Quote section */}
-        <div className="flex-[2]" key={quoteIdx}>
-          <div className="dt-quote">"{q.text}"</div>
-          <div className="dt-quote-author">— {q.author}</div>
-        </div>
-      </div>
+    <div className={`flex items-center gap-2.5 border rounded-2xl px-3.5 py-1.5 text-xs font-bold shadow-sm ${isLanding ? 'bg-white/10 border-white/20 text-white' : 'bg-slate-50 border-slate-200/60 text-slate-600'}`}>
+      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+      <span>
+        <span className={isLanding ? 'text-white/90' : 'text-slate-700'}>
+          <span className="hidden sm:inline">{dayStr}</span>
+          {dateStr}
+        </span>
+        <span className={`mx-2 ${isLanding ? 'text-white/30' : 'text-slate-300'}`}>|</span>
+        <span>{pad(h12)}:{mm}:{ss} <span className={`text-[10px] font-bold ${isLanding ? 'text-yellow-300' : 'text-indigo-500'}`}>{ampm}</span></span>
+      </span>
     </div>
   )
 }
 
-// ─── Animated background ─────────────────────────────────────────────────────
+// ─── Animated background (made static) ───────────────────────────────────────
 const AnimatedBg: React.FC = () => {
-  const shapes = [
-    { size: 12, top: "8%", left: "5%", dur: "8s", delay: "0s", color: "#c7d2fe" },
-    { size: 8, top: "20%", left: "90%", dur: "11s", delay: "2s", color: "#ddd6fe" },
-    { size: 16, top: "70%", left: "8%", dur: "9s", delay: "1s", color: "#a7f3d0" },
-    { size: 10, top: "85%", left: "80%", dur: "13s", delay: "3s", color: "#fde68a" },
-    { size: 6, top: "45%", left: "50%", dur: "7s", delay: "0.5s", color: "#fbcfe8" },
-    { size: 14, top: "15%", left: "40%", dur: "10s", delay: "4s", color: "#bfdbfe" },
-    { size: 7, top: "60%", left: "65%", dur: "12s", delay: "1.5s", color: "#c7d2fe" },
-  ]
-
   return (
     <div className="app-bg-layer">
       <div className="bg-blob bg-blob-1" />
@@ -111,20 +80,173 @@ const AnimatedBg: React.FC = () => {
       <div className="bg-blob bg-blob-3" />
       <div className="bg-blob bg-blob-4" />
       <div className="bg-grid" />
-      {shapes.map((s, i) => (
-        <div
-          key={i}
-          className="bg-shape"
-          style={{
-            width: s.size, height: s.size,
-            top: s.top, left: s.left,
-            borderRadius: i % 2 === 0 ? "50%" : "4px",
-            background: s.color,
-            animationDuration: s.dur,
-            animationDelay: s.delay,
-          }}
-        />
-      ))}
+    </div>
+  )
+}
+
+// ─── Landing Page Grid ────────────────────────────────────────────────────────
+const LandingBgGrid: React.FC = () => {
+  return (
+    <div
+      className="absolute inset-0 pointer-events-none opacity-[0.06] z-0"
+      style={{
+        backgroundImage: `
+          linear-gradient(to right, rgba(255, 255, 255, 0.4) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 1px, transparent 1px)
+        `,
+        backgroundSize: '45px 45px',
+        maskImage: 'radial-gradient(ellipse at center, black 60%, transparent 100%)',
+        WebkitMaskImage: 'radial-gradient(ellipse at center, black 60%, transparent 100%)'
+      }}
+    />
+  )
+}
+
+// ─── Floating Background Icons ───────────────────────────────────────────────
+const FloatingIcons: React.FC = () => {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      {/* Icon 1: Database */}
+      <Database
+        className="absolute w-12 h-12 text-white/10"
+        style={{
+          top: '15%',
+          left: '8%',
+          animation: 'float-slow 7s ease-in-out infinite'
+        }}
+      />
+      {/* Icon 2: TrendingUp */}
+      <TrendingUp
+        className="absolute w-14 h-14 text-white/10"
+        style={{
+          top: '45%',
+          left: '5%',
+          animation: 'float-medium 9s ease-in-out infinite'
+        }}
+      />
+      {/* Icon 3: FileSpreadsheet */}
+      <FileSpreadsheet
+        className="absolute w-10 h-10 text-white/10"
+        style={{
+          top: '75%',
+          left: '12%',
+          animation: 'float-fast 6s ease-in-out infinite'
+        }}
+      />
+      {/* Icon 4: ShieldCheck */}
+      <ShieldCheck
+        className="absolute w-12 h-12 text-white/10"
+        style={{
+          top: '20%',
+          right: '35%',
+          animation: 'float-medium 8s ease-in-out infinite'
+        }}
+      />
+      {/* Icon 5: BarChart3 */}
+      <BarChart3
+        className="absolute w-16 h-16 text-white/10"
+        style={{
+          top: '12%',
+          right: '8%',
+          animation: 'float-slow 10s ease-in-out infinite'
+        }}
+      />
+      {/* Icon 6: Zap */}
+      <Zap
+        className="absolute w-8 h-8 text-white/15"
+        style={{
+          top: '55%',
+          right: '4%',
+          animation: 'float-fast 5s ease-in-out infinite'
+        }}
+      />
+      {/* Icon 7: Lock */}
+      <Lock
+        className="absolute w-10 h-10 text-white/10"
+        style={{
+          top: '80%',
+          right: '32%',
+          animation: 'float-slow 8s ease-in-out infinite'
+        }}
+      />
+
+      <style>{`
+        @keyframes float-slow {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-15px) rotate(6deg); }
+        }
+        @keyframes float-medium {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(-8deg); }
+        }
+        @keyframes float-fast {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-12px) rotate(12deg); }
+        }
+      `}</style>
+    </div>
+  )
+}
+
+// ─── Greeting and Quote Rotation Card ─────────────────────────────────────────
+const QuoteRotatorCard: React.FC = () => {
+  const [index, setIndex] = useState(0)
+  const [greeting, setGreeting] = useState("")
+
+  useEffect(() => {
+    const hours = new Date().getHours()
+    if (hours < 12) setGreeting("Good Morning")
+    else if (hours < 17) setGreeting("Good Afternoon")
+    else setGreeting("Good Evening")
+
+    const timer = setInterval(() => {
+      setIndex(prev => (prev + 1) % QUOTES.length)
+    }, 6000)
+
+    return () => clearInterval(timer)
+  }, [])
+
+  return (
+    <div className="w-full max-w-lg mx-auto lg:mx-0 bg-white/10 backdrop-blur-md rounded-[2rem] border border-white/20 shadow-2xl p-6 relative overflow-hidden transition-all duration-500">
+      {/* Decorative Quotation Mark */}
+      <span className="absolute -top-8 -left-4 text-[10rem] text-white/5 font-serif select-none pointer-events-none">“</span>
+
+      <div className="relative z-10 space-y-4">
+        {/* Top: Dynamic Greeting with Icon */}
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-[11px] font-extrabold text-white/60 uppercase tracking-widest">
+            {greeting}, Team
+          </span>
+        </div>
+
+        {/* Welcome Text */}
+        <h3 className="text-xl font-extrabold text-white tracking-tight leading-tight">
+          Ready to refine today's numbers?
+        </h3>
+
+        {/* Quote Content */}
+        <div className="pt-2 min-h-[85px] flex flex-col justify-between">
+          <p className="text-sm text-white/95 font-medium italic leading-relaxed transition-opacity duration-300">
+            "{QUOTES[index].text}"
+          </p>
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
+            <span className="text-[10px] font-black text-yellow-300 tracking-wider uppercase">
+              — {QUOTES[index].author}
+            </span>
+            {/* Pagination Indicators */}
+            <div className="flex items-center gap-1.5">
+              {QUOTES.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setIndex(i)}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === index ? 'bg-white scale-125' : 'bg-white/30'}`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -147,71 +269,42 @@ const PasswordScreen: React.FC<{ onAuth: () => void }> = ({ onAuth }) => {
   }
 
   return (
-    <div className="app-bg min-h-screen flex items-center justify-center p-4">
+    <div className="app-bg app-dark-mesh-bg min-h-screen flex items-center justify-center p-4">
       <AnimatedBg />
 
-      <div className="relative z-10 w-full max-w-sm">
+      <div className="pw-card-container">
         {/* Glow behind card */}
-        <div
-          className="absolute -inset-2 rounded-3xl opacity-40"
-          style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6,#06b6d4)", filter: "blur(24px)" }}
-        />
+        <div className="pw-card-glow" />
 
-        <div
-          className="relative rounded-3xl p-8"
-          style={{
-            background: "rgba(255,255,255,0.82)",
-            backdropFilter: "blur(24px)",
-            border: "1px solid rgba(99,102,241,0.2)",
-            boxShadow: "0 24px 80px rgba(99,102,241,0.18), inset 0 1px 0 rgba(255,255,255,1)",
-          }}
-        >
-          {/* Top rainbow bar */}
-          <div
-            className="absolute top-0 left-8 right-8 h-0.5 rounded-full"
-            style={{ background: "linear-gradient(90deg,#6366f1,#8b5cf6,#06b6d4)" }}
-          />
-
+        <div className="pw-card">
           {/* Lock icon */}
-          <div className="flex justify-center mb-6">
+          <div className="pw-lock-wrap">
             <div className="relative">
-              <div
-                className="absolute inset-0 rounded-2xl opacity-30 animate-pulse"
-                style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)", filter: "blur(12px)" }}
-              />
-              <div
-                className="relative w-16 h-16 rounded-2xl flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)", boxShadow: "0 10px 30px rgba(99,102,241,0.4)" }}
-              >
+              <div className="pw-lock-glow animate-pulse" />
+              <div className="pw-lock-core">
                 <Lock className="w-8 h-8 text-white" strokeWidth={2.5} />
               </div>
-              <div
-                className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center border-2 border-white"
-                style={{ background: "linear-gradient(135deg,#10b981,#059669)" }}
-              >
-                <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+              <div className="pw-lock-indicator">
+                <div className="pw-lock-dot" />
               </div>
             </div>
           </div>
 
           {/* Heading */}
           <div className="text-center mb-6">
-            <div
-              className="inline-block mb-3 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest"
-              style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#dc2626" }}
-            >
-              🔒 Restricted Access
+            <div className="pw-badge">
+              <Lock className="w-3 h-3 inline-block mr-1.5 -mt-0.5" /> Restricted Access
             </div>
-            <h2 className="text-2xl font-extrabold text-slate-900 mb-1 tracking-tight">MM Media Portal</h2>
-            <p className="text-sm text-slate-500">Enter your password to continue</p>
+            <h2 className="pw-title">MM Media Portal</h2>
+            <p className="pw-subtitle">Enter your password to continue</p>
           </div>
 
           {/* Form */}
-          <form onSubmit={submit} className="space-y-4">
+          <form onSubmit={submit} className="space-y-5">
             <div>
-              <label className="block text-xs font-bold text-slate-600 mb-2 uppercase tracking-wide">Password</label>
+              <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wide">Password</label>
               <div
-                className={`relative transition-all duration-300 ${shaking ? "animate-[shake_0.4s_ease]" : ""}`}
+                className={`pw-input-wrapper transition-all duration-300 ${shaking ? "animate-[shake_0.4s_ease]" : ""}`}
                 style={{ animation: shaking ? "shake 0.4s ease" : undefined }}
               >
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -223,58 +316,35 @@ const PasswordScreen: React.FC<{ onAuth: () => void }> = ({ onAuth }) => {
                   onChange={e => setInput(e.target.value)}
                   autoFocus
                   placeholder="Enter password"
-                  className="w-full pl-10 pr-10 py-3 rounded-xl text-sm font-medium outline-none transition-all"
-                  style={{
-                    background: "rgba(248,250,252,0.8)",
-                    border: "1.5px solid rgba(99,102,241,0.2)",
-                    color: "#1e293b",
-                  }}
-                  onFocus={e => {
-                    e.target.style.borderColor = "#6366f1"
-                    e.target.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.12)"
-                  }}
-                  onBlur={e => {
-                    e.target.style.borderColor = "rgba(99,102,241,0.2)"
-                    e.target.style.boxShadow = "none"
-                  }}
+                  className="pw-input"
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200"
                   onClick={() => setShowPw(v => !v)}
                 >
-                  {showPw ? "🙈" : "👁️"}
+                  {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full relative overflow-hidden py-3 rounded-xl font-bold text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
-              style={{
-                background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
-                boxShadow: "0 10px 30px rgba(99,102,241,0.4)",
-              }}
+              className="pw-button"
             >
               <span className="relative flex items-center justify-center gap-2">
                 <Lock className="w-4 h-4" /> Unlock Access
                 <ArrowRight className="w-4 h-4" />
               </span>
               {/* Shimmer */}
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent)",
-                  animation: "fu-btn-shimmer 2s ease infinite",
-                }}
-              />
+              <div className="fu-btn-shimmer" />
             </button>
           </form>
 
           {/* Footer */}
-          <div className="mt-5 pt-4" style={{ borderTop: "1px solid rgba(99,102,241,0.1)" }}>
-            <div className="flex items-center justify-center gap-2 text-xs text-slate-400">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+          <div className="mt-6 pt-4" style={{ borderTop: "1px solid rgba(99, 102, 241, 0.15)" }}>
+            <div className="flex items-center justify-center gap-2 text-xs text-slate-400 font-semibold">
+              <ShieldCheck className="w-4 h-4 text-emerald-500" />
               Secure access · Your data is protected
             </div>
           </div>
@@ -300,6 +370,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("")
   const [showCelebration, setShowCelebration] = useState(false)
   const [hasTriggeredCelebration, setHasTriggeredCelebration] = useState(false)
+  const [hasQueuedFiles, setHasQueuedFiles] = useState(false)
 
   const handleFilesUploaded = (files: UploadedFile[]) => {
     setUploadedFiles(files)
@@ -341,52 +412,85 @@ function App() {
   }
 
   return (
-    <div className="app-bg">
-      <AnimatedBg />
+    <div
+      className={`app-bg ${!combinedData ? "app-dark-mesh-bg" : ""}`}
+      style={{
+        height: combinedData ? "auto" : "100vh",
+        minHeight: combinedData ? "100vh" : undefined,
+        display: "flex",
+        flexDirection: "column",
+        overflow: combinedData ? "visible" : "hidden",
+        background: combinedData ? "#f8fafc" : undefined,
+        transition: "background 0.5s ease"
+      }}
+    >
+      {combinedData ? (
+        <AnimatedBg />
+      ) : (
+        <>
+          <LandingBgGrid />
+          <FloatingIcons />
+        </>
+      )}
 
-      {/* ── Header ── */}
-      <header className="app-header relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
+      {/* ── Header (Navbar) ── */}
+      <header
+        className="relative z-10"
+        style={{
+          flexShrink: 0,
+          background: combinedData ? "rgba(255, 255, 255, 0.6)" : "transparent",
+          backdropFilter: combinedData ? "blur(20px)" : "none",
+          borderBottom: combinedData ? "1px solid rgba(226, 232, 240, 0.4)" : "none"
+        }}
+      >
+        <div className="max-w-[1300px] mx-auto px-6">
+          <div className="flex items-center justify-between h-14 relative">
+
+            {/* Left: Brand Identity */}
+            <div className="flex items-center gap-2.5">
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg overflow-hidden"
-                style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}
-              >
-                <img src="/logo.png" width={28} alt="MM Media" />
+                className="w-8 h-8 rounded-xl flex items-center justify-center shadow-sm overflow-hidden bg-gray-700">
+                <img src="/logo.png" width={24} alt="MM Media" />
               </div>
               <div>
-                <h1 className="text-base font-extrabold text-slate-900 leading-tight">MM Media</h1>
-                <p className="text-xs text-slate-500 -mt-0.5">Report & Campaign Management</p>
+                <h1 className={`text-[13px] font-black leading-tight ${combinedData ? "text-slate-900" : "text-white"}`}>MM Media</h1>
+                <p className={`text-[9px] font-bold -mt-0.5 tracking-wider uppercase ${combinedData ? "text-slate-400" : "text-white/60"}`}>Report Portal</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* Middle: Date & Time (Centered) */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+              <CompactClockNavbar isLanding={!combinedData} />
+            </div>
+
+            {/* Right: User Actions */}
+            <div className="flex items-center gap-2.5">
               <div
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-extrabold uppercase tracking-wider"
                 style={{
-                  background: "rgba(16,185,129,0.1)",
-                  border: "1px solid rgba(16,185,129,0.2)",
-                  color: "#059669",
+                  background: combinedData ? "rgba(16,185,129,0.08)" : "rgba(255,255,255,0.15)",
+                  border: combinedData ? "1px solid rgba(16,185,129,0.15)" : "1px solid rgba(255,255,255,0.25)",
+                  color: combinedData ? "#059669" : "#fff",
                 }}
               >
-                <span className="dt-live-dot" style={{ width: 6, height: 6 }} />
+                <span className={`w-1.5 h-1.5 rounded-full bg-emerald-400 ${combinedData ? "animate-pulse" : ""}`} />
                 Live
               </div>
+
               {combinedData && (
                 <button
                   onClick={() => {
                     setUploadedFiles([]); setCombinedData(null)
                     setSearchQuery(""); setHasTriggeredCelebration(false)
                   }}
-                  className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all hover:scale-105"
+                  className="px-3 py-1 rounded-lg text-[11px] font-bold transition-all hover:scale-105 active:scale-95 shadow-sm flex items-center gap-1.5"
                   style={{
-                    background: "rgba(99,102,241,0.1)",
-                    border: "1px solid rgba(99,102,241,0.2)",
-                    color: "#6366f1",
+                    background: "rgba(79,70,229,0.08)",
+                    border: "1px solid rgba(79,70,229,0.15)",
+                    color: "#4f46e5",
                   }}
                 >
-                  ↩ New Upload
+                  <RefreshCw className="w-3 h-3" /> New Upload
                 </button>
               )}
             </div>
@@ -394,90 +498,135 @@ function App() {
         </div>
       </header>
 
-      {/* ── Main ── */}
-      <main className="relative z-10">
-        <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-2 py-10 sm:py-12">
+      {/* ── Main Content ── */}
+      <main className="relative z-10 flex-1 flex flex-col min-h-0">
 
-          {!combinedData ? (
-            <div className="space-y-10">
+        {!combinedData ? (
+          /* ═══ LANDING PAGE — Full-Height Floating Card Layout ═══ */
+          <div className="max-w-[1300px] w-full mx-auto px-6 flex-1 flex flex-col lg:flex-row items-center gap-8 xl:gap-12 justify-center py-6 min-h-0">
 
-              {/* ── DateTime + Motivation widget ── */}
-              <section className="max-w-4xl mx-auto w-full">
-                <DateTimeWidget />
-              </section>
-
-              {/* ── Hero ── */}
-              <section className="text-center px-4">
+            {/* ── LEFT: Dashboard Preview / Hero ── */}
+            <div className="flex-1 flex flex-col justify-center space-y-6 min-h-0">
+              {/* Content */}
+              <div className="space-y-4 text-center lg:text-left">
                 {/* Badge */}
-                <div className="inline-flex items-center gap-2 mb-5 px-4 py-2 rounded-full text-sm font-semibold"
-                  style={{
-                    background: "rgba(99,102,241,0.08)",
-                    border: "1px solid rgba(99,102,241,0.2)",
-                    color: "#6366f1",
-                  }}
-                >
-                  <Sparkles className="w-4 h-4" />
-                  Powered by MM Media Intelligence
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[10px] font-bold bg-white/10 border border-white/20 text-white shadow-2xs">
+                  <Sparkles className="w-3 h-3 text-yellow-300" />
+                  Campaign Report Management Platform
                 </div>
 
-                <h1 className="hero-title mb-4">
-                  Upload Campaign{" "}
-                  <span className="hero-gradient-text">Reports</span>
-                </h1>
+                {/* Title */}
+                <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-black text-white tracking-tight leading-[1.12]">
+                  Process & Analyze<br />
+                  <span className="bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-300 bg-clip-text text-transparent">
+                    Campaign Reports
+                  </span>
+                </h2>
 
-                <p className="hero-sub mb-8">
-                  Drop your CSV files and instantly get beautiful analytics,
-                  campaign insights, and ET performance breakdowns — all in your browser.
+                {/* Description */}
+                <p className="text-sm text-white/80 font-medium leading-relaxed max-w-md mx-auto lg:mx-0">
+                  Parse SUBID metrics, analyze revenue performance, and generate detailed XX breakdowns — all locally, securely, and instantly.
                 </p>
 
-                {/* Feature pills */}
-                <div className="flex flex-wrap justify-center gap-3 mb-10">
+                {/* Stats Row */}
+                <div className="flex flex-wrap gap-2.5 pt-1 justify-center lg:justify-start">
                   {[
-                    { icon: TrendingUp, color: "#10b981", label: "Real-time Analytics" },
-                    { icon: ShieldCheck, color: "#6366f1", label: "Secure Processing" },
-                    { icon: Zap, color: "#f59e0b", label: "Instant Results" },
-                    { icon: BarChart3, color: "#8b5cf6", label: "Deep Insights" },
-                  ].map(({ icon: Icon, color, label }) => (
-                    <div key={label} className="feature-pill">
-                      <Icon className="w-4 h-4" style={{ color }} />
-                      {label}
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* ── Upload card ── */}
-              <section className="max-w-4xl mx-auto w-full">
-                <FileUpload onFilesUploaded={handleFilesUploaded} />
-              </section>
-
-              {/* ── Stats row ── */}
-              <section className="max-w-4xl mx-auto w-full">
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    { value: "100%", label: "Local Processing", color: "#10b981" },
-                    { value: "∞", label: "Files Supported", color: "#6366f1" },
-                    { value: "⚡", label: "Instant Reports", color: "#f59e0b" },
+                    { label: "Local Processing", value: "100%", icon: ShieldCheck, color: "#34d399" },
+                    { label: "Real-time", value: "Instant", icon: Zap, color: "#fbbf24" },
+                    { label: "Multi-file", value: "Queue", icon: BarChart3, color: "#60a5fa" },
                   ].map(s => (
-                    <div
-                      key={s.label}
-                      className="rounded-2xl p-4 text-center"
-                      style={{
-                        background: "rgba(255,255,255,0.6)",
-                        border: "1px solid rgba(99,102,241,0.12)",
-                        backdropFilter: "blur(12px)",
-                        boxShadow: "0 4px 20px rgba(99,102,241,0.07)",
-                      }}
-                    >
-                      <div className="text-2xl font-black mb-0.5" style={{ color: s.color }}>{s.value}</div>
-                      <div className="text-xs font-medium text-slate-500">{s.label}</div>
+                    <div key={s.label} className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-xl px-3 py-1.5 border border-white/10 shadow-xs">
+                      <s.icon className="w-3.5 h-3.5" style={{ color: s.color }} />
+                      <div>
+                        <div className="text-[11px] font-black text-white">{s.value}</div>
+                        <div className="text-[8px] text-white/60 font-semibold">{s.label}</div>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </section>
+              </div>
 
+              {/* Greeting and Quote Rotation Card */}
+              <QuoteRotatorCard />
             </div>
-          ) : (
+
+            {/* ── RIGHT: Floating Upload Panel Card ── */}
+            <div
+              className="w-full lg:w-[380px] xl:w-[410px] bg-white/10 backdrop-blur-2xl rounded-[2rem] border border-white/15 shadow-[0_25px_80px_rgba(0,0,0,0.45)] flex flex-col relative overflow-hidden"
+              style={{ flexShrink: 0, maxHeight: "90%" }}
+            >
+              <div className="flex-grow flex flex-col p-5 sm:p-6 overflow-y-auto">
+                {/* Panel Header */}
+                {!hasQueuedFiles && (
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center">
+                        <Sparkles className="w-3.5 h-3.5 text-indigo-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-black text-white">Report Processor</h3>
+                        <p className="text-[9px] text-white/60 font-semibold">Upload & analyze instantly</p>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-white/70 leading-relaxed">
+                      Upload CSV files containing <span className="font-bold text-indigo-300">SUBID</span> & <span className="font-bold text-indigo-300">REV</span> columns.
+                    </p>
+                  </div>
+                )}
+
+                {/* File Upload Component */}
+                <div id="upload-panel" className="flex-1 min-h-0">
+                  <FileUpload
+                    onFilesUploaded={handleFilesUploaded}
+                    onQueueChange={setHasQueuedFiles}
+                  />
+                </div>
+
+                {/* Info Specs */}
+                {!hasQueuedFiles && (
+                  <div className="grid grid-cols-3 gap-2.5 mt-4 pt-4 border-t border-white/10">
+                    {[
+                      { value: "100%", title: "Local", desc: "No server", color: "#34d399", icon: ShieldCheck, glow: "rgba(52, 211, 153, 0.15)" },
+                      { value: "\u221E", title: "Queue", desc: "Multi-file", color: "#818cf8", icon: FileSpreadsheet, glow: "rgba(129, 140, 248, 0.15)" },
+                      { value: "Instant", title: "Parse", desc: "Real-time", color: "#fbbf24", icon: Zap, glow: "rgba(251, 191, 36, 0.15)" },
+                    ].map(s => (
+                      <div
+                        key={s.title}
+                        className="flex flex-col items-center p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-300 group hover:-translate-y-0.5 shadow-sm"
+                      >
+                        {/* Glowing Icon Wrapper */}
+                        <div
+                          className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 border border-white/5 transition-transform duration-300 group-hover:scale-110"
+                          style={{
+                            background: `radial-gradient(circle, ${s.glow} 0%, transparent 100%)`,
+                            boxShadow: `inset 0 1px 0 rgba(255, 255, 255, 0.08)`
+                          }}
+                        >
+                          <s.icon className="w-4 h-4" style={{ color: s.color }} />
+                        </div>
+                        {/* Values & Labels */}
+                        <div className="text-[11px] font-black text-white tracking-tight">{s.value}</div>
+                        <div className="text-[8px] font-black uppercase mt-0.5 tracking-wider" style={{ color: s.color }}>{s.title}</div>
+                        <div className="text-[8px] text-white/50 font-medium mt-0.5 text-center leading-tight">{s.desc}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Security footer */}
+                {!hasQueuedFiles && (
+                  <div className="mt-3 flex items-center justify-center gap-1 text-[9px] text-slate-400 font-semibold">
+                    <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                    Secure local sandbox
+                  </div>
+                )}
+              </div>
+            </div>
+
+          </div>
+        ) : (
+          /* ═══ DASHBOARD VIEW ═══ */
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
             <Dashboard
               data={combinedData}
               uploadedFiles={uploadedFiles}
@@ -488,32 +637,26 @@ function App() {
                 setSearchQuery(""); setHasTriggeredCelebration(false)
               }}
             />
-          )}
-        </div>
+          </div>
+        )}
       </main>
 
       <CelebrationEffect isActive={showCelebration} onComplete={() => setShowCelebration(false)} />
 
       {/* ── Footer ── */}
       {!combinedData && (
-        <footer className="relative z-10 pb-8">
-          <div className="max-w-xs mx-auto px-4">
-            <p
-              className="text-center text-sm flex items-center justify-center gap-1 rounded-xl py-2 px-4"
-              style={{
-                background: "rgba(255,255,255,0.6)",
-                border: "1px solid rgba(99,102,241,0.1)",
-                color: "#64748b",
-                backdropFilter: "blur(12px)",
-              }}
-            >
-              Made with <Heart className="w-3.5 h-3.5 text-rose-500 mx-0.5" fill="currentColor" /> by{" "}
+        <footer className="relative z-10" style={{ flexShrink: 0 }}>
+          <div className="max-w-[1300px] mx-auto px-6 py-3 border-t border-white/10 flex items-center justify-between">
+            <p className="text-[10px] text-white/60 font-semibold">
+              © 2026 MM Media Reports
+            </p>
+            <p className="text-[10px] text-white/80 font-semibold flex items-center gap-1">
+              Made with <Heart className="w-3 h-3 text-pink-400" fill="currentColor" /> by{" "}
               <a
                 href="https://iconicchandu.online/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-bold ml-0.5"
-                style={{ color: "#6366f1" }}
+                className="font-bold hover:underline text-white"
               >
                 Iconic Chandu
               </a>

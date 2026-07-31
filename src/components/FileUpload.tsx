@@ -22,18 +22,23 @@ interface UploadedFile {
 
 interface FileUploadProps {
   onFilesUploaded: (files: UploadedFile[]) => void;
+  onQueueChange?: (hasFiles: boolean) => void;
 }
 
 
 
 // ─── Main Component ─────────────────────────────────────────────────────────────
-const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
+const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded, onQueueChange }) => {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [successPulse, setSuccessPulse] = useState(false);
+
+  React.useEffect(() => {
+    onQueueChange?.(selectedFiles.length > 0);
+  }, [selectedFiles, onQueueChange]);
 
   // ── Drag handlers ──
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -214,87 +219,61 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
       <div className="fu-content">
 
         {/* ── Drop Zone ── */}
-        <div
-          className={`fu-dropzone${dragActive ? ' fu-dropzone--active' : ''}${successPulse ? ' fu-dropzone--success' : ''}`}
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
-        >
-          <input
-            type="file"
-            multiple
-            accept=".csv"
-            onChange={handleFileInput}
-            className="fu-file-input"
-          />
+        {selectedFiles.length === 0 && (
+          <div
+            className={`fu-dropzone${dragActive ? ' fu-dropzone--active' : ''}${successPulse ? ' fu-dropzone--success' : ''}`}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+          >
+            <input
+              type="file"
+              multiple
+              accept=".csv"
+              onChange={handleFileInput}
+              className="fu-file-input"
+            />
 
-          {/* Corner accents */}
-          <span className="fu-corner fu-corner-tl" />
-          <span className="fu-corner fu-corner-tr" />
-          <span className="fu-corner fu-corner-bl" />
-          <span className="fu-corner fu-corner-br" />
+            {/* Corner accents */}
+            <span className="fu-corner fu-corner-tl" />
+            <span className="fu-corner fu-corner-tr" />
+            <span className="fu-corner fu-corner-bl" />
+            <span className="fu-corner fu-corner-br" />
 
-          {/* Scanning line animation when drag active */}
-          {dragActive && <div className="fu-scan-line" />}
+            {/* Scanning line animation when drag active */}
+            {dragActive && <div className="fu-scan-line" />}
 
-          <div className="fu-dropzone-inner">
-            {/* Icon */}
-            <div className={`fu-icon-wrap${dragActive ? ' fu-icon-wrap--active' : ''}`}>
-              <div className="fu-icon-glow" />
-              <div className="fu-icon-ring fu-icon-ring-1" />
-              <div className="fu-icon-ring fu-icon-ring-2" />
-              <div className="fu-icon-core">
-                <UploadCloud className="fu-icon" />
+            <div className="fu-dropzone-inner">
+              {/* Icon */}
+              <div className={`fu-icon-wrap${dragActive ? ' fu-icon-wrap--active' : ''}`}>
+                <div className="fu-icon-glow" />
+                <div className="fu-icon-ring fu-icon-ring-1" />
+                <div className="fu-icon-ring fu-icon-ring-2" />
+                <div className="fu-icon-core">
+                  <UploadCloud className="fu-icon" />
+                </div>
               </div>
-            </div>
 
-            {/* Text */}
-            <div className="fu-dropzone-text">
-              {dragActive ? (
-                <>
-                  <h3 className="fu-title fu-title--active">Release to Upload</h3>
-                  <p className="fu-subtitle fu-subtitle--active">Drop your CSV files here</p>
-                </>
-              ) : (
-                <>
-                  <h3 className="fu-title">Drag & Drop CSV Files</h3>
-                  <p className="fu-subtitle">
-                    or <span className="fu-browse-link">click to browse</span> from your device
-                  </p>
-                </>
-              )}
-            </div>
-
-            {/* Feature pills */}
-            <div className="fu-pills">
-              <div className="fu-pill">
-                <Database className="fu-pill-icon fu-pill-icon--blue" />
-                <span>CSV Format</span>
+              {/* Text */}
+              <div className="fu-dropzone-text">
+                {dragActive ? (
+                  <>
+                    <h3 className="fu-title fu-title--active">Release to Upload</h3>
+                    <p className="fu-subtitle fu-subtitle--active">Drop your CSV files here</p>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="fu-title">Drag & Drop CSV Files</h3>
+                    <p className="fu-subtitle">
+                      or <span className="fu-browse-link">click to browse</span> from your device
+                    </p>
+                  </>
+                )}
               </div>
-              <div className="fu-pill">
-                <FilePlus2 className="fu-pill-icon fu-pill-icon--violet" />
-                <span>Multiple Files</span>
-              </div>
-              <div className="fu-pill">
-                <Cpu className="fu-pill-icon fu-pill-icon--emerald" />
-                <span>Auto-Processing</span>
-              </div>
-              <div className="fu-pill">
-                <ShieldCheck className="fu-pill-icon fu-pill-icon--amber" />
-                <span>100% Local</span>
-              </div>
-            </div>
-
-            {/* Required columns hint */}
-            <div className="fu-hint">
-              Required columns:&nbsp;
-              <code className="fu-code fu-code--blue">SUBID</code>
-              &nbsp;&amp;&nbsp;
-              <code className="fu-code fu-code--emerald">REV</code>
             </div>
           </div>
-        </div>
+        )}
 
         {/* ── Error Banner ── */}
         {error && (
@@ -317,18 +296,26 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
             <div className="fu-panel-header">
               <div className="fu-panel-title-wrap">
                 <div className="fu-panel-icon">
-                  <FileText className="w-5 h-5 text-white" />
+                  <FileText className="w-4 h-4 text-white" />
                 </div>
                 <div>
                   <h3 className="fu-panel-title">Selected Files</h3>
                   <p className="fu-panel-sub">
-                    {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''} queued for processing
+                    {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''} queued
                   </p>
                 </div>
               </div>
-              <div className="fu-badge">
-                <Sparkles className="w-3 h-3 mr-1" />
-                {selectedFiles.length} Ready
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setSelectedFiles([])}
+                  className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white/10 hover:bg-white/15 text-white transition-colors border border-white/10 shadow-sm"
+                >
+                  New Upload
+                </button>
+                <div className="fu-badge">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  {selectedFiles.length} Ready
+                </div>
               </div>
             </div>
 
@@ -337,7 +324,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded }) => {
               {selectedFiles.map((file, index) => (
                 <div key={index} className="fu-file-item" style={{ animationDelay: `${index * 60}ms` }}>
                   <div className="fu-file-icon-wrap">
-                    <FileText className="w-5 h-5 text-blue-400" />
+                    <FileText className="w-5 h-5 text-indigo-500" />
                   </div>
                   <div className="fu-file-info">
                     <p className="fu-file-name">{file.name}</p>

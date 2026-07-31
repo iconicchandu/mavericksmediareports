@@ -69,6 +69,17 @@ const hexToRgba = (hex: string, alpha: number): string => {
   const b = bigint & 255;
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
+
+const isMIRecord = (r: DataRecord) =>
+  (!!r.fileName && r.fileName.toUpperCase().includes('MI CAMPS') &&
+    !!r.subid && /^MI(\/|_|$)/i.test(r.subid.trim())) ||
+  (!!r.creative && r.creative.toUpperCase().includes('_MI'));
+
+const isICORecord = (r: DataRecord) => r.advertiser === 'ICO';
+
+const is7MRecord = (r: DataRecord) =>
+  !!r.fileName && r.fileName.toUpperCase().includes('7M');
+
 // Custom Tooltip for ET Revenue Charts
 interface ETCustomTooltipProps {
   active?: boolean;
@@ -147,28 +158,23 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
   // 🎯 Target revenue map (keys stored normalized)
   const rawTargetRevenueMap: Record<string, string> = {
-    "JSG21": "$1100",
-    "P24": "$1100",
-    "JSG41": "$1100",
-    "CM41": "$1500",
-    "JSG34": "$1100",
-    "JSG36": "$800",
-    "C36": "JSG36",
-    "JSG26": "$1800",
-    "JSG29": "$1800",
-    "JSG30PM": "$2000",
-    "JSG22": "0",
-    "JSG32": "$1100",
-    "EX32": "JSG32",
-    "JSG20": "$1800",
-    "JSG38": "$1100",
-    "JSG40": "$1100",
-    "JSG43": "$1000",
-    "JSG44": "$1100",
-    "JSG18": "$800",
-    "JSG20+JSG44": "$2000",
-    "JSG38+JSG38N": "$1800",
-    "JSG36+P36": "$800",
+    "C30": "$200",
+    "JSG26MET": "$800",
+    "JSG43NC": "$200",
+    "JSG44NC": "$200",
+    "JSG48MET": "$800",
+    "JSG36MET": "$1300",
+    "C36": "250",
+    "JSG38N": "$1300",
+    "JSG38NR": "$1300",
+    "JSG53NC": "$200",
+    "JSG34NC": "$500",
+    "JSG41MET": "$700",
+    "JSG45": "$700",
+    "JSG50": "$1000",
+    "JSG52": "$1300",
+    "JSG55": "$500",
+    "C47MET": "$300",
   };
 
 
@@ -251,6 +257,47 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
   };
   // ---End of------For Weekly Revenue (Multiply by 7)-----------
 
+  // Helper to render target vs revenue comparison (+/- difference)
+  const renderTargetComparison = (etName: string, etRevenue: number, totalRevenue: number, isDarkVariant = false) => {
+    const rawValue = getTargetRevenue(etName);
+    if (!rawValue || rawValue === "NA") return null;
+
+    const hasLetters = /[a-zA-Z]/.test(rawValue);
+    const hasNumbers = /\d/.test(rawValue);
+
+    if (hasLetters || !hasNumbers) return null;
+
+    const numericValue = parseFloat(rawValue.replace(/[^0-9.]/g, ""));
+    const targetVal = numericValue * (totalRevenue >= 40000 ? 7 : 1);
+
+    const diff = etRevenue - targetVal;
+    const isPositive = diff >= 0;
+    const formattedDiff = Math.abs(diff).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    if (isPositive) {
+      return (
+        <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md border ${isDarkVariant
+          ? 'bg-emerald-500/25 text-emerald-950 border-emerald-500/30'
+          : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+          } inline-block`}>
+          +${formattedDiff}
+        </span>
+      );
+    } else {
+      return (
+        <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md border ${isDarkVariant
+          ? 'bg-rose-500/25 text-rose-950 border-rose-500/30'
+          : 'bg-rose-500/10 text-rose-600 border-rose-500/20'
+          } inline-block`}>
+          -${formattedDiff}
+        </span>
+      );
+    }
+  };
+
   // ------------------ET Info Stack,Manager-----
   // 👥 ET Information Map (Stack, Manager, and optional Type)
   const etInfoMap: Record<
@@ -264,29 +311,36 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG55": { stack: "S1", manager: "Kaif K." },
 
     // S4
-    "C34MET": { stack: "S4", manager: "Abhay S." },
+    "JSG34NC": { stack: "S4", manager: "Keshav T." },
 
     // S6
     "JSG36MET": { stack: "S6", manager: "Aditya G." },
+    "C36": { stack: "S6", manager: "Abhay S." },
 
     // S7
     "JSG26MET": { stack: "S7", manager: "Aman P." },
     "JSG30MET": { stack: "S7", manager: "Aditya S." },
+    "C30": { stack: "S7", manager: "Aditya S." },
     "JSG47": { stack: "S7", manager: "Keshav T." },
+    "C47MET": { stack: "S7", manager: "Abhay S." },
     "JSG50": { stack: "S7", manager: "Vaibhav G." },
 
     // S11
     "JSG44": { stack: "S11", manager: "Harsh G." },
+    "JSG44NC": { stack: "S11", manager: "Harsh G." },
     "JSG53MET": { stack: "S11", manager: "Harsh G." },
+    "JSG53NC": { stack: "S11", manager: "Harsh G." },
     "JSG56": { stack: "S11", manager: "Abhay S." },
 
     // S12
     "JSG38N": { stack: "S12", manager: "Kaif K." },
+    "JSG38NR": { stack: "S12", manager: "Kaif K." },
     "JSG40": { stack: "S12", manager: "Keshav T." },
     "JSG52": { stack: "S12", manager: "Keshav T." },
 
     // S13
     "JSG43MET": { stack: "S13", manager: "Vaibhav G." },
+    "JSG43NC": { stack: "S13", manager: "Vaibhav G." },
   };
 
   // 🔍 Get ET Info (safe helper, case-insensitive)
@@ -744,11 +798,28 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       // Get campaigns
       const campaigns = Array.from(new Set(etRecords.map(r => r.campaign)));
 
+      // Get advertisers
+      const advertisersMap = new Map<string, number>();
+      etRecords.forEach(r => {
+        const advertiserKey = isMIRecord(r)
+          ? 'MI'
+          : isICORecord(r)
+            ? 'ICO'
+            : is7MRecord(r)
+              ? '7M'
+              : r.advertiser;
+        advertisersMap.set(advertiserKey, (advertisersMap.get(advertiserKey) || 0) + r.revenue);
+      });
+      const advertisersArray = Array.from(advertisersMap.entries())
+        .map(([name, revenue]) => ({ name, revenue }))
+        .sort((a, b) => b.revenue - a.revenue);
+
       return {
         name: etName,
         revenue,
         creatives,
-        campaigns
+        campaigns,
+        advertisersArray
       };
     };
 
@@ -1246,66 +1317,94 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       {/* End: Summary Cards */}
 
       {/* Advertiser Revenue Breakdown (redesigned cards) */}
-      <div className={`p-4 rounded-xl border shadow-sm bg-white border-gray-100`}>
-        <div className="flex items-center mb-4 justify-between">
-          <div className="flex items-center">
-            <Building2 className="h-5 w-5 mr-2 text-red-500" />
-            <h3 className="text-lg font-bold">Advertiser-Wise Revenue</h3>
+      <div className="p-6 rounded-2xl border border-slate-100/90 shadow-[0_8px_30px_rgb(0,0,0,0.015)] bg-white">
+        <div className="flex items-center mb-6 justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-red-50 text-red-500 border border-red-100">
+              <Building2 className="h-5 w-5" />
+            </div>
+            <h3 className="text-lg font-black text-slate-800 tracking-tight">Advertiser Revenue Breakdown</h3>
           </div>
-          <div className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
-            Top advertisers by revenue
+          <div className="text-[10px] font-bold px-3 py-1.5 rounded-full bg-slate-50 text-slate-600 uppercase tracking-widest border border-slate-200/50">
+            Top Advertisers
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-3">
-          {analytics.advertiserStats.map((advertiser) => {
-            const accent = getAdvertiserAccent(advertiser.name);
-            const iconBg = hexToRgba(accent, 0.12);
-            // Get first letter(s) of advertiser name
-            const getInitials = (name: string): string => {
-              if (name === 'XC EXC') return 'XE';
-              if (name === 'NON COMCAST') return 'NC';
-              if (name.length <= 3) return name.toUpperCase(); // For short names like GZ, ES, XC, DB, MI, RGR
-              return name.substring(0, 2).toUpperCase();
-            };
-            const initials = getInitials(advertiser.name);
+        {(() => {
+          const maxRevenue = Math.max(...analytics.advertiserStats.map(a => a.revenue)) || 1;
 
-            return (
-              <div
-                key={advertiser.name}
-                onClick={() => openAdvertiserPopup(advertiser.name)}
-                className="relative py-2.5 px-3 rounded-xl border border-gray-200 cursor-pointer transition-all duration-100 ease-in-out bg-white shadow-[3px_3px_0px_0px_var(--accent-color)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[4px_4px_0px_0px_var(--accent-color)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_0px_var(--accent-color)]"
-                style={{
-                  '--accent-color': accent
-                } as React.CSSProperties}
-              >
-                <div className="flex items-center space-x-2.5">
+          return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+              {analytics.advertiserStats.map((advertiser) => {
+                const accent = getAdvertiserAccent(advertiser.name);
+
+                // Get first letter(s) of advertiser name
+                const getInitials = (name: string): string => {
+                  if (name === 'XC EXC') return 'XE';
+                  if (name === 'NON COMCAST') return 'NC';
+                  if (name.length <= 3) return name.toUpperCase();
+                  return name.substring(0, 2).toUpperCase();
+                };
+                const initials = getInitials(advertiser.name);
+
+                return (
                   <div
-                    className="flex items-center justify-center rounded-lg w-8 h-8 flex-shrink-0 font-extrabold text-xs shadow-sm"
-                    style={{ backgroundColor: accent, color: '#FFFFFF' }}
+                    key={advertiser.name}
+                    onClick={() => openAdvertiserPopup(advertiser.name)}
+                    className="relative p-3 rounded-2xl border border-slate-100 bg-slate-50/20 hover:bg-white hover:border-indigo-100 hover:shadow-[0_12px_25px_rgba(99,102,241,0.05)] cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 flex flex-col justify-between"
                   >
-                    {initials}
-                  </div>
+                    <div>
+                      {/* Upper row: Initials & Basic Info */}
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="flex items-center justify-center rounded-xl w-10 h-10 flex-shrink-0 font-black text-xs shadow-inner"
+                          style={{
+                            backgroundColor: hexToRgba(accent, 0.12),
+                            color: accent,
+                            border: `1.5px solid ${hexToRgba(accent, 0.22)}`
+                          }}
+                        >
+                          {initials}
+                        </div>
 
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-sm text-gray-800 truncate leading-tight">{advertiser.name}</h4>
-                    <div className="flex items-baseline justify-between mt-0.5">
-                      <span className="text-base font-extrabold tracking-tight" style={{ color: accent }}>
-                        ${advertiser.revenue.toLocaleString()}
-                      </span>
-                      <span className="text-[10px] font-semibold text-gray-500 whitespace-nowrap ml-2">
-                        {advertiser.name === 'RGR' || advertiser.name === 'ICO'
-                          ? `${advertiser.frequency || 0} count`
-                          : `${advertiser.campaigns.length} campaign${advertiser.campaigns.length !== 1 ? 's' : ''}`
-                        }
-                      </span>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-extrabold text-sm text-slate-800 truncate leading-snug">{advertiser.name}</h4>
+                          <p className="text-[10px] font-bold text-slate-400 mt-0.5">
+                            {advertiser.name === 'RGR' || advertiser.name === 'ICO'
+                              ? `${advertiser.frequency || 0} conversions`
+                              : `${advertiser.campaigns.length} active campaign${advertiser.campaigns.length !== 1 ? 's' : ''}`
+                            }
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Revenue Info */}
+                      <div className="flex items-baseline justify-between mt-4 mb-1">
+                        <span className="text-lg font-black tracking-tight text-slate-900">
+                          ${advertiser.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                        <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">
+                          {((advertiser.revenue / analytics.totalRevenue) * 100).toFixed(1)}% Share
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Progress Indicator */}
+                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${(advertiser.revenue / maxRevenue) * 100}%`,
+                          backgroundColor: accent
+                        }}
+                      />
                     </div>
                   </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          );
+        })()}
       </div>
 
       {/* End: Advertiser Revenue Breakdown */}
@@ -1598,10 +1697,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                     </div>
 
                     <div className="text-right">
-                      <p className="text-xl font-black text-gray-900 mb-0.5 leading-none drop-shadow-sm">
-                        {displayTargetRevenue(et.name, analytics.totalRevenue)}
-                      </p>
-                      <p className="text-[10px] font-bold text-yellow-900/80 uppercase tracking-widest mt-1.5">
+                      <div className="flex items-center justify-end gap-2 mb-1">
+                        <span className="text-xl font-black text-gray-900 leading-none drop-shadow-sm">
+                          {displayTargetRevenue(et.name, analytics.totalRevenue)}
+                        </span>
+                        {renderTargetComparison(et.name, et.revenue, analytics.totalRevenue, true)}
+                      </div>
+                      <p className="text-[10px] font-bold text-yellow-900/80 uppercase tracking-widest mt-1">
                         Daily Target
                       </p>
                     </div>
@@ -1622,32 +1724,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                     </div>
                   </div>
 
-                  {/* Toggle button */}
-                  <button
-                    onClick={() => toggleET(et.name)}
-                    className="flex items-center gap-1.5 text-[10px] font-black text-gray-900 hover:text-black uppercase tracking-wider drop-shadow-sm transition-colors"
-                  >
-                    {expandedETs.has(et.name) ? (
-                      <><ChevronUp className="w-3.5 h-3.5" /> View Advertisers</>
-                    ) : (
-                      <><ChevronDown className="w-3.5 h-3.5" /> View Advertisers</>
-                    )}
-                  </button>
 
-                  {/* Advertiser Breakdown */}
-                  <div
-                    className={`overflow-hidden transition-all duration-300 ease-in-out
-                    ${expandedETs.has(et.name) ? 'max-h-96 opacity-100 mt-3' : 'max-h-0 opacity-0'}`}
-                  >
-                    <div className="flex flex-wrap gap-2">
-                      {et.advertisersArray?.map(ad => (
-                        <div key={ad.name} className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/20 border border-white/30 backdrop-blur-sm shadow-sm">
-                          <span className="text-[10px] font-bold text-gray-900">{ad.name}</span>
-                          <span className="text-[10px] font-black text-gray-800">${ad.revenue.toFixed(2)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
                 </div>
               </div>
             ))}
@@ -1667,121 +1744,113 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {analytics.etStats.slice(3, 100).map((et, index) => (
-            <div
-              key={et.name}
-              className={`rounded-2xl border bg-white shadow-sm transition-all hover:shadow-md hover:scale-[1.01] overflow-hidden ${et.name.includes('+') ? 'border-purple-200/60' : 'border-blue-200/60'}`}
-            >
-              {/* Header Section */}
-              <div className={`flex items-center justify-between p-3 border-b ${et.name.includes('+') ? 'bg-purple-50/50 border-purple-100/50' : 'bg-blue-50/50 border-blue-100/50'}`}>
-                <div className="flex items-center gap-2.5">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center ${et.name.includes('+') ? 'bg-purple-100' : 'bg-blue-100'}`}>
-                    <Users className={`w-3.5 h-3.5 ${et.name.includes('+') ? 'text-purple-500' : 'text-blue-500'}`} />
+          {analytics.etStats.slice(3, 100).map((et, index) => {
+            const isCombined = et.name.includes('+');
+            const cardBorderClass = isCombined
+              ? 'border-purple-100 hover:border-purple-300 hover:shadow-purple-100/50'
+              : 'border-slate-100 hover:border-indigo-200 hover:shadow-indigo-50/50';
+            const headerBgClass = isCombined
+              ? 'bg-gradient-to-r from-purple-50/60 to-fuchsia-50/40'
+              : 'bg-gradient-to-r from-indigo-50/40 to-slate-50/60';
+            const iconBgClass = isCombined
+              ? 'bg-purple-100/80 text-purple-600 border border-purple-200/50'
+              : 'bg-indigo-100/80 text-indigo-600 border border-indigo-200/50';
+
+            return (
+              <div
+                key={et.name}
+                className={`rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 overflow-hidden ${cardBorderClass}`}
+              >
+                {/* Header Section */}
+                <div className={`flex items-center justify-between p-3.5 border-b border-slate-100/80 ${headerBgClass}`}>
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-inner ${iconBgClass}`}>
+                      <Users className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-slate-800 leading-tight text-sm tracking-tight">
+                        {et.name}
+                      </h4>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900 leading-tight text-sm">
-                      {et.name}
-                    </h4>
-                  </div>
+
+                  {(() => {
+                    const info = getETInfo(et.name);
+                    if (!info) return null;
+                    return (
+                      <div className="flex items-center text-[9px] font-bold rounded-lg overflow-hidden border border-slate-200/80 bg-white/90 backdrop-blur-sm shadow-sm">
+                        <span className="bg-slate-100 text-slate-700 px-2 py-0.5 border-r border-slate-200/60">
+                          {info.stack}
+                        </span>
+                        <span className="text-slate-600 px-2 py-0.5">
+                          {info.manager}
+                        </span>
+                      </div>
+                    );
+                  })()}
                 </div>
 
-                {(() => {
-                  const info = getETInfo(et.name);
-                  if (!info) return null;
-                  return (
-                    <div className="flex items-center text-[9px] font-bold">
-                      <span className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-l-md border border-gray-200 border-r-0">
-                        {info.stack}
-                      </span>
-                      <span className="bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded-r-md border border-gray-200">
-                        {info.manager}
+                {/* Main Content Section */}
+                <div className="p-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <div>
+                      <p className={`text-xl font-black mb-0.5 leading-none tracking-tight ${isCombined ? 'text-purple-600' : 'text-indigo-600'}`}>
+                        ${et.revenue.toLocaleString()}
+                      </p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                        {isCombined ? 'Combined Revenue' : 'Today Revenue'}
+                      </p>
+
+                      {isCombined && (
+                        <div className="mt-2 flex flex-col gap-1 border-l-2 border-purple-100 pl-2">
+                          {(et as any).et1Name && (
+                            <span className="text-[9px] font-bold text-slate-500">
+                              {(et as any).et1Name}: <span className="font-black text-slate-800">${((et as any).et1Revenue ?? 0).toLocaleString()}</span>
+                            </span>
+                          )}
+                          {(et as any).et2Name && (
+                            <span className="text-[9px] font-bold text-slate-500">
+                              {(et as any).et2Name}: <span className="font-black text-slate-800">${((et as any).et2Revenue ?? 0).toLocaleString()}</span>
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="text-right">
+                      <div className="flex items-center justify-end gap-1.5 mb-0.5">
+                        <span className="text-base font-extrabold text-slate-800 leading-none">
+                          {displayTargetRevenue(et.name, analytics.totalRevenue)}
+                        </span>
+                        {renderTargetComparison(et.name, et.revenue, analytics.totalRevenue, false)}
+                      </div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                        Daily Target
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Info Tags */}
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl bg-slate-50 border border-slate-100/70 hover:bg-slate-100/50 transition-colors">
+                      <Layers className="h-3.5 w-3.5 text-emerald-500" />
+                      <span className="text-[11px] font-bold text-slate-700">
+                        {et.creatives.length} <span className="text-slate-400 font-normal">Cr</span>
                       </span>
                     </div>
-                  );
-                })()}
-              </div>
-
-              {/* Main Content Section */}
-              <div className="p-3.5">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <p className={`text-xl font-black mb-0.5 leading-none ${et.name.includes('+') ? 'text-purple-600' : 'text-blue-600'}`}>
-                      ${et.revenue.toLocaleString()}
-                    </p>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pt-2">
-                      {et.name.includes('+') ? 'Combined Revenue' : 'Today Revenue'}
-                    </p>
-
-                    {et.name.includes('+') && (
-                      <div className="mt-1.5 flex flex-col gap-0.5">
-                        {(et as any).et1Name && (
-                          <span className="text-[9px] font-medium text-gray-500">
-                            {(et as any).et1Name}: <span className="font-bold">${((et as any).et1Revenue ?? 0).toLocaleString()}</span>
-                          </span>
-                        )}
-                        {(et as any).et2Name && (
-                          <span className="text-[9px] font-medium text-gray-500">
-                            {(et as any).et2Name}: <span className="font-bold">${((et as any).et2Revenue ?? 0).toLocaleString()}</span>
-                          </span>
-                        )}
-                      </div>
-                    )}
+                    <div className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl bg-slate-50 border border-slate-100/70 hover:bg-slate-100/50 transition-colors">
+                      <Target className="h-3.5 w-3.5 text-indigo-500" />
+                      <span className="text-[11px] font-bold text-slate-700">
+                        {et.campaigns.length} <span className="text-slate-400 font-normal">Camp</span>
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="text-right">
-                    <p className="text-base font-bold text-gray-900 mb-0.5 leading-none">
-                      {displayTargetRevenue(et.name, analytics.totalRevenue)}
-                    </p>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pt-2">
-                      Daily Target
-                    </p>
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-3 py-2 border-y border-gray-100 mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <Layers className="h-3.5 w-3.5 text-emerald-500" />
-                    <span className="text-[11px] font-semibold text-gray-600">
-                      {et.creatives.length} <span className="text-gray-400 font-normal">Cr</span>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Target className="h-3.5 w-3.5 text-blue-500" />
-                    <span className="text-[11px] font-semibold text-gray-600">
-                      {et.campaigns.length} <span className="text-gray-400 font-normal">Camp</span>
-                    </span>
-                  </div>
-                </div>
-
-                {/* Toggle button */}
-                <button
-                  onClick={() => toggleET(et.name)}
-                  className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider hover:opacity-80 ${et.name.includes('+') ? 'text-purple-600' : 'text-blue-600'}`}
-                >
-                  {expandedETs.has(et.name) ? (
-                    <><ChevronUp className="w-3 h-3" /> Hide Advertisers</>
-                  ) : (
-                    <><ChevronDown className="w-3 h-3" /> View Advertisers</>
-                  )}
-                </button>
-
-                {/* Advertiser Breakdown */}
-                <div
-                  className={`overflow-hidden transition-all duration-300 ease-in-out
-                  ${expandedETs.has(et.name) ? 'max-h-96 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}
-                >
-                  <div className="flex flex-wrap gap-1.5">
-                    {et.advertisersArray?.map(ad => (
-                      <div key={ad.name} className={`flex items-center gap-1 px-2 py-0.5 rounded-md border ${et.name.includes('+') ? 'bg-purple-50 border-purple-100/50' : 'bg-blue-50 border-blue-100/50'}`}>
-                        <span className={`text-[9px] font-bold ${et.name.includes('+') ? 'text-purple-800' : 'text-blue-800'}`}>{ad.name}</span>
-                        <span className={`text-[9px] font-medium ${et.name.includes('+') ? 'text-purple-600' : 'text-blue-600'}`}>${ad.revenue.toFixed(2)}</span>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -2439,6 +2508,27 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                     </div>
                   )}
 
+                  {/* Advertiser Revenue Breakdown */}
+                  {etData.advertisersArray && etData.advertisersArray.length > 0 && (
+                    <div className="mb-6">
+                      <div className="flex items-center mb-4 gap-3">
+                        <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100">
+                          <Building2 className="h-5 w-5" />
+                        </div>
+                        <h4 className="text-lg font-bold text-gray-900">Advertiser-Wise Revenue Breakdown</h4>
+                      </div>
+                      <div className="flex flex-wrap gap-2.5">
+                        {etData.advertisersArray.map(ad => (
+                          <div key={ad.name} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/60 shadow-xs hover:bg-slate-100/40 transition-colors">
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getAdvertiserAccent(ad.name) }} />
+                            <span className="text-xs font-bold text-slate-700">{ad.name}</span>
+                            <span className="text-xs font-black text-slate-900">${ad.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Campaign Revenue for Selected ET */}
                   <div className="mb-6">
                     <div className="flex items-center mb-4 gap-3">
@@ -2687,6 +2777,27 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                           {selectedETData.creatives[0].frequency} occurrences
                         </p>
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Advertiser Revenue Breakdown */}
+                {selectedETData.advertisersArray && selectedETData.advertisersArray.length > 0 && (
+                  <div className="mb-6">
+                    <div className="flex items-center mb-4 gap-3">
+                      <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100">
+                        <Building2 className="h-5 w-5" />
+                      </div>
+                      <h4 className="text-lg font-bold text-gray-900">Advertiser-Wise Revenue Breakdown</h4>
+                    </div>
+                    <div className="flex flex-wrap gap-2.5">
+                      {selectedETData.advertisersArray.map(ad => (
+                        <div key={ad.name} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/60 shadow-xs hover:bg-slate-100/40 transition-colors">
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getAdvertiserAccent(ad.name) }} />
+                          <span className="text-xs font-bold text-slate-700">{ad.name}</span>
+                          <span className="text-xs font-black text-slate-900">${ad.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
