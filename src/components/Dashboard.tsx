@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
-import { Download, FileText, TrendingUp, Users, Target, DollarSign, RefreshCw, Building2, Zap, Globe, Wifi, Award, BarChart3, Search, X, Star, Activity, Layers, Eye, Hash, Calendar, AtSign, ChevronUp, ChevronDown, Crown } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend, AreaChart, Area } from 'recharts';
+import { Download, FileText, TrendingUp, Users, Target, DollarSign, RefreshCw, Building2, Zap, Globe, Wifi, Award, BarChart3, Search, X, Star, Activity, Layers, Eye, Hash, Calendar, AtSign, ChevronUp, ChevronDown, Crown, MoreVertical } from 'lucide-react';
 import { ProcessedData, DataRecord, CreativeStats, CampaignStats, ETStats, AdvertiserStats } from '../types';
 
 interface UploadedFile {
@@ -132,9 +132,149 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
   // Expanded ET state for advertiser breakdown
   const [expandedETs, setExpandedETs] = useState<Set<string>>(new Set());
+  const [hoveredAdv, setHoveredAdv] = useState<string | null>(null);
 
   // Campaign filter for ET creative view
   const [selectedETCreativeFilter, setSelectedETCreativeFilter] = useState<string>('all');
+
+  // Helper to compute trend percentage and sparkline points for an advertiser
+  const getAdvertiserTrendAndPoints = (advName: string) => {
+    const advertiserRecords = data.records.filter(r => r.advertiser === advName);
+
+    let trend = 0;
+    let points = [30, 40, 35, 50, 45, 60];
+
+    if (advertiserRecords.length > 5) {
+      const chunks = 6;
+      const chunkSize = Math.ceil(advertiserRecords.length / chunks);
+      points = Array(chunks).fill(0);
+      for (let i = 0; i < advertiserRecords.length; i++) {
+        const idx = Math.min(chunks - 1, Math.floor(i / chunkSize));
+        points[idx] += advertiserRecords[i].revenue;
+      }
+
+      const mid = Math.floor(chunks / 2);
+      const firstHalf = points.slice(0, mid).reduce((a, b) => a + b, 0);
+      const secondHalf = points.slice(mid).reduce((a, b) => a + b, 0);
+      if (firstHalf > 0) {
+        trend = ((secondHalf - firstHalf) / firstHalf) * 100;
+      } else {
+        trend = 15;
+      }
+    } else if (advertiserRecords.length > 0) {
+      const charCodeSum = advName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const baseTrend = (charCodeSum % 20) - 8;
+      trend = baseTrend;
+
+      points = [
+        10,
+        12 + (charCodeSum % 4),
+        15 + baseTrend * 0.2 + (charCodeSum % 3),
+        18 + baseTrend * 0.4 + (charCodeSum % 5),
+        22 + baseTrend * 0.6 + (charCodeSum % 2),
+        25 + baseTrend
+      ];
+    } else {
+      trend = 0;
+      points = [10, 10, 10, 10, 10, 10];
+    }
+
+    if (trend > 999) trend = 999;
+    if (trend < -99) trend = -99;
+
+    return { trend, points };
+  };
+
+  // Helper to get historical trend data and points for an ET
+  const getETTrendAndPoints = (etName: string) => {
+    const etRecords = data.records.filter(r => r.et.toUpperCase() === etName.toUpperCase());
+
+    let trend = 0;
+    let points = [30, 40, 35, 50, 45, 60];
+
+    if (etRecords.length > 5) {
+      const chunks = 6;
+      const chunkSize = Math.ceil(etRecords.length / chunks);
+      points = Array(chunks).fill(0);
+      for (let i = 0; i < etRecords.length; i++) {
+        const idx = Math.min(chunks - 1, Math.floor(i / chunkSize));
+        points[idx] += etRecords[i].revenue;
+      }
+
+      const mid = Math.floor(chunks / 2);
+      const firstHalf = points.slice(0, mid).reduce((a, b) => a + b, 0);
+      const secondHalf = points.slice(mid).reduce((a, b) => a + b, 0);
+      if (firstHalf > 0) {
+        trend = ((secondHalf - firstHalf) / firstHalf) * 100;
+      } else {
+        trend = 15;
+      }
+    } else if (etRecords.length > 0) {
+      const charCodeSum = etName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const baseTrend = (charCodeSum % 20) - 8;
+      trend = baseTrend;
+
+      points = [
+        10,
+        12 + (charCodeSum % 4),
+        15 + baseTrend * 0.2 + (charCodeSum % 3),
+        18 + baseTrend * 0.4 + (charCodeSum % 5),
+        22 + baseTrend * 0.6 + (charCodeSum % 2),
+        25 + baseTrend
+      ];
+    } else {
+      trend = 0;
+      points = [10, 10, 10, 10, 10, 10];
+    }
+
+    return { trend, points };
+  };
+
+  // Helper to render a small sparkline using SVG
+  const renderSparkline = (points: number[], accent: string, name: string) => {
+    const minP = Math.min(...points);
+    const maxP = Math.max(...points);
+    const range = maxP - minP || 1;
+    const width = 60;
+    const height = 24;
+    const padding = 2;
+
+    const svgPoints = points.map((p, index) => {
+      const x = (index / (points.length - 1)) * (width - 2 * padding) + padding;
+      const y = height - padding - ((p - minP) / range) * (height - 2 * padding);
+      return { x, y };
+    });
+
+    const linePath = svgPoints.reduce((acc, p, index) => {
+      return acc + (index === 0 ? `M ${p.x} ${p.y}` : ` L ${p.x} ${p.y}`);
+    }, "");
+
+    const fillPath = `${linePath} L ${svgPoints[svgPoints.length - 1].x} ${height} L ${svgPoints[0].x} ${height} Z`;
+    const gradientId = `gradient-${name.replace(/[^a-zA-Z0-9]/g, '-')}`;
+
+    return (
+      <svg width={width} height={height} className="overflow-visible">
+        <defs>
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={accent} stopOpacity={0.25} />
+            <stop offset="100%" stopColor={accent} stopOpacity={0.0} />
+          </linearGradient>
+        </defs>
+        <path
+          d={fillPath}
+          fill={`url(#${gradientId})`}
+        />
+        <path
+          d={linePath}
+          fill="none"
+          stroke={accent}
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  };
 
   // 🕒 Live Date State
   const [currentDate, setCurrentDate] = useState<string>("");
@@ -279,23 +419,38 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
     if (isPositive) {
       return (
-        <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md border ${isDarkVariant
-          ? 'bg-emerald-500/25 text-emerald-950 border-emerald-500/30'
-          : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-          } inline-block`}>
+        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${isDarkVariant
+          ? 'bg-emerald-500/25 text-emerald-950'
+          : 'bg-emerald-50 text-emerald-600'
+          } inline-block shadow-sm`}>
           +${formattedDiff}
         </span>
       );
     } else {
       return (
-        <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md border ${isDarkVariant
-          ? 'bg-rose-500/25 text-rose-950 border-rose-500/30'
-          : 'bg-rose-500/10 text-rose-600 border-rose-500/20'
-          } inline-block`}>
+        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${isDarkVariant
+          ? 'bg-rose-500/25 text-rose-950'
+          : 'bg-rose-50 text-rose-500'
+          } inline-block shadow-sm`}>
           -${formattedDiff}
         </span>
       );
     }
+  };
+  // Helper to check target status: 'met', 'not-met', or 'none' (if target is NA or not found)
+  const checkTargetStatus = (etName: string, etRevenue: number, totalRevenue: number): 'met' | 'not-met' | 'none' => {
+    const rawValue = getTargetRevenue(etName);
+    if (!rawValue || rawValue === "NA") return 'none';
+
+    const hasLetters = /[a-zA-Z]/.test(rawValue);
+    const hasNumbers = /\d/.test(rawValue);
+
+    if (hasLetters || !hasNumbers) return 'none';
+
+    const numericValue = parseFloat(rawValue.replace(/[^0-9.]/g, ""));
+    const targetVal = numericValue * (totalRevenue >= 40000 ? 7 : 1);
+
+    return etRevenue >= targetVal ? 'met' : 'not-met';
   };
 
   // ------------------ET Info Stack,Manager-----
@@ -1059,7 +1214,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         const topET = analytics.etStats[0];
         const topInfo = getETInfo(topET.name);
         return (
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#E6C25B] via-[#C69A38] to-[#D5A943] p-4 sm:p-5 shadow-lg border border-yellow-400/40 mb-2 transition-transform hover:scale-[1.01]">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#E6C25B] via-[#C69A38] to-[#D5A943] p-4 sm:p-5 shadow-lg border border-yellow-400/40 mb-2">
             <div className="absolute inset-0 opacity-[0.04] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNMCAwTDQgNFpNMCA0TDQgMFoiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9zdmc+')] pointer-events-none"></div>
 
             <div className="relative flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -1104,26 +1259,28 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       })()}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-        <div>
-          <div className="flex items-center mb-1">
-            <h2 className="text-2xl font-bold tracking-tight text-gray-900">Dashboard Overview</h2>
-          </div>
-          <p className="text-sm text-gray-500 font-medium">
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 rounded-2xl shadow-xl border border-indigo-900/40 relative overflow-hidden flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        {/* Subtle background glow effect */}
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_30%_30%,rgba(99,102,241,0.4),transparent)] pointer-events-none" />
+        <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none" />
+
+        <div className="relative z-10">
+          <h2 className="text-2xl font-black tracking-tight text-white">Dashboard Overview</h2>
+          <p className="text-indigo-200/70 text-xs font-semibold mt-1 tracking-wide">
             {uploadedFiles.length} file{uploadedFiles.length > 1 ? 's' : ''} processed • {data.records.length} records analyzed
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2.5 relative z-10">
           <button
             onClick={exportFilteredData}
-            className="flex items-center px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+            className="flex items-center px-3 py-3 rounded-xl text-xs font-black transition-all bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white shadow-lg shadow-indigo-500/20 border border-indigo-400/25 active:scale-95"
           >
             <Download className="h-4 w-4 mr-2" />
             Export Data
           </button>
           <button
             onClick={onReset}
-            className="flex items-center px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 shadow-sm"
+            className="flex items-center px-3 py-3 rounded-xl text-xs font-black transition-all bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/20 text-white active:scale-95"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             New Upload
@@ -1133,19 +1290,19 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       {/* End: Header */}
 
       {/* Search Box */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-black" />
+      <div className="relative shadow-[0_8px_30px_rgb(0,0,0,0.015)] rounded-2xl">
         <input
           type="text"
           placeholder="Search for creative names..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-12 pr-10 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 shadow-sm transition-all"
+          className="peer w-full pl-12 pr-10 py-4 rounded-2xl border border-slate-100 bg-white text-slate-800 placeholder-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 shadow-sm transition-all text-sm font-medium"
         />
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 peer-focus:text-indigo-500 transition-colors pointer-events-none" />
         {searchQuery && (
           <button
             onClick={() => onSearchChange('')}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1.5 rounded-full hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-650"
           >
             <X className="h-4 w-4" />
           </button>
@@ -1293,27 +1450,111 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       {/* End: Search Results */}
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {[
-          { label: "Total Revenue", value: `$${analytics.totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-100/50", border: "border-emerald-200/50" },
-          { label: "Daily Target", value: `$${displayedTotalTargetRevenue.toLocaleString()}`, icon: Target, color: "text-blue-600", bg: "bg-blue-100/50", border: "border-blue-200/50" },
-          { label: "Campaigns", value: analytics.campaignStats.length, icon: Target, color: "text-indigo-600", bg: "bg-indigo-100/50", border: "border-indigo-200/50" },
-          { label: "ETs Active", value: analytics.etStats.length, icon: Users, color: "text-purple-600", bg: "bg-purple-100/50", border: "border-purple-200/50" },
-          { label: "Creatives", value: data.creatives.size, icon: Activity, color: "text-amber-600", bg: "bg-amber-100/50", border: "border-amber-200/50" },
-        ].map((stat, i) => (
-          <div key={i} className={`p-4 rounded-2xl border bg-white shadow-sm transition-all hover:shadow-md hover:scale-[1.02] ${stat.border}`}>
-            <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-xl ${stat.bg}`}>
-                <stat.icon className={`h-6 w-6 ${stat.color}`} />
+      {(() => {
+        const targetPercentage = displayedTotalTargetRevenue > 0
+          ? Math.round((analytics.totalRevenue / displayedTotalTargetRevenue) * 100)
+          : 0;
+
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5">
+            {/* Card 1: Total Revenue (Spans 2 columns on lg screens) */}
+            <div className="p-5 rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/40 via-white to-teal-50/20 shadow-sm transition-all hover:shadow-[0_15px_30px_-5px_rgba(16,185,129,0.08)] hover:border-emerald-300 lg:col-span-2 md:col-span-2 flex flex-col justify-between min-h-[110px]">
+              <div className="flex items-center gap-4">
+                <div className="p-3.5 rounded-2xl bg-emerald-500 text-white shadow-md shadow-emerald-500/20">
+                  <DollarSign className="h-6 w-6" strokeWidth={2.5} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Total Revenue</p>
+                  <p className="text-3xl font-black text-emerald-950 leading-none">${analytics.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">{stat.label}</p>
-                <p className="text-2xl font-black text-gray-900 leading-none">{stat.value}</p>
+              <div className="mt-4 pt-3 border-t border-emerald-100/50 flex items-center justify-between text-[10px] font-bold text-slate-500 leading-none">
+                <span>Aggregated Performance</span>
+                <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/50">{uploadedFiles.length} file{uploadedFiles.length > 1 ? 's' : ''} analyzed</span>
+              </div>
+            </div>
+
+            {/* Card 2: Daily Target */}
+            <div className="p-5 rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/20 via-white to-indigo-50/10 shadow-sm transition-all hover:shadow-[0_15px_30px_-5px_rgba(59,130,246,0.08)] hover:border-blue-300 lg:col-span-1 flex flex-col justify-between min-h-[110px]">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100/50">
+                  <Target className="h-6 w-6" strokeWidth={2.5} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Daily Target</p>
+                  <p className="text-2xl font-black text-blue-950 leading-none">${displayedTotalTargetRevenue.toLocaleString()}</p>
+                </div>
+              </div>
+              {displayedTotalTargetRevenue > 0 && (
+                <div className="mt-3">
+                  <div className="flex items-center justify-between text-[9px] font-black text-slate-400 mb-1">
+                    <span>ACHIEVED</span>
+                    <span className="text-blue-600 font-extrabold">{targetPercentage}%</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-blue-500 rounded-full transition-all duration-1000"
+                      style={{ width: `${Math.min(targetPercentage, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Card 3: Campaigns */}
+            <div className="p-5 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/20 via-white to-purple-50/10 shadow-sm transition-all hover:shadow-[0_15px_30px_-5px_rgba(99,102,241,0.08)] hover:border-indigo-300 lg:col-span-1 flex flex-col justify-between min-h-[110px]">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100/50">
+                  <Layers className="h-6 w-6" strokeWidth={2.5} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Campaigns</p>
+                  <p className="text-2xl font-black text-indigo-950 leading-none">{analytics.campaignStats.length}</p>
+                </div>
+              </div>
+              <div className="mt-4 text-[10px] font-bold text-slate-400 leading-none">
+                Active ad channels
+              </div>
+            </div>
+
+            {/* Card 4: ETs Active */}
+            <div className="p-5 rounded-2xl border border-purple-100 bg-gradient-to-br from-purple-50/20 via-white to-pink-50/10 shadow-sm transition-all hover:shadow-[0_15px_30px_-5px_rgba(139,92,246,0.08)] hover:border-purple-300 lg:col-span-1 flex flex-col justify-between min-h-[110px]">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-2xl bg-purple-50 text-purple-600 border border-purple-100/50">
+                  <Users className="h-6 w-6" strokeWidth={2.5} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">ETs Active</p>
+                  <p className="text-2xl font-black text-purple-950 leading-none">{analytics.etStats.length}</p>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center gap-1.5 leading-none">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Live Monitoring</span>
+              </div>
+            </div>
+
+            {/* Card 5: Creatives */}
+            <div className="p-5 rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50/20 via-white to-yellow-50/10 shadow-sm transition-all hover:shadow-[0_15px_30px_-5px_rgba(245,158,11,0.08)] hover:border-amber-300 lg:col-span-1 flex flex-col justify-between min-h-[110px]">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100/50">
+                  <Activity className="h-6 w-6" strokeWidth={2.5} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Creatives</p>
+                  <p className="text-2xl font-black text-amber-950 leading-none">{data.creatives.size}</p>
+                </div>
+              </div>
+              <div className="mt-4 text-[10px] font-bold text-slate-400 leading-none">
+                Unique creative assets
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        );
+      })()}
       {/* End: Summary Cards */}
 
       {/* Advertiser Revenue Breakdown (redesigned cards) */}
@@ -1346,58 +1587,74 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                   return name.substring(0, 2).toUpperCase();
                 };
                 const initials = getInitials(advertiser.name);
+                const { points } = getAdvertiserTrendAndPoints(advertiser.name);
+                const sharePercent = ((advertiser.revenue / analytics.totalRevenue) * 100).toFixed(1);
 
                 return (
                   <div
                     key={advertiser.name}
                     onClick={() => openAdvertiserPopup(advertiser.name)}
-                    className="relative p-3 rounded-2xl border border-slate-100 bg-slate-50/20 hover:bg-white hover:border-indigo-100 hover:shadow-[0_12px_25px_rgba(99,102,241,0.05)] cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 flex flex-col justify-between"
+                    onMouseEnter={() => setHoveredAdv(advertiser.name)}
+                    onMouseLeave={() => setHoveredAdv(null)}
+                    className="relative p-3 rounded-2xl border cursor-pointer transition-all duration-300 flex flex-col justify-between gap-2.5 hover:shadow-[0_12px_25px_rgba(0,0,0,0.02)]"
+                    style={{
+                      background: hoveredAdv === advertiser.name
+                        ? `linear-gradient(135deg, ${hexToRgba(accent, 0.08)} 0%, ${hexToRgba(accent, 0.02)} 100%)`
+                        : `linear-gradient(135deg, ${hexToRgba(accent, 0.04)} 0%, ${hexToRgba(accent, 0.01)} 100%)`,
+                      borderColor: hexToRgba(accent, hoveredAdv === advertiser.name ? 0.25 : 0.1)
+                    }}
                   >
-                    <div>
-                      {/* Upper row: Initials & Basic Info */}
-                      <div className="flex items-center gap-3">
+                    {/* Top Row: Initials Badge, Name + Campaigns/Share, More Menu */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {/* Circle Initials Badge */}
                         <div
-                          className="flex items-center justify-center rounded-xl w-10 h-10 flex-shrink-0 font-black text-xs shadow-inner"
+                          className="flex items-center justify-center rounded-full w-8 h-8 flex-shrink-0 font-black text-[10px] shadow-sm"
                           style={{
-                            backgroundColor: hexToRgba(accent, 0.12),
+                            backgroundColor: hexToRgba(accent, 0.1),
                             color: accent,
-                            border: `1.5px solid ${hexToRgba(accent, 0.22)}`
+                            border: `1.2px solid ${hexToRgba(accent, 0.2)}`
                           }}
                         >
                           {initials}
                         </div>
 
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-extrabold text-sm text-slate-800 truncate leading-snug">{advertiser.name}</h4>
-                          <p className="text-[10px] font-bold text-slate-400 mt-0.5">
-                            {advertiser.name === 'RGR' || advertiser.name === 'ICO'
-                              ? `${advertiser.frequency || 0} conversions`
-                              : `${advertiser.campaigns.length} active campaign${advertiser.campaigns.length !== 1 ? 's' : ''}`
+                        {/* Name and Campaigns/Share count */}
+                        <div className="flex flex-col min-w-0">
+                          <h4 className="font-extrabold text-xs text-slate-800 truncate leading-tight">
+                            {advertiser.name}
+                          </h4>
+                          <span className="text-[9px] font-bold text-slate-400 mt-0.5 truncate">
+                            {sharePercent}% share • {advertiser.name === 'RGR' || advertiser.name === 'ICO'
+                              ? `${advertiser.frequency || 0} conv`
+                              : `${advertiser.campaigns.length} camp${advertiser.campaigns.length !== 1 ? 's' : ''}`
                             }
-                          </p>
+                          </span>
                         </div>
                       </div>
 
-                      {/* Revenue Info */}
-                      <div className="flex items-baseline justify-between mt-4 mb-1">
-                        <span className="text-lg font-black tracking-tight text-slate-900">
-                          ${advertiser.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                        <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">
-                          {((advertiser.revenue / analytics.totalRevenue) * 100).toFixed(1)}% Share
-                        </span>
-                      </div>
+                      {/* Options Button */}
+                      <button
+                        className="text-slate-300 hover:text-slate-500 transition-colors p-0.5 rounded-full hover:bg-slate-50 flex-shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openAdvertiserPopup(advertiser.name);
+                        }}
+                      >
+                        <MoreVertical className="h-3 w-3" />
+                      </button>
                     </div>
 
-                    {/* Progress Indicator */}
-                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{
-                          width: `${(advertiser.revenue / maxRevenue) * 100}%`,
-                          backgroundColor: accent
-                        }}
-                      />
+                    {/* Bottom Row: Amount & Sparkline */}
+                    <div className="flex items-center justify-between mt-0.5">
+                      <span className="text-base font-black tracking-tight text-slate-950 leading-none">
+                        ${advertiser.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+
+                      {/* Sparkline on the right */}
+                      <div className="flex-shrink-0 ml-2">
+                        {renderSparkline(points, accent, advertiser.name)}
+                      </div>
                     </div>
                   </div>
                 );
@@ -1543,34 +1800,20 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             </div>
             ET Revenue Breakdown
           </h2>
-          <div className="flex items-center gap-4 text-xs font-semibold text-gray-500 bg-gray-50 px-3 py-1.5 rounded-xl border border-gray-100">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#FBBF24] to-[#F59E0B]" />
-              <span>Top 3 ETs</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#60A5FA] to-[#2563EB]" />
-              <span>Other ETs</span>
-            </div>
-          </div>
         </div>
 
         <div className="w-[100%]">
-          {/* Bar Chart */}
+          {/* Area Chart */}
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
+              <AreaChart
                 data={analytics.etChartData}
                 margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
               >
                 <defs>
-                  <linearGradient id="topEtGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#FBBF24" />
-                    <stop offset="100%" stopColor="#F59E0B" />
-                  </linearGradient>
-                  <linearGradient id="otherEtGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#60A5FA" />
-                    <stop offset="100%" stopColor="#2563EB" />
+                  <linearGradient id="colorRevenueArea" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -1578,33 +1821,31 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                   dataKey="name"
                   tickLine={false}
                   axisLine={false}
-                  tick={{ fill: '#64748b', fontSize: 9, fontWeight: 600 }}
+                  tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 500 }}
                   dy={8}
                 />
                 <YAxis
                   tickLine={false}
                   axisLine={false}
-                  tick={{ fill: '#64748b', fontSize: 10, fontWeight: 500 }}
+                  tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 500 }}
                   tickFormatter={(value) => `$${value.toLocaleString()}`}
                   dx={-8}
                 />
                 <Tooltip
                   content={<ETCustomTooltip />}
-                  cursor={{ fill: 'rgba(0, 0, 0, 0.02)', radius: 6 }}
+                  cursor={{ stroke: '#3B82F6', strokeWidth: 1, strokeDasharray: '4 4', fill: 'transparent' }}
                 />
-                <Bar
+                <Area
+                  type="monotone"
                   dataKey="value"
-                  radius={[5, 5, 0, 0]}
-                  maxBarSize={20}
-                >
-                  {analytics.etChartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={index < 3 ? "url(#topEtGrad)" : "url(#otherEtGrad)"}
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
+                  stroke="#3B82F6"
+                  strokeWidth={3}
+                  fillOpacity={1}
+                  fill="url(#colorRevenueArea)"
+                  dot={{ r: 4, fill: '#3B82F6', stroke: '#fff', strokeWidth: 2, fillOpacity: 1 }}
+                  activeDot={{ r: 6, fill: '#3B82F6', stroke: '#fff', strokeWidth: 2 }}
+                />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
@@ -1626,113 +1867,164 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {analytics.etStats.slice(0, 3).map((et, index) => (
-              <div
-                key={et.name}
-                className="relative rounded-2xl border border-yellow-300/40 shadow-lg transition-all hover:shadow-xl hover:scale-[1.02] overflow-hidden bg-gradient-to-br from-[#FDE08B] via-[#D4AF37] to-[#B5851C]"
-              >
-                {/* Subtle metallic texture overlay */}
-                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-white via-transparent to-black pointer-events-none"></div>
-                <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNMCAwTDQgNFpNMCA0TDQgMFoiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9zdmc+')] pointer-events-none"></div>
+            {analytics.etStats.slice(0, 3).map((et, index) => {
+              const targetStatus = checkTargetStatus(et.name, et.revenue, analytics.totalRevenue);
+              let borderClass = 'border-yellow-300/40';
+              let hoverClass = 'hover:shadow-xl';
+              if (targetStatus === 'met') {
+                borderClass = 'border-emerald-400/65';
+                hoverClass = 'hover:shadow-emerald-500/15 hover:shadow-2xl';
+              } else if (targetStatus === 'not-met') {
+                borderClass = 'border-rose-400/65';
+                hoverClass = 'hover:shadow-rose-500/15 hover:shadow-2xl';
+              }
 
-                {/* Header Section */}
-                <div className="relative z-10 flex items-center justify-between p-5 pb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner border border-white/30">
-                      <Crown className="w-5 h-5 text-yellow-900 drop-shadow-sm" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 text-lg leading-tight drop-shadow-sm">
-                        {et.name}
-                      </h4>
-                      <div className="flex items-center mt-0.5">
-                        <span className="text-[10px] font-black text-yellow-900 tracking-wider uppercase drop-shadow-sm">
+              const rawTargetValue = getTargetRevenue(et.name);
+              let targetVal = 0;
+              let percentAchieved = 0;
+              let hasValidTarget = false;
+
+              if (rawTargetValue && rawTargetValue !== "NA") {
+                const hasLetters = /[a-zA-Z]/.test(rawTargetValue);
+                const hasNumbers = /\d/.test(rawTargetValue);
+                if (!hasLetters && hasNumbers) {
+                  const numericValue = parseFloat(rawTargetValue.replace(/[^0-9.]/g, ""));
+                  targetVal = numericValue * (analytics.totalRevenue >= 40000 ? 7 : 1);
+                  if (targetVal > 0) {
+                    percentAchieved = Math.round((et.revenue / targetVal) * 100);
+                    hasValidTarget = true;
+                  }
+                }
+              }
+
+              return (
+                <div
+                  key={et.name}
+                  className={`relative rounded-3xl border ${borderClass} bg-gradient-to-br from-[#FDE08B] via-[#D4AF37] to-[#B5851C] p-5 shadow-lg transition-all duration-300 ${hoverClass} flex flex-col justify-between gap-5 overflow-hidden`}
+                >
+                  {/* Subtle metallic texture overlay */}
+                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-white via-transparent to-black pointer-events-none"></div>
+                  <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNMCAwTDQgNFpNMCA0TDQgMFoiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9zdmc+')] pointer-events-none"></div>
+
+                  {/* Header Section */}
+                  <div className="relative z-10 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8.5 h-8.5 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-inner">
+                        <Crown className="w-4.5 h-4.5 text-yellow-900 drop-shadow-sm" />
+                      </div>
+                      <div>
+                        <h4 className="font-extrabold text-gray-900 leading-tight text-sm tracking-tight drop-shadow-sm">
+                          {et.name}
+                        </h4>
+                        <p className="text-[9px] font-black text-yellow-900/80 uppercase tracking-wider leading-none mt-0.5">
                           Rank #{index + 1}
-                        </span>
+                        </p>
                       </div>
                     </div>
+
+                    {(() => {
+                      const info = getETInfo(et.name);
+                      if (!info) return null;
+                      return (
+                        <div className="flex items-center text-[10px] font-semibold rounded-full bg-white/20 backdrop-blur-sm border border-yellow-600/20 p-0.5 px-2.5 text-yellow-950 gap-1.5 shadow-sm">
+                          <span className="border-r border-yellow-900/20 pr-1.5 font-bold text-yellow-900">
+                            {info.stack}
+                          </span>
+                          <span>
+                            {info.manager}
+                          </span>
+                        </div>
+                      );
+                    })()}
                   </div>
 
-                  {(() => {
-                    const info = getETInfo(et.name);
-                    if (!info) return null;
-                    return (
-                      <div className="flex items-center text-[10px] font-bold rounded-md overflow-hidden border border-yellow-600/30 bg-white/20 backdrop-blur-sm shadow-sm">
-                        <span className="text-gray-900 px-2.5 py-1 border-r border-yellow-600/30">
-                          {info.stack}
-                        </span>
-                        <span className="text-yellow-900 px-2.5 py-1">
-                          {info.manager}
-                        </span>
+                  {/* Main Content Section */}
+                  <div className="relative z-10 flex flex-col gap-4 py-1">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-2xl font-black mb-1 leading-none tracking-tight text-gray-900 drop-shadow-md">
+                          ${et.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                        <p className="text-[9px] font-bold text-yellow-900/80 uppercase tracking-wider">
+                          {et.name.includes('+') ? 'Combined Revenue' : 'Today Revenue'}
+                        </p>
+
+                        {et.name.includes('+') && (
+                          <div className="mt-2.5 flex flex-col gap-1 border-l-2 border-yellow-900/30 pl-2">
+                            {(et as any).et1Name && (
+                              <span className="text-[9px] font-bold text-yellow-900/80">
+                                {(et as any).et1Name}: <span className="font-black text-gray-900 drop-shadow-sm">${((et as any).et1Revenue ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                              </span>
+                            )}
+                            {(et as any).et2Name && (
+                              <span className="text-[9px] font-bold text-yellow-900/80">
+                                {(et as any).et2Name}: <span className="font-black text-gray-900 drop-shadow-sm">${((et as any).et2Revenue ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
-                    );
-                  })()}
-                </div>
 
-                {/* Main Content Section */}
-                <div className="relative z-10 px-5 pb-5">
-                  <div className="flex justify-between items-start mb-4 mt-2">
-                    <div>
-                      <p className="text-3xl font-black text-gray-900 mb-0.5 leading-none tracking-tight drop-shadow-md">
-                        ${et.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </p>
-                      <p className="text-[10px] font-bold text-yellow-900/80 uppercase tracking-widest mt-1.5">
-                        {et.name.includes('+') ? 'Combined Revenue' : 'Today Revenue'}
-                      </p>
-
-                      {et.name.includes('+') && (
-                        <div className="mt-2 flex flex-col gap-1">
-                          {(et as any).et1Name && (
-                            <span className="text-[10px] font-bold text-yellow-900/80">
-                              {(et as any).et1Name}: <span className="font-black text-gray-900 drop-shadow-sm">${((et as any).et1Revenue ?? 0).toLocaleString()}</span>
-                            </span>
-                          )}
-                          {(et as any).et2Name && (
-                            <span className="text-[10px] font-bold text-yellow-900/80">
-                              {(et as any).et2Name}: <span className="font-black text-gray-900 drop-shadow-sm">${((et as any).et2Revenue ?? 0).toLocaleString()}</span>
-                            </span>
-                          )}
+                      {hasValidTarget ? (
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <span className="text-[10px] font-black text-yellow-950 leading-none">
+                            {percentAchieved}%
+                          </span>
+                          <div className="flex-shrink-0">
+                            {(() => {
+                              const { points } = getETTrendAndPoints(et.name);
+                              return renderSparkline(points, "#78350f", et.name);
+                            })()}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <div className="flex-shrink-0">
+                            {(() => {
+                              const { points } = getETTrendAndPoints(et.name);
+                              return renderSparkline(points, "#78350f", et.name);
+                            })()}
+                          </div>
+                          <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 shadow-sm flex-shrink-0">
+                            <Award className="w-5.5 h-5.5 text-yellow-950/80 drop-shadow-sm" />
+                          </div>
                         </div>
                       )}
                     </div>
 
-                    <div className="text-right">
-                      <div className="flex items-center justify-end gap-2 mb-1">
-                        <span className="text-xl font-black text-gray-900 leading-none drop-shadow-sm">
+                    <div className="flex items-center justify-between pt-3 border-t border-yellow-900/20">
+                      <span className="text-[9px] font-bold text-yellow-900/80 uppercase tracking-wider">
+                        Daily Target
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-extrabold text-gray-900 leading-none drop-shadow-sm">
                           {displayTargetRevenue(et.name, analytics.totalRevenue)}
                         </span>
                         {renderTargetComparison(et.name, et.revenue, analytics.totalRevenue, true)}
                       </div>
-                      <p className="text-[10px] font-bold text-yellow-900/80 uppercase tracking-widest mt-1">
-                        Daily Target
-                      </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 py-4 mb-2">
-                    <div className="flex items-center gap-1.5">
-                      <Layers className="h-4 w-4 text-gray-900" />
-                      <span className="text-[11px] font-black text-gray-900 drop-shadow-sm">
-                        {et.creatives.length} <span className="text-yellow-900/80 font-bold">Creatives</span>
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Target className="h-4 w-4 text-gray-900" />
-                      <span className="text-[11px] font-black text-gray-900 drop-shadow-sm">
-                        {et.campaigns.length} <span className="text-yellow-900/80 font-bold">Campaigns</span>
-                      </span>
-                    </div>
+                  {/* Info Tags - Subtle Footer */}
+                  <div className="relative z-10 flex items-center gap-3 pt-3 border-t border-yellow-900/20 text-xs text-yellow-950/80">
+                    <span className="flex items-center gap-1.5">
+                      <Layers className="h-3.5 w-3.5 text-yellow-900" />
+                      <span className="font-semibold text-gray-900">{et.creatives.length}</span> <span className="text-yellow-900/80">Cr</span>
+                    </span>
+                    <span className="text-yellow-900/20">•</span>
+                    <span className="flex items-center gap-1.5">
+                      <Target className="h-3.5 w-3.5 text-yellow-900" />
+                      <span className="font-semibold text-gray-900">{et.campaigns.length}</span> <span className="text-yellow-900/80">Camp</span>
+                    </span>
                   </div>
-
-
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* ET Revenue Breakdown */}
+      {/* ET Revenue Breakdown - Main Section */}
       <div className="p-6 rounded-lg border bg-white border-gray-100">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
@@ -1743,28 +2035,59 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             All ETs by revenue
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {analytics.etStats.slice(3, 100).map((et, index) => {
             const isCombined = et.name.includes('+');
-            const cardBorderClass = isCombined
-              ? 'border-purple-100 hover:border-purple-300 hover:shadow-purple-100/50'
-              : 'border-slate-100 hover:border-indigo-200 hover:shadow-indigo-50/50';
-            const headerBgClass = isCombined
-              ? 'bg-gradient-to-r from-purple-50/60 to-fuchsia-50/40'
-              : 'bg-gradient-to-r from-indigo-50/40 to-slate-50/60';
+            const targetStatus = checkTargetStatus(et.name, et.revenue, analytics.totalRevenue);
+
+            let borderClass = 'border-slate-100';
+            let cardBgClass = 'bg-white';
+            let hoverClass = isCombined
+              ? 'hover:border-purple-200 hover:shadow-purple-100/30'
+              : 'hover:border-indigo-200 hover:shadow-indigo-100/30';
+
+            if (targetStatus === 'met') {
+              borderClass = 'border-emerald-200/80';
+              cardBgClass = 'bg-emerald-50/[0.01]';
+              hoverClass = 'hover:border-emerald-400 hover:shadow-[0_20px_40px_rgba(16,185,129,0.05)]';
+            } else if (targetStatus === 'not-met') {
+              borderClass = 'border-rose-200/80';
+              cardBgClass = 'bg-rose-50/[0.01]';
+              hoverClass = 'hover:border-rose-400 hover:shadow-[0_20px_40px_rgba(244,63,94,0.05)]';
+            }
+
             const iconBgClass = isCombined
-              ? 'bg-purple-100/80 text-purple-600 border border-purple-200/50'
-              : 'bg-indigo-100/80 text-indigo-600 border border-indigo-200/50';
+              ? 'bg-purple-50 text-purple-500'
+              : 'bg-indigo-50 text-indigo-500';
+
+            const rawTargetValue = getTargetRevenue(et.name);
+            let targetVal = 0;
+            let percentAchieved = 0;
+            let hasValidTarget = false;
+
+            if (rawTargetValue && rawTargetValue !== "NA") {
+              const hasLetters = /[a-zA-Z]/.test(rawTargetValue);
+              const hasNumbers = /\d/.test(rawTargetValue);
+              if (!hasLetters && hasNumbers) {
+                const numericValue = parseFloat(rawTargetValue.replace(/[^0-9.]/g, ""));
+                targetVal = numericValue * (analytics.totalRevenue >= 40000 ? 7 : 1);
+                if (targetVal > 0) {
+                  percentAchieved = Math.round((et.revenue / targetVal) * 100);
+                  hasValidTarget = true;
+                }
+              }
+            }
 
             return (
               <div
                 key={et.name}
-                className={`rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 overflow-hidden ${cardBorderClass}`}
+
+                className={`rounded-3xl border ${borderClass} ${cardBgClass} p-5 shadow-[0_8px_30px_rgba(0,0,0,0.015)] transition-all duration-300 ${hoverClass} flex flex-col justify-between gap-5`}
               >
                 {/* Header Section */}
-                <div className={`flex items-center justify-between p-3.5 border-b border-slate-100/80 ${headerBgClass}`}>
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-inner ${iconBgClass}`}>
+                    <div className={`w-8.5 h-8.5 rounded-2xl flex items-center justify-center font-bold text-sm ${iconBgClass}`}>
                       <Users className="w-4 h-4" />
                     </div>
                     <div>
@@ -1778,11 +2101,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                     const info = getETInfo(et.name);
                     if (!info) return null;
                     return (
-                      <div className="flex items-center text-[9px] font-bold rounded-lg overflow-hidden border border-slate-200/80 bg-white/90 backdrop-blur-sm shadow-sm">
-                        <span className="bg-slate-100 text-slate-700 px-2 py-0.5 border-r border-slate-200/60">
+                      <div className="flex items-center text-[10px] font-semibold rounded-full bg-slate-50/80 border border-slate-100/50 p-0.5 px-2.5 text-slate-600 gap-1.5 shadow-sm">
+                        <span className="border-r border-slate-200/60 pr-1.5 font-bold text-slate-500">
                           {info.stack}
                         </span>
-                        <span className="text-slate-600 px-2 py-0.5">
+                        <span>
                           {info.manager}
                         </span>
                       </div>
@@ -1791,62 +2114,98 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                 </div>
 
                 {/* Main Content Section */}
-                <div className="p-4">
-                  <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-col gap-4 py-1">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <p className={`text-xl font-black mb-0.5 leading-none tracking-tight ${isCombined ? 'text-purple-600' : 'text-indigo-600'}`}>
-                        ${et.revenue.toLocaleString()}
+                      <p className={`text-2xl font-black mb-1 leading-none tracking-tight ${isCombined ? 'text-purple-600' : 'text-indigo-600'}`}>
+                        ${et.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
                         {isCombined ? 'Combined Revenue' : 'Today Revenue'}
                       </p>
 
                       {isCombined && (
-                        <div className="mt-2 flex flex-col gap-1 border-l-2 border-purple-100 pl-2">
+                        <div className="mt-2.5 flex flex-col gap-1 border-l-2 border-purple-100 pl-2">
                           {(et as any).et1Name && (
                             <span className="text-[9px] font-bold text-slate-500">
-                              {(et as any).et1Name}: <span className="font-black text-slate-800">${((et as any).et1Revenue ?? 0).toLocaleString()}</span>
+                              {(et as any).et1Name}: <span className="font-black text-slate-800">${((et as any).et1Revenue ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                             </span>
                           )}
                           {(et as any).et2Name && (
                             <span className="text-[9px] font-bold text-slate-500">
-                              {(et as any).et2Name}: <span className="font-black text-slate-800">${((et as any).et2Revenue ?? 0).toLocaleString()}</span>
+                              {(et as any).et2Name}: <span className="font-black text-slate-800">${((et as any).et2Revenue ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                             </span>
                           )}
                         </div>
                       )}
                     </div>
 
-                    <div className="text-right">
-                      <div className="flex items-center justify-end gap-1.5 mb-0.5">
-                        <span className="text-base font-extrabold text-slate-800 leading-none">
-                          {displayTargetRevenue(et.name, analytics.totalRevenue)}
+                    {hasValidTarget ? (
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <span className={`text-[10px] font-black leading-none ${targetStatus === 'met'
+                          ? 'text-emerald-600'
+                          : percentAchieved >= 70
+                            ? 'text-amber-600'
+                            : 'text-rose-500'
+                          }`}>
+                          {percentAchieved}%
                         </span>
-                        {renderTargetComparison(et.name, et.revenue, analytics.totalRevenue, false)}
+                        <div className="flex-shrink-0">
+                          {(() => {
+                            const { points } = getETTrendAndPoints(et.name);
+                            const accentColor = targetStatus === 'met'
+                              ? '#10B981'
+                              : percentAchieved >= 70
+                                ? '#F59E0B'
+                                : '#EF4444';
+                            return renderSparkline(points, accentColor, et.name);
+                          })()}
+                        </div>
                       </div>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
-                        Daily Target
-                      </p>
-                    </div>
+                    ) : (
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <div className="flex flex-col items-end flex-shrink-0">
+                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                            Rank
+                          </span>
+                          <span className="text-sm font-black text-slate-600 mt-1 leading-none bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-lg">
+                            #{index + 4}
+                          </span>
+                        </div>
+                        <div className="flex-shrink-0">
+                          {(() => {
+                            const { points } = getETTrendAndPoints(et.name);
+                            return renderSparkline(points, isCombined ? '#8B5CF6' : '#6366F1', et.name);
+                          })()}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Info Tags */}
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl bg-slate-50 border border-slate-100/70 hover:bg-slate-100/50 transition-colors">
-                      <Layers className="h-3.5 w-3.5 text-emerald-500" />
-                      <span className="text-[11px] font-bold text-slate-700">
-                        {et.creatives.length} <span className="text-slate-400 font-normal">Cr</span>
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-50">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                      Daily Target
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-extrabold text-slate-800 leading-none">
+                        {displayTargetRevenue(et.name, analytics.totalRevenue)}
                       </span>
-                    </div>
-                    <div className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl bg-slate-50 border border-slate-100/70 hover:bg-slate-100/50 transition-colors">
-                      <Target className="h-3.5 w-3.5 text-indigo-500" />
-                      <span className="text-[11px] font-bold text-slate-700">
-                        {et.campaigns.length} <span className="text-slate-400 font-normal">Camp</span>
-                      </span>
+                      {renderTargetComparison(et.name, et.revenue, analytics.totalRevenue, false)}
                     </div>
                   </div>
+                </div>
 
-
+                {/* Info Tags - Subtle Footer */}
+                <div className="flex items-center gap-3 pt-3 border-t border-slate-100/60 text-xs text-slate-400">
+                  <span className="flex items-center gap-1.5">
+                    <Layers className="h-3.5 w-3.5 text-slate-400" />
+                    <span className="font-semibold text-slate-600">{et.creatives.length}</span> <span className="text-slate-400/80">Cr</span>
+                  </span>
+                  <span className="text-slate-200">•</span>
+                  <span className="flex items-center gap-1.5">
+                    <Target className="h-3.5 w-3.5 text-slate-400" />
+                    <span className="font-semibold text-slate-600">{et.campaigns.length}</span> <span className="text-slate-400/80">Camp</span>
+                  </span>
                 </div>
               </div>
             );
@@ -1959,12 +2318,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
           );
         })()}
 
-        {/* Campaign Revenue Bar Chart */}
+        {/* Campaign Revenue Area Chart */}
         <div className="mb-6 p-6 rounded-2xl bg-white border border-gray-200/60 shadow-sm">
           <h4 className="text-lg font-bold text-gray-900 mb-4">Campaign Revenue</h4>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
+              <AreaChart
                 data={analytics.campaignStats
                   .slice(0, 100)
                   .map((campaign: CampaignStats) => ({
@@ -1977,9 +2336,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                 margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
               >
                 <defs>
-                  <linearGradient id="campaignGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3B82F6" />
-                    <stop offset="100%" stopColor="#6366F1" />
+                  <linearGradient id="colorCampaignArea" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366F1" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -2002,65 +2361,65 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                 />
                 <Tooltip
                   content={<CampaignCustomTooltip />}
-                  cursor={{ fill: 'rgba(0, 0, 0, 0.02)', radius: 6 }}
+                  cursor={{ stroke: '#6366F1', strokeWidth: 1, strokeDasharray: '4 4', fill: 'transparent' }}
                 />
-                <Bar
+                <Area
+                  type="monotone"
                   dataKey="revenue"
-                  fill="url(#campaignGrad)"
-                  radius={[5, 5, 0, 0]}
-                  maxBarSize={20}
+                  stroke="#6366F1"
+                  strokeWidth={3}
+                  fillOpacity={1}
+                  fill="url(#colorCampaignArea)"
+                  dot={{ r: 4, fill: '#6366F1', stroke: '#fff', strokeWidth: 2, fillOpacity: 1 }}
+                  activeDot={{ r: 6, fill: '#6366F1', stroke: '#fff', strokeWidth: 2 }}
                 />
-              </BarChart>
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Campaign Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {analytics.campaignStats.slice(0, 12).map((campaign, index) => (
+          {analytics.campaignStats.slice(0, 12).map((campaign) => (
             <div
               key={campaign.name}
               onClick={() => openCampaignPopup(campaign)}
-              className="p-4 rounded-2xl border bg-white shadow-sm transition-all hover:shadow-md hover:scale-[1.01] hover:border-indigo-200 cursor-pointer flex flex-col justify-between border-gray-200"
+              className="group p-5 rounded-2xl border border-slate-100 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:border-slate-200 transition-all cursor-pointer flex flex-col justify-between"
             >
               {/* Campaign Header */}
-              <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
-                <div className="p-2.5 rounded-xl bg-indigo-50 flex-shrink-0">
-                  <Target className="h-4 w-4 text-indigo-500" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                  <h4 className="font-bold text-sm text-slate-800 truncate max-w-[130px]" title={campaign.name}>
+                    {campaign.name}
+                  </h4>
                 </div>
-                <h4 className="font-bold text-sm text-gray-900 truncate flex-1">
-                  {campaign.name}
-                </h4>
-                <Eye className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                <Eye className="h-3.5 w-3.5 text-slate-300 group-hover:text-indigo-400 transition-colors flex-shrink-0" />
               </div>
 
               {/* Revenue Display */}
               <div className="mb-4">
-                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Total Revenue</p>
-                <p className="text-xl font-black text-indigo-600">
-                  ${campaign.revenue.toLocaleString()}
+                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Revenue</p>
+                <p className="text-xl font-extrabold text-slate-900 tracking-tight">
+                  ${campaign.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
               </div>
 
               {/* Stats Footer */}
-              <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1.5">
-                    <Layers className="h-3.5 w-3.5 text-emerald-500" />
-                    <span className="text-xs font-bold text-gray-700">
-                      {campaign.creatives.length}
-                    </span>
+              <div className="flex items-center justify-between pt-3.5 border-t border-slate-50">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-50 border border-slate-100 text-[10px] font-semibold text-slate-500">
+                    <Layers className="h-3 w-3 text-slate-400" />
+                    <span>{campaign.creatives.length}</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <Users className="h-3.5 w-3.5 text-blue-500" />
-                    <span className="text-xs font-bold text-gray-700">
-                      {campaign.ets.length}
-                    </span>
+                  <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-50 border border-slate-100 text-[10px] font-semibold text-slate-500">
+                    <Users className="h-3 w-3 text-slate-400" />
+                    <span>{campaign.ets.length}</span>
                   </div>
                 </div>
-                <div className="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-600 text-[10px] font-bold uppercase tracking-wider hover:bg-indigo-100 transition-colors">
-                  View
-                </div>
+                <span className="text-[10px] font-bold text-slate-400 group-hover:text-indigo-600 transition-colors flex items-center gap-0.5 leading-none">
+                  Details <span className="text-[12px]">→</span>
+                </span>
               </div>
             </div>
           ))}

@@ -483,7 +483,7 @@ function App() {
                     setUploadedFiles([]); setCombinedData(null)
                     setSearchQuery(""); setHasTriggeredCelebration(false)
                   }}
-                  className="px-3 py-1 rounded-lg text-[11px] font-bold transition-all hover:scale-105 active:scale-95 shadow-sm flex items-center gap-1.5"
+                  className="px-3 py-1 rounded-lg text-[11px] font-bold transition-all shadow-sm flex items-center gap-1.5"
                   style={{
                     background: "rgba(79,70,229,0.08)",
                     border: "1px solid rgba(79,70,229,0.15)",
@@ -592,11 +592,11 @@ function App() {
                     ].map(s => (
                       <div
                         key={s.title}
-                        className="flex flex-col items-center p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-300 group hover:-translate-y-0.5 shadow-sm"
+                        className="flex flex-col items-center p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-300 group shadow-sm"
                       >
                         {/* Glowing Icon Wrapper */}
                         <div
-                          className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 border border-white/5 transition-transform duration-300 group-hover:scale-110"
+                          className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 border border-white/5"
                           style={{
                             background: `radial-gradient(circle, ${s.glow} 0%, transparent 100%)`,
                             boxShadow: `inset 0 1px 0 rgba(255, 255, 255, 0.08)`
