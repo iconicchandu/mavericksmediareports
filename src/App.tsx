@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react"
 import {
   Heart, TrendingUp, ShieldCheck, Zap, Lock,
-  BarChart3, Clock, Sparkles, ArrowRight, Eye, EyeOff, RefreshCw,
+  BarChart3, Sparkles, RefreshCw,
   Database, FileSpreadsheet
 } from "lucide-react"
 import FileUpload from "./components/FileUpload"
@@ -16,7 +16,6 @@ interface UploadedFile {
   data: ProcessedData
 }
 
-const PASSWORD = "MMmEdiaak@8767"
 
 // ─── Motivational quotes pool ───────────────────────────────────────────────
 const QUOTES = [
@@ -251,120 +250,8 @@ const QuoteRotatorCard: React.FC = () => {
   )
 }
 
-// ─── Password screen ─────────────────────────────────────────────────────────
-const PasswordScreen: React.FC<{ onAuth: () => void }> = ({ onAuth }) => {
-  const [input, setInput] = useState("")
-  const [shaking, setShaking] = useState(false)
-  const [showPw, setShowPw] = useState(false)
-
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (input === PASSWORD) {
-      onAuth()
-    } else {
-      setShaking(true)
-      setInput("")
-      setTimeout(() => setShaking(false), 600)
-    }
-  }
-
-  return (
-    <div className="app-bg app-dark-mesh-bg min-h-screen flex items-center justify-center p-4">
-      <AnimatedBg />
-
-      <div className="pw-card-container">
-        {/* Glow behind card */}
-        <div className="pw-card-glow" />
-
-        <div className="pw-card">
-          {/* Lock icon */}
-          <div className="pw-lock-wrap">
-            <div className="relative">
-              <div className="pw-lock-glow animate-pulse" />
-              <div className="pw-lock-core">
-                <Lock className="w-8 h-8 text-white" strokeWidth={2.5} />
-              </div>
-              <div className="pw-lock-indicator">
-                <div className="pw-lock-dot" />
-              </div>
-            </div>
-          </div>
-
-          {/* Heading */}
-          <div className="text-center mb-6">
-            <div className="pw-badge">
-              <Lock className="w-3 h-3 inline-block mr-1.5 -mt-0.5" /> Restricted Access
-            </div>
-            <h2 className="pw-title">MM Media Portal</h2>
-            <p className="pw-subtitle">Enter your password to continue</p>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={submit} className="space-y-5">
-            <div>
-              <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wide">Password</label>
-              <div
-                className={`pw-input-wrapper transition-all duration-300 ${shaking ? "animate-[shake_0.4s_ease]" : ""}`}
-                style={{ animation: shaking ? "shake 0.4s ease" : undefined }}
-              >
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Lock className="w-4 h-4 text-slate-400" />
-                </div>
-                <input
-                  type={showPw ? "text" : "password"}
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  autoFocus
-                  placeholder="Enter password"
-                  className="pw-input"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200"
-                  onClick={() => setShowPw(v => !v)}
-                >
-                  {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="pw-button"
-            >
-              <span className="relative flex items-center justify-center gap-2">
-                <Lock className="w-4 h-4" /> Unlock Access
-                <ArrowRight className="w-4 h-4" />
-              </span>
-              {/* Shimmer */}
-              <div className="fu-btn-shimmer" />
-            </button>
-          </form>
-
-          {/* Footer */}
-          <div className="mt-6 pt-4" style={{ borderTop: "1px solid rgba(99, 102, 241, 0.15)" }}>
-            <div className="flex items-center justify-center gap-2 text-xs text-slate-400 font-semibold">
-              <ShieldCheck className="w-4 h-4 text-emerald-500" />
-              Secure access · Your data is protected
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <style>{`
-        @keyframes shake {
-          0%,100% { transform:translateX(0); }
-          20%,60%  { transform:translateX(-6px); }
-          40%,80%  { transform:translateX(6px); }
-        }
-      `}</style>
-    </div>
-  )
-}
-
 // ─── Main App ────────────────────────────────────────────────────────────────
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [combinedData, setCombinedData] = useState<ProcessedData | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
@@ -400,16 +287,6 @@ function App() {
       }
     }
   }, [combinedData, hasTriggeredCelebration])
-
-  if (!isAuthenticated) {
-    return (
-      <PasswordScreen
-        onAuth={() => {
-          setIsAuthenticated(true)
-        }}
-      />
-    )
-  }
 
   return (
     <div
