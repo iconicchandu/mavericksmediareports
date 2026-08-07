@@ -4,7 +4,8 @@ import React, { useState, useEffect } from "react"
 import {
   Heart, TrendingUp, ShieldCheck, Zap, Lock,
   BarChart3, Sparkles, RefreshCw,
-  Database, FileSpreadsheet
+  Database, FileSpreadsheet,
+  LineChart, Percent, Activity, DollarSign, ArrowUpRight
 } from "lucide-react"
 import FileUpload from "./components/FileUpload"
 import Dashboard from "./components/Dashboard"
@@ -56,15 +57,15 @@ const CompactClockNavbar: React.FC<{ isLanding?: boolean }> = ({ isLanding }) =>
   const dateStr = `${monthName} ${dateNum}, ${year}`
 
   return (
-    <div className={`flex items-center gap-2.5 border rounded-2xl px-3.5 py-1.5 text-xs font-bold shadow-sm ${isLanding ? 'bg-white/10 border-white/20 text-white' : 'bg-slate-50 border-slate-200/60 text-slate-600'}`}>
-      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+    <div className="flex items-center gap-2.5 border rounded-2xl px-3.5 py-1.5 text-xs font-bold shadow-xs bg-white/80 border-slate-200/60 text-slate-600 backdrop-blur-md">
+      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
       <span>
-        <span className={isLanding ? 'text-white/90' : 'text-slate-700'}>
+        <span className="text-slate-700">
           <span className="hidden sm:inline">{dayStr}</span>
           {dateStr}
         </span>
-        <span className={`mx-2 ${isLanding ? 'text-white/30' : 'text-slate-300'}`}>|</span>
-        <span>{pad(h12)}:{mm}:{ss} <span className={`text-[10px] font-bold ${isLanding ? 'text-yellow-300' : 'text-indigo-500'}`}>{ampm}</span></span>
+        <span className="mx-2 text-slate-200">|</span>
+        <span>{pad(h12)}:{mm}:{ss} <span className="text-[10px] font-bold text-indigo-600">{ampm}</span></span>
       </span>
     </div>
   )
@@ -87,11 +88,11 @@ const AnimatedBg: React.FC = () => {
 const LandingBgGrid: React.FC = () => {
   return (
     <div
-      className="absolute inset-0 pointer-events-none opacity-[0.06] z-0"
+      className="absolute inset-0 pointer-events-none opacity-[0.08] z-0"
       style={{
         backgroundImage: `
-          linear-gradient(to right, rgba(255, 255, 255, 0.4) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 1px, transparent 1px)
+          linear-gradient(to right, rgba(99, 102, 241, 0.15) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(99, 102, 241, 0.15) 1px, transparent 1px)
         `,
         backgroundSize: '45px 45px',
         maskImage: 'radial-gradient(ellipse at center, black 60%, transparent 100%)',
@@ -107,7 +108,7 @@ const FloatingIcons: React.FC = () => {
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
       {/* Icon 1: Database */}
       <Database
-        className="absolute w-12 h-12 text-white/10"
+        className="absolute w-12 h-12 text-indigo-500/10"
         style={{
           top: '15%',
           left: '8%',
@@ -116,7 +117,7 @@ const FloatingIcons: React.FC = () => {
       />
       {/* Icon 2: TrendingUp */}
       <TrendingUp
-        className="absolute w-14 h-14 text-white/10"
+        className="absolute w-14 h-14 text-indigo-500/10"
         style={{
           top: '45%',
           left: '5%',
@@ -125,7 +126,7 @@ const FloatingIcons: React.FC = () => {
       />
       {/* Icon 3: FileSpreadsheet */}
       <FileSpreadsheet
-        className="absolute w-10 h-10 text-white/10"
+        className="absolute w-10 h-10 text-indigo-500/10"
         style={{
           top: '75%',
           left: '12%',
@@ -134,7 +135,7 @@ const FloatingIcons: React.FC = () => {
       />
       {/* Icon 4: ShieldCheck */}
       <ShieldCheck
-        className="absolute w-12 h-12 text-white/10"
+        className="absolute w-12 h-12 text-indigo-500/10"
         style={{
           top: '20%',
           right: '35%',
@@ -143,7 +144,7 @@ const FloatingIcons: React.FC = () => {
       />
       {/* Icon 5: BarChart3 */}
       <BarChart3
-        className="absolute w-16 h-16 text-white/10"
+        className="absolute w-16 h-16 text-indigo-500/10"
         style={{
           top: '12%',
           right: '8%',
@@ -152,7 +153,7 @@ const FloatingIcons: React.FC = () => {
       />
       {/* Icon 6: Zap */}
       <Zap
-        className="absolute w-8 h-8 text-white/15"
+        className="absolute w-8 h-8 text-indigo-500/15"
         style={{
           top: '55%',
           right: '4%',
@@ -161,7 +162,7 @@ const FloatingIcons: React.FC = () => {
       />
       {/* Icon 7: Lock */}
       <Lock
-        className="absolute w-10 h-10 text-white/10"
+        className="absolute w-10 h-10 text-indigo-500/10"
         style={{
           top: '80%',
           right: '32%',
@@ -187,6 +188,256 @@ const FloatingIcons: React.FC = () => {
   )
 }
 
+// ─── Live Animated Background Chart ──────────────────────────────────────────
+const AnimatedBackgroundChart: React.FC = () => {
+  const [points, setPoints] = useState<number[]>([20, 28, 25, 38, 35, 48, 42, 58, 52, 68, 62, 78])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPoints(prev => {
+        const next = [...prev]
+        const lastVal = next[next.length - 1]
+        
+        // General upward trend with light fluctuations
+        const isUp = Math.random() > 0.35 // 65% chance of going up
+        const change = (isUp ? 1 : -1) * (Math.random() * 8 + 2)
+        let newVal = Math.max(15, Math.min(95, lastVal + change))
+        
+        // Reset or level off if it hits the ceiling to prevent going out of bounds
+        if (newVal > 90) {
+          newVal = 55 + Math.random() * 15
+        }
+        
+        next.shift()
+        next.push(newVal)
+        return next
+      })
+    }, 2500)
+    return () => clearInterval(interval)
+  }, [])
+
+  const width = 1100
+  const height = 280
+  const paddingX = 70
+  const paddingY = 30
+
+  const getCoordinates = () => {
+    const stepX = (width - paddingX * 2) / (points.length - 1)
+    return points.map((p, index) => {
+      const x = paddingX + index * stepX
+      const y = height - paddingY - (p / 100) * (height - paddingY * 2)
+      return { x, y }
+    })
+  }
+
+  const coords = getCoordinates()
+
+  // Generate smooth cubic bezier path
+  let pathD = ""
+  if (coords.length > 0) {
+    pathD = `M ${coords[0].x} ${coords[0].y}`
+    const stepX = (width - paddingX * 2) / (points.length - 1)
+    for (let i = 0; i < coords.length - 1; i++) {
+      const curr = coords[i]
+      const next = coords[i + 1]
+      const cpX1 = curr.x + stepX / 2
+      const cpY1 = curr.y
+      const cpX2 = next.x - stepX / 2
+      const cpY2 = next.y
+      pathD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${next.x} ${next.y}`
+    }
+  }
+
+  const areaD = pathD ? `${pathD} L ${coords[coords.length - 1].x} ${height - paddingY} L ${coords[0].x} ${height - paddingY} Z` : ""
+
+  return (
+    <div className="absolute inset-x-0 bottom-6 top-1/3 pointer-events-none z-0 overflow-hidden opacity-[0.25] select-none">
+      <svg className="w-full h-full" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="chart-line-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#c084fc" stopOpacity="0.3" />
+            <stop offset="50%" stopColor="#818cf8" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#4f46e5" stopOpacity="1.0" />
+          </linearGradient>
+          <linearGradient id="chart-area-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.12" />
+            <stop offset="100%" stopColor="#6366f1" stopOpacity="0.0" />
+          </linearGradient>
+        </defs>
+
+        {/* Horizontal Faint Grid lines */}
+        <line x1={paddingX} y1={height * 0.25} x2={width - paddingX} y2={height * 0.25} stroke="rgba(99,102,241,0.06)" strokeWidth="1" strokeDasharray="4 4" />
+        <line x1={paddingX} y1={height * 0.5} x2={width - paddingX} y2={height * 0.5} stroke="rgba(99,102,241,0.06)" strokeWidth="1" strokeDasharray="4 4" />
+        <line x1={paddingX} y1={height * 0.75} x2={width - paddingX} y2={height * 0.75} stroke="rgba(99,102,241,0.06)" strokeWidth="1" strokeDasharray="4 4" />
+
+        {/* Y-Axis Labels */}
+        <text x={paddingX - 45} y={height * 0.25 + 3} fill="rgba(99,102,241,0.4)" fontSize="8.5" fontWeight="700" fontFamily="Inter, sans-serif">100k</text>
+        <text x={paddingX - 45} y={height * 0.5 + 3} fill="rgba(99,102,241,0.4)" fontSize="8.5" fontWeight="700" fontFamily="Inter, sans-serif">50k</text>
+        <text x={paddingX - 45} y={height * 0.75 + 3} fill="rgba(99,102,241,0.4)" fontSize="8.5" fontWeight="700" fontFamily="Inter, sans-serif">25k</text>
+
+        {/* Area under curve */}
+        {areaD && <path d={areaD} fill="url(#chart-area-grad)" className="transition-all duration-1000 ease-in-out" />}
+
+        {/* The main line */}
+        {pathD && (
+          <path
+            d={pathD}
+            fill="none"
+            stroke="url(#chart-line-grad)"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="transition-all duration-1000 ease-in-out"
+          />
+        )}
+
+        {/* Pulsing nodes on data points */}
+        {coords.map((c, i) => {
+          const isLast = i === coords.length - 1
+          return (
+            <g key={i} className="transition-all duration-1000 ease-in-out" style={{ transformOrigin: `${c.x}px ${c.y}px` }}>
+              {isLast && (
+                <circle
+                  cx={c.x}
+                  cy={c.y}
+                  r="8"
+                  fill="#4f46e5"
+                  className="animate-ping opacity-35"
+                />
+              )}
+              <circle
+                cx={c.x}
+                cy={c.y}
+                r={isLast ? "4" : "3"}
+                fill={isLast ? "#4f46e5" : "#818cf8"}
+                stroke="#fff"
+                strokeWidth={isLast ? "2" : "1.5"}
+                className={isLast ? "" : "opacity-75"}
+              />
+            </g>
+          )
+        })}
+
+        {/* X-Axis Labels */}
+        <text x={paddingX} y={height - 8} fill="rgba(99,102,241,0.3)" fontSize="8" fontWeight="600" fontFamily="Inter, sans-serif">09:00 AM</text>
+        <text x={width * 0.33} y={height - 8} fill="rgba(99,102,241,0.3)" fontSize="8" fontWeight="600" fontFamily="Inter, sans-serif">10:00 AM</text>
+        <text x={width * 0.66} y={height - 8} fill="rgba(99,102,241,0.3)" fontSize="8" fontWeight="600" fontFamily="Inter, sans-serif">11:00 AM</text>
+        <text x={width - paddingX - 60} y={height - 8} fill="rgba(99,102,241,0.5)" fontSize="8" fontWeight="700" fontFamily="Inter, sans-serif" className="animate-pulse">LIVE TRACKING</text>
+      </svg>
+    </div>
+  )
+}
+
+// ─── Live Background Dashboard Widgets ───────────────────────────────────────
+const BackgroundDashboardWidgets: React.FC = () => {
+  const [revenue, setRevenue] = useState(14205.80)
+  const [roi, setRoi] = useState(242.4)
+  const [activeUsers, setActiveUsers] = useState(84)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setRevenue(prev => prev + (Math.random() - 0.45) * 6)
+      setRoi(prev => Math.max(100, Math.min(500, prev + (Math.random() - 0.5) * 1.2)))
+      setActiveUsers(prev => Math.max(50, Math.min(150, prev + (Math.random() > 0.5 ? 1 : -1))))
+    }, 1500)
+    return () => clearInterval(timer)
+  }, [])
+
+  return (
+    <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-[0.22] select-none">
+      
+      {/* Widget 1: Top Right - Live Analytics Card */}
+      <div 
+        className="absolute w-[220px] p-4 rounded-3xl bg-white/40 border border-indigo-100/40 shadow-xs backdrop-blur-xs"
+        style={{
+          top: '12%',
+          right: '8%',
+          animation: 'float-slow 8s ease-in-out infinite'
+        }}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            <div className="w-5 h-5 rounded-md bg-indigo-50 border border-indigo-100 flex items-center justify-center">
+              <Activity className="w-3 h-3 text-indigo-500" />
+            </div>
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Live Feed</span>
+          </div>
+          <span className="flex items-center text-[9px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+            <ArrowUpRight className="w-2.5 h-2.5 mr-0.5" /> +12%
+          </span>
+        </div>
+        <div className="text-lg font-black text-slate-700 tracking-tight">
+          ${revenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </div>
+        <div className="text-[8px] text-slate-400 font-bold mt-0.5">ESTIMATED REVENUE</div>
+        
+        {/* Micro sparkline */}
+        <div className="h-6 mt-3 flex items-end gap-1">
+          {[40, 60, 50, 70, 65, 80, 75, 90, 85].map((val, idx) => (
+            <div 
+              key={idx} 
+              className="flex-1 bg-indigo-500/25 rounded-xs transition-all duration-500"
+              style={{ height: `${val}%`, backgroundColor: idx === 8 ? '#6366f1' : undefined }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Widget 2: Mid Left - Campaign Efficiency Gauge */}
+      <div 
+        className="absolute w-[190px] p-3.5 rounded-3xl bg-white/40 border border-indigo-100/40 shadow-xs backdrop-blur-xs"
+        style={{
+          top: '55%',
+          left: '4%',
+          animation: 'float-medium 9s ease-in-out infinite'
+        }}
+      >
+        <div className="flex items-center gap-1.5 mb-2">
+          <div className="w-5 h-5 rounded-md bg-purple-50 border border-purple-100/80 flex items-center justify-center">
+            <Percent className="w-3 h-3 text-purple-500" />
+          </div>
+          <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Efficiency</span>
+        </div>
+        <div className="text-base font-black text-slate-700 tracking-tight">
+          {roi.toFixed(1)}% <span className="text-[9px] font-bold text-slate-400">ROI</span>
+        </div>
+        
+        {/* Micro progress bar */}
+        <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2.5 overflow-hidden">
+          <div 
+            className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-1000"
+            style={{ width: `${(roi / 500) * 100}%` }}
+          />
+        </div>
+        <div className="text-[7.5px] text-slate-400 font-bold mt-1.5 uppercase tracking-wide">Optimization Target</div>
+      </div>
+
+      {/* Widget 3: Bottom Right (Partially Behind Uploader) - Server Load / Active Channels */}
+      <div 
+        className="absolute w-[180px] p-3.5 rounded-3xl bg-white/40 border border-indigo-100/40 shadow-xs backdrop-blur-xs"
+        style={{
+          bottom: '12%',
+          right: '32%',
+          animation: 'float-fast 7s ease-in-out infinite'
+        }}
+      >
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <div className="w-5 h-5 rounded-md bg-blue-50 border border-blue-100/80 flex items-center justify-center">
+            <LineChart className="w-3 h-3 text-blue-500" />
+          </div>
+          <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Channels</span>
+        </div>
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-base font-black text-slate-700">{activeUsers}</span>
+          <span className="text-[8px] font-bold text-emerald-500">● LIVE RUNNING</span>
+        </div>
+        <div className="text-[7.5px] text-slate-400 font-bold mt-1 uppercase tracking-wide">ACTIVE API INSTANCES</div>
+      </div>
+
+    </div>
+  )
+}
+
 // ─── Greeting and Quote Rotation Card ─────────────────────────────────────────
 const QuoteRotatorCard: React.FC = () => {
   const [index, setIndex] = useState(0)
@@ -206,31 +457,31 @@ const QuoteRotatorCard: React.FC = () => {
   }, [])
 
   return (
-    <div className="w-full max-w-lg mx-auto lg:mx-0 bg-white/10 backdrop-blur-md rounded-[2rem] border border-white/20 shadow-2xl p-6 relative overflow-hidden transition-all duration-500">
+    <div className="w-full max-w-lg mx-auto lg:mx-0 bg-white/80 backdrop-blur-md rounded-[2.25rem] border border-slate-200/80 shadow-md p-6 relative overflow-hidden transition-all duration-500">
       {/* Decorative Quotation Mark */}
-      <span className="absolute -top-8 -left-4 text-[10rem] text-white/5 font-serif select-none pointer-events-none">“</span>
+      <span className="absolute -top-8 -left-4 text-[10rem] text-slate-200/40 font-serif select-none pointer-events-none">“</span>
 
       <div className="relative z-10 space-y-4">
         {/* Top: Dynamic Greeting with Icon */}
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-[11px] font-extrabold text-white/60 uppercase tracking-widest">
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-[11px] font-extrabold text-indigo-600/80 uppercase tracking-widest">
             {greeting}, Team
           </span>
         </div>
 
         {/* Welcome Text */}
-        <h3 className="text-xl font-extrabold text-white tracking-tight leading-tight">
+        <h3 className="text-xl font-extrabold text-slate-800 tracking-tight leading-tight">
           Ready to refine today's numbers?
         </h3>
 
         {/* Quote Content */}
         <div className="pt-2 min-h-[85px] flex flex-col justify-between">
-          <p className="text-sm text-white/95 font-medium italic leading-relaxed transition-opacity duration-300">
+          <p className="text-sm text-slate-600 font-medium italic leading-relaxed transition-opacity duration-300">
             "{QUOTES[index].text}"
           </p>
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
-            <span className="text-[10px] font-black text-yellow-300 tracking-wider uppercase">
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
+            <span className="text-[10px] font-black text-indigo-600 tracking-wider uppercase">
               — {QUOTES[index].author}
             </span>
             {/* Pagination Indicators */}
@@ -239,7 +490,7 @@ const QuoteRotatorCard: React.FC = () => {
                 <button
                   key={i}
                   onClick={() => setIndex(i)}
-                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === index ? 'bg-white scale-125' : 'bg-white/30'}`}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === index ? 'bg-indigo-600 scale-125' : 'bg-slate-300'}`}
                 />
               ))}
             </div>
@@ -290,14 +541,14 @@ function App() {
 
   return (
     <div
-      className={`app-bg ${!combinedData ? "app-dark-mesh-bg" : ""}`}
+      className={`app-bg ${!combinedData ? "app-light-mesh-bg" : ""}`}
       style={{
         height: combinedData ? "auto" : "100vh",
         minHeight: combinedData ? "100vh" : undefined,
         display: "flex",
         flexDirection: "column",
         overflow: combinedData ? "visible" : "hidden",
-        background: combinedData ? "#f8fafc" : undefined,
+        background: "#f8fafc",
         transition: "background 0.5s ease"
       }}
     >
@@ -307,6 +558,8 @@ function App() {
         <>
           <LandingBgGrid />
           <FloatingIcons />
+          <AnimatedBackgroundChart />
+          <BackgroundDashboardWidgets />
         </>
       )}
 
@@ -326,12 +579,12 @@ function App() {
             {/* Left: Brand Identity */}
             <div className="flex items-center gap-2.5">
               <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center shadow-sm overflow-hidden bg-gray-700">
+                className="w-8 h-8 rounded-xl flex items-center justify-center shadow-sm overflow-hidden bg-slate-900">
                 <img src="/logo.png" width={24} alt="MM Media" />
               </div>
               <div>
-                <h1 className={`text-[13px] font-black leading-tight ${combinedData ? "text-slate-900" : "text-white"}`}>MM Media</h1>
-                <p className={`text-[9px] font-bold -mt-0.5 tracking-wider uppercase ${combinedData ? "text-slate-400" : "text-white/60"}`}>Report Portal</p>
+                <h1 className="text-[13px] font-black leading-tight text-slate-800">MM Media</h1>
+                <p className="text-[9px] font-bold -mt-0.5 tracking-wider uppercase text-slate-400">Report Portal</p>
               </div>
             </div>
 
@@ -345,12 +598,12 @@ function App() {
               <div
                 className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-extrabold uppercase tracking-wider"
                 style={{
-                  background: combinedData ? "rgba(16,185,129,0.08)" : "rgba(255,255,255,0.15)",
-                  border: combinedData ? "1px solid rgba(16,185,129,0.15)" : "1px solid rgba(255,255,255,0.25)",
-                  color: combinedData ? "#059669" : "#fff",
+                  background: "rgba(16,185,129,0.08)",
+                  border: "1px solid rgba(16,185,129,0.15)",
+                  color: "#059669",
                 }}
               >
-                <span className={`w-1.5 h-1.5 rounded-full bg-emerald-400 ${combinedData ? "animate-pulse" : ""}`} />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Live
               </div>
 
@@ -362,9 +615,9 @@ function App() {
                   }}
                   className="px-3 py-1 rounded-lg text-[11px] font-bold transition-all shadow-sm flex items-center gap-1.5"
                   style={{
-                    background: "rgba(79,70,229,0.08)",
-                    border: "1px solid rgba(79,70,229,0.15)",
-                    color: "#4f46e5",
+                    background: "#0400f7ff",
+                    border: "1px solid #0800fdff",
+                    color: "#ffffffff",
                   }}
                 >
                   <RefreshCw className="w-3 h-3" /> New Upload
@@ -387,36 +640,36 @@ function App() {
               {/* Content */}
               <div className="space-y-4 text-center lg:text-left">
                 {/* Badge */}
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[10px] font-bold bg-white/10 border border-white/20 text-white shadow-2xs">
-                  <Sparkles className="w-3 h-3 text-yellow-300" />
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[10px] font-bold bg-indigo-50 border border-indigo-100 text-indigo-700 shadow-2xs">
+                  <Sparkles className="w-3 h-3 text-indigo-500" />
                   Campaign Report Management Platform
                 </div>
 
                 {/* Title */}
-                <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-black text-white tracking-tight leading-[1.12]">
+                <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-black text-slate-800 tracking-tight leading-[1.12]">
                   Process & Analyze<br />
-                  <span className="bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-300 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-700 bg-clip-text text-transparent">
                     Campaign Reports
                   </span>
                 </h2>
 
                 {/* Description */}
-                <p className="text-sm text-white/80 font-medium leading-relaxed max-w-md mx-auto lg:mx-0">
-                  Parse SUBID metrics, analyze revenue performance, and generate detailed XX breakdowns — all locally, securely, and instantly.
+                <p className="text-sm text-slate-600 font-medium leading-relaxed max-w-md mx-auto lg:mx-0">
+                  Parse SUBID metrics, analyze revenue performance, and generate detailed breakdowns — all locally, securely, and instantly.
                 </p>
 
                 {/* Stats Row */}
                 <div className="flex flex-wrap gap-2.5 pt-1 justify-center lg:justify-start">
                   {[
-                    { label: "Local Processing", value: "100%", icon: ShieldCheck, color: "#34d399" },
-                    { label: "Real-time", value: "Instant", icon: Zap, color: "#fbbf24" },
-                    { label: "Multi-file", value: "Queue", icon: BarChart3, color: "#60a5fa" },
+                    { label: "Local Processing", value: "100%", icon: ShieldCheck, color: "#10b981", bg: "bg-emerald-50", border: "border-emerald-100" },
+                    { label: "Real-time", value: "Instant", icon: Zap, color: "#f59e0b", bg: "bg-amber-50", border: "border-amber-100" },
+                    { label: "Multi-file", value: "Queue", icon: BarChart3, color: "#3b82f6", bg: "bg-blue-50", border: "border-blue-100" },
                   ].map(s => (
-                    <div key={s.label} className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-xl px-3 py-1.5 border border-white/10 shadow-xs">
+                    <div key={s.label} className={`flex items-center gap-2 ${s.bg} rounded-xl px-3 py-1.5 border ${s.border} shadow-xs`}>
                       <s.icon className="w-3.5 h-3.5" style={{ color: s.color }} />
                       <div>
-                        <div className="text-[11px] font-black text-white">{s.value}</div>
-                        <div className="text-[8px] text-white/60 font-semibold">{s.label}</div>
+                        <div className="text-[11px] font-black text-slate-800">{s.value}</div>
+                        <div className="text-[8px] text-slate-500 font-semibold">{s.label}</div>
                       </div>
                     </div>
                   ))}
@@ -429,7 +682,7 @@ function App() {
 
             {/* ── RIGHT: Floating Upload Panel Card ── */}
             <div
-              className="w-full lg:w-[380px] xl:w-[410px] bg-white/10 backdrop-blur-2xl rounded-[2rem] border border-white/15 shadow-[0_25px_80px_rgba(0,0,0,0.45)] flex flex-col relative overflow-hidden"
+              className="w-full lg:w-[380px] xl:w-[410px] bg-white/90 backdrop-blur-2xl rounded-[2.25rem] border border-slate-200/80 shadow-[0_20px_50px_rgba(15,23,42,0.08)] flex flex-col relative overflow-hidden"
               style={{ flexShrink: 0, maxHeight: "90%" }}
             >
               <div className="flex-grow flex flex-col p-5 sm:p-6 overflow-y-auto">
@@ -437,16 +690,16 @@ function App() {
                 {!hasQueuedFiles && (
                   <div className="mb-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center">
-                        <Sparkles className="w-3.5 h-3.5 text-indigo-300" />
+                      <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100/50 flex items-center justify-center">
+                        <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
                       </div>
                       <div>
-                        <h3 className="text-xs font-black text-white">Report Processor</h3>
-                        <p className="text-[9px] text-white/60 font-semibold">Upload & analyze instantly</p>
+                        <h3 className="text-xs font-black text-slate-800">Report Processor</h3>
+                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Upload & analyze instantly</p>
                       </div>
                     </div>
-                    <p className="text-[10px] text-white/70 leading-relaxed">
-                      Upload CSV files containing <span className="font-bold text-indigo-300">SUBID</span> & <span className="font-bold text-indigo-300">REV</span> columns.
+                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                      Upload CSV files containing <span className="font-bold text-indigo-600 bg-indigo-50/50 px-1 py-0.5 rounded">SUBID</span> & <span className="font-bold text-indigo-600 bg-indigo-50/50 px-1 py-0.5 rounded">REV</span> columns.
                     </p>
                   </div>
                 )}
@@ -461,30 +714,29 @@ function App() {
 
                 {/* Info Specs */}
                 {!hasQueuedFiles && (
-                  <div className="grid grid-cols-3 gap-2.5 mt-4 pt-4 border-t border-white/10">
+                  <div className="grid grid-cols-3 gap-2.5 mt-4 pt-4 border-t border-slate-100">
                     {[
-                      { value: "100%", title: "Local", desc: "No server", color: "#34d399", icon: ShieldCheck, glow: "rgba(52, 211, 153, 0.15)" },
-                      { value: "\u221E", title: "Queue", desc: "Multi-file", color: "#818cf8", icon: FileSpreadsheet, glow: "rgba(129, 140, 248, 0.15)" },
-                      { value: "Instant", title: "Parse", desc: "Real-time", color: "#fbbf24", icon: Zap, glow: "rgba(251, 191, 36, 0.15)" },
+                      { value: "100%", title: "Local", desc: "No server", color: "#059669", icon: ShieldCheck, glow: "rgba(5, 150, 105, 0.08)" },
+                      { value: "\u221E", title: "Queue", desc: "Multi-file", color: "#4f46e5", icon: FileSpreadsheet, glow: "rgba(79, 70, 229, 0.08)" },
+                      { value: "Instant", title: "Parse", desc: "Real-time", color: "#d97706", icon: Zap, glow: "rgba(217, 119, 6, 0.08)" },
                     ].map(s => (
                       <div
                         key={s.title}
-                        className="flex flex-col items-center p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/8 transition-all duration-300 group shadow-sm"
+                        className="flex flex-col items-center p-3 rounded-2xl bg-slate-50/50 border border-slate-100 hover:border-indigo-100 hover:bg-white hover:shadow-xs transition-all duration-300 group"
                       >
                         {/* Glowing Icon Wrapper */}
                         <div
-                          className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 border border-white/5"
+                          className="w-8 h-8 rounded-xl flex items-center justify-center mb-2 border border-slate-100"
                           style={{
-                            background: `radial-gradient(circle, ${s.glow} 0%, transparent 100%)`,
-                            boxShadow: `inset 0 1px 0 rgba(255, 255, 255, 0.08)`
+                            background: s.glow,
                           }}
                         >
                           <s.icon className="w-4 h-4" style={{ color: s.color }} />
                         </div>
                         {/* Values & Labels */}
-                        <div className="text-[11px] font-black text-white tracking-tight">{s.value}</div>
+                        <div className="text-[11px] font-black text-slate-800 tracking-tight">{s.value}</div>
                         <div className="text-[8px] font-black uppercase mt-0.5 tracking-wider" style={{ color: s.color }}>{s.title}</div>
-                        <div className="text-[8px] text-white/50 font-medium mt-0.5 text-center leading-tight">{s.desc}</div>
+                        <div className="text-[8px] text-slate-400 font-semibold mt-0.5 text-center leading-tight">{s.desc}</div>
                       </div>
                     ))}
                   </div>
@@ -523,17 +775,17 @@ function App() {
       {/* ── Footer ── */}
       {!combinedData && (
         <footer className="relative z-10" style={{ flexShrink: 0 }}>
-          <div className="max-w-[1300px] mx-auto px-6 py-3 border-t border-white/10 flex items-center justify-between">
-            <p className="text-[10px] text-white/60 font-semibold">
+          <div className="max-w-[1300px] mx-auto px-6 py-3 border-t border-slate-200/60 flex items-center justify-between">
+            <p className="text-[10px] text-slate-400 font-semibold">
               © 2026 MM Media Reports
             </p>
-            <p className="text-[10px] text-white/80 font-semibold flex items-center gap-1">
+            <p className="text-[10px] text-slate-500 font-semibold flex items-center gap-1">
               Made with <Heart className="w-3 h-3 text-pink-400" fill="currentColor" /> by{" "}
               <a
                 href="https://iconicchandu.online/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-bold hover:underline text-white"
+                className="font-bold hover:underline text-slate-600 hover:text-indigo-600"
               >
                 Iconic Chandu
               </a>

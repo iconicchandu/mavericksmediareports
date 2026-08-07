@@ -309,6 +309,11 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded, onQueueChange 
                 <button
                   onClick={() => setSelectedFiles([])}
                   className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white/10 hover:bg-white/15 text-white transition-colors border border-white/10 shadow-sm"
+                  style={{
+                    background: "#4f46e5",
+                    border: "1px solid #0800fdff",
+                    color: "#ffffffff",
+                  }}
                 >
                   New Upload
                 </button>
