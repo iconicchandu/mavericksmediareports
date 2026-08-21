@@ -5,13 +5,10 @@ import {
   FileText,
   X,
   AlertCircle,
-  Sparkles,
+  ArrowUpRight,
+  ShieldCheck,
   Database,
   Zap,
-  UploadCloud,
-  FilePlus2,
-  ShieldCheck,
-  Cpu,
 } from 'lucide-react';
 
 
@@ -34,7 +31,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded, onQueueChange 
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [successPulse, setSuccessPulse] = useState(false);
 
   React.useEffect(() => {
     onQueueChange?.(selectedFiles.length > 0);
@@ -196,10 +192,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded, onQueueChange 
         result.push({ name: selectedFiles[i].name, data });
         setUploadProgress(Math.round(((i + 1) / selectedFiles.length) * 100));
       }
-      setSuccessPulse(true);
       setTimeout(() => {
         onFilesUploaded(result);
-        setSuccessPulse(false);
       }, 600);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to process files');
@@ -214,183 +208,171 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesUploaded, onQueueChange 
       : `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 
   return (
-    <div className="fu-root">
-      {/* ── Content ── */}
-      <div className="fu-content">
-
-        {/* ── Drop Zone ── */}
-        {selectedFiles.length === 0 && (
-          <div
-            className={`fu-dropzone${dragActive ? ' fu-dropzone--active' : ''}${successPulse ? ' fu-dropzone--success' : ''}`}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-          >
-            <input
-              type="file"
-              multiple
-              accept=".csv"
-              onChange={handleFileInput}
-              className="fu-file-input"
-            />
-
-            {/* Corner accents */}
-            <span className="fu-corner fu-corner-tl" />
-            <span className="fu-corner fu-corner-tr" />
-            <span className="fu-corner fu-corner-bl" />
-            <span className="fu-corner fu-corner-br" />
-
-            {/* Scanning line animation when drag active */}
-            {dragActive && <div className="fu-scan-line" />}
-
-            <div className="fu-dropzone-inner">
-              {/* Icon */}
-              <div className={`fu-icon-wrap${dragActive ? ' fu-icon-wrap--active' : ''}`}>
-                <div className="fu-icon-glow" />
-                <div className="fu-icon-ring fu-icon-ring-1" />
-                <div className="fu-icon-ring fu-icon-ring-2" />
-                <div className="fu-icon-core">
-                  <UploadCloud className="fu-icon" />
-                </div>
-              </div>
-
-              {/* Text */}
-              <div className="fu-dropzone-text">
-                {dragActive ? (
-                  <>
-                    <h3 className="fu-title fu-title--active">Release to Upload</h3>
-                    <p className="fu-subtitle fu-subtitle--active">Drop your CSV files here</p>
-                  </>
-                ) : (
-                  <>
-                    <h3 className="fu-title">Drag & Drop CSV Files</h3>
-                    <p className="fu-subtitle">
-                      or <span className="fu-browse-link">click to browse</span> from your device
-                    </p>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Error Banner ── */}
-        {error && (
-          <div className="fu-error">
-            <AlertCircle className="fu-error-icon" />
-            <div>
-              <p className="fu-error-title">Upload Error</p>
-              <p className="fu-error-msg">{error}</p>
-            </div>
-            <button className="fu-error-close" onClick={() => setError(null)}>
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-
-        {/* ── Selected Files Panel ── */}
-        {selectedFiles.length > 0 && (
-          <div className="fu-panel">
-            {/* Panel header */}
-            <div className="fu-panel-header">
-              <div className="fu-panel-title-wrap">
-                <div className="fu-panel-icon">
-                  <FileText className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                  <h3 className="fu-panel-title">Selected Files</h3>
-                  <p className="fu-panel-sub">
-                    {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''} queued
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setSelectedFiles([])}
-                  className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white/10 hover:bg-white/15 text-white transition-colors border border-white/10 shadow-sm"
-                  style={{
-                    background: "#4f46e5",
-                    border: "1px solid #0800fdff",
-                    color: "#ffffffff",
-                  }}
-                >
-                  New Upload
-                </button>
-                <div className="fu-badge">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  {selectedFiles.length} Ready
-                </div>
-              </div>
-            </div>
-
-            {/* File list */}
-            <div className="fu-file-list">
-              {selectedFiles.map((file, index) => (
-                <div key={index} className="fu-file-item" style={{ animationDelay: `${index * 60}ms` }}>
-                  <div className="fu-file-icon-wrap">
-                    <FileText className="w-5 h-5 text-indigo-500" />
-                  </div>
-                  <div className="fu-file-info">
-                    <p className="fu-file-name">{file.name}</p>
-                    <div className="fu-file-meta">
-                      <span className="fu-file-size">{formatSize(file.size)}</span>
-                      <span className="fu-file-tag">CSV</span>
-                    </div>
-                  </div>
-                  <button
-                    className="fu-remove-btn"
-                    onClick={() => removeFile(index)}
-                    title="Remove file"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/* Progress bar (visible while uploading) */}
-            {uploading && (
-              <div className="fu-progress-wrap">
-                <div className="fu-progress-bar">
-                  <div
-                    className="fu-progress-fill"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-                <span className="fu-progress-label">{uploadProgress}%</span>
-              </div>
-            )}
-
-            {/* Process button */}
-            <div className="fu-actions">
-              <button
-                onClick={processFiles}
-                disabled={uploading}
-                className={`fu-process-btn${uploading ? ' fu-process-btn--loading' : ''}`}
-              >
-                {uploading ? (
-                  <>
-                    <div className="fu-spinner" />
-                    <span>Processing files…</span>
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-300" />
-                    <span>Process {selectedFiles.length} File{selectedFiles.length > 1 ? 's' : ''}</span>
-                    {/* Shimmer overlay */}
-                    <div className="fu-btn-shimmer" />
-                  </>
-                )}
-              </button>
-              <p className="fu-security-note">
-                <ShieldCheck className="w-3.5 h-3.5 mr-1 text-emerald-400" />
-                Files are processed locally · never uploaded to any server
-              </p>
-            </div>
-          </div>
-        )}
+    <div className="w-full sm:w-[480px] bg-white rounded-[1.5rem] border border-slate-200 shadow-[0_8px_30px_rgba(15,23,42,0.03)] p-6 space-y-5 text-slate-800 transition-all duration-300">
+      
+      {/* Top Header */}
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+          Campaign Processor
+        </span>
+        <span className="inline-flex bg-[#059669] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full">
+          Local
+        </span>
       </div>
+
+      {/* Error Banner */}
+      {error && (
+        <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-red-700 text-xs flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <span className="font-bold">Error:</span> {error}
+          </div>
+          <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* Upload Zone OR File List + Action */}
+      {selectedFiles.length === 0 ? (
+        <div
+          className={`minimal-dropzone h-[280px] flex flex-col items-center justify-center text-center ${dragActive ? 'minimal-dropzone--active' : ''}`}
+          onDragEnter={handleDrag}
+          onDragLeave={handleDrag}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
+        >
+          <input
+            type="file"
+            multiple
+            accept=".csv"
+            onChange={handleFileInput}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+          />
+          <div className="text-3xl font-black text-slate-900 tracking-tight">
+            Drag & Drop
+          </div>
+          <div className="text-xs text-slate-400 font-extrabold uppercase tracking-wider mt-2">
+            or click to browse
+          </div>
+        </div>
+      ) : (
+        /* Selected Files List and Actions */
+        <div className="space-y-3">
+          {/* Header of list */}
+          <div 
+            className="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider animate-blur-in opacity-0"
+            style={{ animationDelay: '0.02s' }}
+          >
+            <span>Selected Files ({selectedFiles.length})</span>
+            {!uploading && (
+              <button 
+                onClick={() => setSelectedFiles([])}
+                className="text-slate-400 hover:text-red-500 font-bold transition-colors"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
+          {/* Files List */}
+          <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+            {selectedFiles.map((file, idx) => (
+              <div 
+                key={`${file.name}-${idx}`} 
+                className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl animate-blur-in opacity-0"
+                style={{ animationDelay: `${(idx + 1) * 0.04}s` }}
+              >
+                <div className="flex items-center gap-2 truncate">
+                  <FileText className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                  <div className="truncate">
+                    <p className="text-[11px] font-bold text-slate-700 truncate leading-tight animate-blur-in opacity-0" style={{ animationDelay: `${(idx + 1) * 0.04 + 0.02}s` }}>{file.name}</p>
+                    <p className="text-[9px] text-slate-400 font-semibold mt-0.5 animate-blur-in opacity-0" style={{ animationDelay: `${(idx + 1) * 0.04 + 0.04}s` }}>{formatSize(file.size)}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => removeFile(idx)}
+                  className="text-slate-400 hover:text-red-500 transition-colors"
+                  disabled={uploading}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Action Button */}
+          <button
+            onClick={processFiles}
+            disabled={uploading}
+            className="w-full bg-slate-950 hover:bg-indigo-600 text-white text-xs font-black py-2.5 px-4 rounded-xl flex items-center justify-center gap-1.5 transition-all duration-300 shadow-xs animate-blur-in opacity-0"
+            style={{ animationDelay: `${(selectedFiles.length + 1) * 0.04 + 0.06}s` }}
+          >
+            {uploading ? (
+              <>
+                <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1" />
+                <span>Processing...</span>
+              </>
+            ) : (
+              <>
+                <span>Process Files</span>
+                <ArrowUpRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* Progress Bar (Visible while uploading/processing) */}
+      {uploading && (
+        <div className="h-1 bg-slate-100 w-full rounded-full overflow-hidden relative">
+          <div 
+            className="h-full bg-indigo-600 transition-all duration-300"
+            style={{ width: `${uploadProgress}%` }}
+          />
+        </div>
+      )}
+
+      {selectedFiles.length === 0 && (
+        <>
+          {/* Divider */}
+          <div className="h-[1px] bg-slate-100 w-full" />
+
+          {/* Stats / Specs Section with Icons */}
+          <div className="grid grid-cols-3 gap-2 py-1">
+            <div className="flex items-center justify-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <div className="text-left">
+                <span className="text-[11px] font-extrabold text-slate-800 leading-none block">100% Local</span>
+                <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5 block">Sandbox</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-2 border-l border-slate-100">
+              <Database className="w-4 h-4 text-indigo-600 flex-shrink-0" />
+              <div className="text-left">
+                <span className="text-[11px] font-extrabold text-slate-800 leading-none block">Multi-File</span>
+                <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5 block">Queue</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-2 border-l border-slate-100">
+              <Zap className="w-4 h-4 text-amber-500 flex-shrink-0" />
+              <div className="text-left">
+                <span className="text-[11px] font-extrabold text-slate-800 leading-none block">Instant</span>
+                <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5 block">Parse</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="h-[1px] bg-slate-100 w-full" />
+
+          {/* Helpful usage tip */}
+          <p className="text-[10px] text-slate-400 font-semibold text-center leading-normal bg-slate-50/80 rounded-xl py-2 px-3 border border-slate-100/50">
+            💡 Drag campaign CSV files directly into the box above to automatically parse and combine reports.
+          </p>
+        </>
+      )}
+
     </div>
   );
 };

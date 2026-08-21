@@ -36,6 +36,8 @@ export interface CampaignStats {
   revenue: number;
   creatives: CreativeStats[];
   ets: string[];
+  advertiser?: string;
+  originalCampaignName?: string;
 }
 
 export interface ETStats {

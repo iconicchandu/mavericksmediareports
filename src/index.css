@@ -1,5 +1,46 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Dancing+Script:wght@700&family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;800;900&display=swap');
 
+/* Gordita Font Declarations */
+@font-face {
+  font-family: 'Gordita';
+  src: url('/fonts/Gordita-Regular.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gordita';
+  src: url('/fonts/Gordita-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gordita';
+  src: url('/fonts/Gordita-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gordita';
+  src: url('/fonts/Gordita-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gordita';
+  src: url('/fonts/Gordita-Bold.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -15,8 +56,8 @@
 }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
-  background: #f0f4ff;
+  font-family: 'Gordita', 'Inter', system-ui, sans-serif;
+  background: #ffffff;
   color: #1e293b;
   -webkit-font-smoothing: antialiased;
 }
@@ -49,73 +90,9 @@ body {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
-  background: #f8fafc;
+  background: #ffffff;
 }
 
-/* ── Background canvas layer ── */
-.app-bg-layer {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-
-/* Ambient blobs - STATIC, no animations */
-.bg-blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-  will-change: transform;
-}
-
-.bg-blob-1 {
-  width: 700px;
-  height: 700px;
-  top: -250px;
-  left: -200px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
-}
-
-.bg-blob-2 {
-  width: 600px;
-  height: 600px;
-  top: 15%;
-  right: -250px;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
-}
-
-.bg-blob-3 {
-  width: 550px;
-  height: 550px;
-  bottom: -200px;
-  left: 20%;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
-}
-
-.bg-blob-4 {
-  width: 450px;
-  height: 450px;
-  top: 70%;
-  left: -150px;
-  background: radial-gradient(circle, rgba(245, 158, 11, 0.06) 0%, transparent 70%);
-}
-
-/* Fine grid with blue gradient lines */
-.bg-grid {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 40%, #8b5cf6 80%, #06b6d4 100%);
-  opacity: 0.08;
-  -webkit-mask-image:
-    linear-gradient(to right, black 1px, transparent 1px),
-    linear-gradient(to bottom, black 1px, transparent 1px);
-  mask-image:
-    linear-gradient(to right, black 1px, transparent 1px),
-    linear-gradient(to bottom, black 1px, transparent 1px);
-  -webkit-mask-size: 45px 45px;
-  mask-size: 45px 45px;
-}
 
 /* ════════════════════════════════════
    HEADER — light glassmorphism
@@ -1375,12 +1352,100 @@ body {
 }
 
 
-/* Sleek Premium Light Mesh Gradient Background */
+/* Sleek Premium Light White, Blue, & Red Gradient Background */
 .app-light-mesh-bg {
-  background: 
-    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
-    radial-gradient(at 50% 0%, rgba(139, 92, 246, 0.08) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.08) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(236, 72, 153, 0.05) 0px, transparent 50%),
-    #f8fafc !important;
+  background-color: #F5F7FC !important;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.06) 0px, transparent 50%),
+    /* Subtle indigo top-left */
+    radial-gradient(at 100% 0%, rgba(244, 63, 94, 0.04) 0px, transparent 50%) !important;
+    /* Subtle rose top-right */
+}
+
+/* Minimal Design Custom Styles */
+.minimal-dropzone {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #f8fafc,
+    #f8fafc 4px,
+    #f1f5f9 4px,
+    #f1f5f9 8px
+  );
+  border: 1px dashed #cbd5e1;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.minimal-dropzone:hover {
+  border-color: #1e293b;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #ffffff,
+    #ffffff 4px,
+    #f8fafc 4px,
+    #f8fafc 8px
+  );
+}
+
+.minimal-dropzone--active {
+  border-color: #4f46e5;
+  border-style: solid;
+  background-color: rgba(99, 102, 241, 0.02);
+}
+
+.minimal-btn-action {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background-color: #0f172a;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.minimal-btn-action:hover:not(:disabled) {
+  background-color: #4f46e5;
+  transform: translateY(-1px);
+}
+
+.minimal-btn-action:disabled {
+  background-color: #f1f5f9;
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+/* Smooth Blur-In Animation */
+@keyframes blurIn {
+  0% {
+    filter: blur(10px);
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    filter: blur(0);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-blur-in {
+  animation: blurIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Smooth Fade-In Animation (Opacity only to prevent containing block override on fixed modals) */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
 }
