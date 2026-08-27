@@ -25,6 +25,7 @@ const OTHER_ET_COLOR = "#1e40af";
 const getAdvertiserAccent = (name: string): string => {
   switch (name) {
     case 'Branded':
+    case 'BRANDED':
       return '#6366F1'; // indigo
     case 'RGR':
       return '#F59E0B'; // amber
@@ -54,6 +55,7 @@ const getAdvertiserAccent = (name: string): string => {
     case 'Comcast':
       return '#DC2626'; // red
     case 'Other':
+    case 'OTHER':
       return '#6B7280'; // gray
     default:
       return '#10B981'; // emerald fallback
@@ -468,6 +470,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG45": { stack: "S1", manager: "Aditya G." },
     "JSG41MET": { stack: "S1", manager: "Satyam S." },
     "JSG48MET": { stack: "S1", manager: "Abhay S." },
+    "C48MET": { stack: "S1", manager: "Abhay S." },
     "JSG55": { stack: "S1", manager: "Kaif K." },
 
     // S4
@@ -483,6 +486,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "C30": { stack: "S7", manager: "Aditya S." },
     "JSG47": { stack: "S7", manager: "Keshav T." },
     "C47MET": { stack: "S7", manager: "Abhay S." },
+    "JSG47NC": { stack: "S7", manager: "Keshav T." },
     "JSG50": { stack: "S7", manager: "Vaibhav G." },
 
     // S11
@@ -497,6 +501,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG38NR": { stack: "S12", manager: "Kaif K." },
     "JSG40": { stack: "S12", manager: "Keshav T." },
     "JSG52": { stack: "S12", manager: "Keshav T." },
+    "JSG52C": { stack: "S12", manager: "Keshav T." },
 
     // S13
     "JSG43MET": { stack: "S13", manager: "Vaibhav G." },
@@ -673,7 +678,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         const advertiser = advertiserStats.get(record.advertiser)!;
         advertiser.revenue += record.revenue;
         advertiser.frequency = (advertiser.frequency || 0) + (record.conv ?? 1);
-        
+
         // Use separated name for advertiser.campaigns
         const hasMultiple = campaignAdvertisers.get(record.campaign)!.size > 1;
         const displayName = hasMultiple ? `${record.campaign} (${advertiserKey})` : record.campaign;
@@ -888,7 +893,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
           ? '7M'
           : record.advertiser;
     // Find the campaign in campaignStats that matches this record
-    const campaign = analytics.campaignStats.find(c => 
+    const campaign = analytics.campaignStats.find(c =>
       c.originalCampaignName === record.campaign && c.advertiser === advertiserKey
     );
     return campaign ? campaign.name : record.campaign;
@@ -903,8 +908,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         : is7MRecord(r)
           ? '7M'
           : r.advertiser;
-    return r.campaign === (campaign.originalCampaignName || campaign.name) && 
-           (campaign.advertiser === undefined || advertiserKey === campaign.advertiser);
+    return r.campaign === (campaign.originalCampaignName || campaign.name) &&
+      (campaign.advertiser === undefined || advertiserKey === campaign.advertiser);
   };
 
   // Displayed total target: multiply by 7 when overall revenue is > 40000
@@ -1383,7 +1388,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
           const hasLetters = /[a-zA-Z]/.test(rawTarget);
           const isNumericTarget = hasNumbers && !hasLetters;
           if (!isNumericTarget) return false;
-          
+
           const numericTarget = parseFloat(rawTarget.replace(/[^0-9.]/g, "")) || 0;
           const targetVal = numericTarget * (analytics.totalRevenue >= 40000 ? 7 : 1);
           return et.revenue >= targetVal;
@@ -1409,7 +1414,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                 </p>
               </div>
             </div>
-            
+
             <div className="flex flex-wrap gap-2.5 relative z-10">
               {achievedETs.map(et => {
                 const info = getETInfo(et.name);
@@ -1422,8 +1427,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                 const stackName = info ? info.stack : "N/A";
 
                 return (
-                  <div 
-                    key={et.name} 
+                  <div
+                    key={et.name}
                     className="inline-flex items-center gap-3 bg-white border border-emerald-500/10 hover:border-emerald-500/30 rounded-full pl-3 pr-1.5 py-1 text-xs shadow-3xs hover:shadow-2xs transition-all duration-300 hover:-translate-y-0.5"
                   >
                     {/* Dot and ET Name */}
@@ -2542,9 +2547,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                   : is7MRecord(r)
                     ? '7M'
                     : r.advertiser;
-              return r.creative === creativeName && 
-                     r.campaign === (tc.originalCampaignName || tc.campaign) && 
-                     (tc.advertiser === undefined || advertiserKey === tc.advertiser);
+              return r.creative === creativeName &&
+                r.campaign === (tc.originalCampaignName || tc.campaign) &&
+                (tc.advertiser === undefined || advertiserKey === tc.advertiser);
             })
             .forEach(record => {
               const et = record.et.toUpperCase();
@@ -2667,8 +2672,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {analytics.campaignStats.map((campaign) => {
             const advColor = campaign.advertiser ? getAdvertiserAccent(campaign.advertiser) : '#6366F1';
-            const bgRgba = hexToRgba(advColor, 0.035);
-            const borderRgba = hexToRgba(advColor, 0.18);
+            const bgRgba = hexToRgba(advColor, 0.045);
+            const borderRgba = hexToRgba(advColor, 0.16);
 
             return (
               <div
@@ -2678,29 +2683,39 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                   backgroundColor: bgRgba,
                   borderColor: borderRgba
                 }}
-                className="group p-3.5 rounded-2xl border shadow-2xs hover:shadow-xs transition-all duration-200 cursor-pointer flex flex-col justify-between"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = hexToRgba(advColor, 0.35);
+                  e.currentTarget.style.backgroundColor = hexToRgba(advColor, 0.075);
+                  e.currentTarget.style.boxShadow = `0 10px 20px -5px ${hexToRgba(advColor, 0.12)}, 0 4px 6px -4px ${hexToRgba(advColor, 0.12)}`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = borderRgba;
+                  e.currentTarget.style.backgroundColor = bgRgba;
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+                className="group p-4 rounded-3xl border shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md transition-all duration-300 cursor-pointer flex flex-col justify-between gap-3"
               >
                 {/* Campaign Header */}
-                <div className="flex items-center justify-between mb-2 gap-2">
+                <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <span
-                      className="w-2 h-2 rounded-full flex-shrink-0 animate-pulse"
+                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                       style={{ backgroundColor: advColor }}
                     />
                     <h4
-                      className="font-extrabold text-xs text-slate-700 truncate"
+                      className="font-extrabold text-sm text-slate-800 truncate"
                       title={campaign.name}
                     >
                       {campaign.name}
                     </h4>
                   </div>
                   {campaign.advertiser && (
-                    <span 
-                      className="px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider leading-none select-none flex-shrink-0"
+                    <span
+                      className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider leading-none select-none flex-shrink-0"
                       style={{
-                        backgroundColor: hexToRgba(advColor, 0.1),
+                        backgroundColor: hexToRgba(advColor, 0.08),
                         color: advColor,
-                        border: `1.2px solid ${hexToRgba(advColor, 0.2)}`
+                        border: `1px solid ${hexToRgba(advColor, 0.15)}`
                       }}
                     >
                       {campaign.advertiser}
@@ -2709,10 +2724,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                 </div>
 
                 {/* Revenue Display */}
-                <div className="mb-2">
-                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block leading-none mb-0.5">Revenue</span>
+                <div>
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block leading-none mb-1.5">REVENUE</span>
                   <p
-                    className="text-base font-black tracking-tight leading-none"
+                    className="text-[22px] font-black tracking-tight leading-none"
                     style={{ color: advColor }}
                   >
                     ${campaign.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -2720,19 +2735,22 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                 </div>
 
                 {/* Stats Footer */}
-                <div className="flex items-center justify-between pt-2.5 border-t border-slate-200/40">
+                <div className="flex items-center justify-between mt-0.5">
                   <div className="flex items-center gap-1.5">
-                    <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white border border-slate-100 text-[9px] font-bold text-slate-500 shadow-3xs">
-                      <Layers className="h-2.5 w-2.5 text-slate-400" />
+                    <div className="flex items-center gap-1 px-1.5 py-0.75 rounded-md bg-white border border-slate-200/50 text-[10px] font-bold text-slate-500 shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
+                      <Layers className="h-3 w-3 text-slate-400" />
                       <span>{campaign.creatives.length}</span>
                     </div>
-                    <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white border border-slate-100 text-[9px] font-bold text-slate-500 shadow-3xs">
-                      <Users className="h-2.5 w-2.5 text-slate-400" />
+                    <div className="flex items-center gap-1 px-1.5 py-0.75 rounded-md bg-white border border-slate-200/50 text-[10px] font-bold text-slate-500 shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
+                      <Users className="h-3 w-3 text-slate-400" />
                       <span>{campaign.ets.length}</span>
                     </div>
                   </div>
-                  <span className="text-[9px] font-extrabold text-slate-400 group-hover:text-slate-600 transition-colors flex items-center gap-0.5 leading-none">
-                    Details <span className="text-[11px]">→</span>
+                  <span
+                    className="text-[10px] font-black transition-colors flex items-center gap-0.5 leading-none"
+                    style={{ color: advColor }}
+                  >
+                    Details <span className="text-[11px] font-bold">→</span>
                   </span>
                 </div>
               </div>
@@ -3199,19 +3217,74 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                   {etData.advertisersArray && etData.advertisersArray.length > 0 && (
                     <div className="mb-6">
                       <div className="flex items-center mb-4 gap-3">
-                        <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100">
+                        <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm">
                           <Building2 className="h-5 w-5" />
                         </div>
-                        <h4 className="text-lg font-bold text-gray-900">Advertiser-Wise Revenue Breakdown</h4>
+                        <h4 className="text-lg font-extrabold text-slate-800 tracking-tight">Advertiser-Wise Revenue Breakdown</h4>
                       </div>
-                      <div className="flex flex-wrap gap-2.5">
-                        {etData.advertisersArray.map(ad => (
-                          <div key={ad.name} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/60 shadow-xs hover:bg-slate-100/40 transition-colors">
-                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getAdvertiserAccent(ad.name) }} />
-                            <span className="text-xs font-bold text-slate-700">{ad.name}</span>
-                            <span className="text-xs font-black text-slate-900">${ad.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                          </div>
-                        ))}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
+                        {etData.advertisersArray.map(ad => {
+                          const accent = getAdvertiserAccent(ad.name);
+                          const percent = etData.revenue > 0 ? (ad.revenue / etData.revenue) * 100 : 0;
+                          return (
+                            <div
+                              key={ad.name}
+                              className="relative p-3.5 rounded-2xl border transition-all duration-300 flex flex-col justify-between gap-2 hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.08)] hover:scale-[1.01] group bg-white"
+                              style={{
+                                background: `linear-gradient(135deg, ${hexToRgba(accent, 0.05)} 0%, ${hexToRgba(accent, 0.015)} 100%)`,
+                                borderColor: hexToRgba(accent, 0.15),
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = hexToRgba(accent, 0.35);
+                                e.currentTarget.style.boxShadow = `0 10px 15px -3px ${hexToRgba(accent, 0.08)}, 0 4px 6px -4px ${hexToRgba(accent, 0.08)}`;
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = hexToRgba(accent, 0.15);
+                                e.currentTarget.style.boxShadow = 'none';
+                              }}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <span
+                                    className="w-2 h-2 rounded-full flex-shrink-0"
+                                    style={{
+                                      backgroundColor: accent,
+                                      boxShadow: `0 0 6px ${hexToRgba(accent, 0.4)}`,
+                                    }}
+                                  />
+                                  <span className="text-xs font-bold text-slate-700 truncate group-hover:text-slate-900 transition-colors">
+                                    {ad.name}
+                                  </span>
+                                </div>
+                                <span
+                                  className="text-[10px] font-black px-1.5 py-0.5 rounded-md flex-shrink-0"
+                                  style={{
+                                    backgroundColor: hexToRgba(accent, 0.09),
+                                    color: accent,
+                                    border: `1px solid ${hexToRgba(accent, 0.15)}`,
+                                  }}
+                                >
+                                  {percent.toFixed(1)}%
+                                </span>
+                              </div>
+                              <div className="mt-1 flex items-baseline">
+                                <span className="text-base font-black text-slate-900 tracking-tight">
+                                  ${ad.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </span>
+                              </div>
+                              <div className="w-full h-1.5 bg-slate-100/70 rounded-full overflow-hidden mt-1.5">
+                                <div
+                                  className="h-full rounded-full transition-all duration-500 ease-out"
+                                  style={{
+                                    width: `${percent}%`,
+                                    backgroundColor: accent,
+                                    boxShadow: `0 0 4px ${hexToRgba(accent, 0.25)}`,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -3247,34 +3320,66 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                               }
                               return acc;
                             }, [] as { name: string; frequency: number; revenue: number }[]);
-                          return { campaignName, campaignRevenue, creatives };
+                          return { campaignName, campaignRevenue, creatives, advertiser: campaignData?.advertiser };
                         })
                         .sort((a, b) => b.campaignRevenue - a.campaignRevenue)
                         .map((campaignData) => {
                           const campaignFrequency = campaignData.creatives.reduce((sum, c) => sum + c.frequency, 0);
+                          const advertiserName = campaignData?.advertiser;
+                          const advertiserAccent = getAdvertiserAccent(advertiserName || '');
                           return (
                             <div
                               key={campaignData.campaignName}
-                              className="p-4 rounded-2xl border border-slate-200/80 bg-white hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
+                              style={{
+                                backgroundColor: hexToRgba(advertiserAccent, 0.045),
+                                borderColor: hexToRgba(advertiserAccent, 0.16)
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = hexToRgba(advertiserAccent, 0.35);
+                                e.currentTarget.style.backgroundColor = hexToRgba(advertiserAccent, 0.075);
+                                e.currentTarget.style.boxShadow = `0 8px 16px -4px ${hexToRgba(advertiserAccent, 0.1)}, 0 4px 6px -4px ${hexToRgba(advertiserAccent, 0.1)}`;
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = hexToRgba(advertiserAccent, 0.16);
+                                e.currentTarget.style.backgroundColor = hexToRgba(advertiserAccent, 0.045);
+                                e.currentTarget.style.boxShadow = 'none';
+                              }}
+                              className="p-3.5 rounded-2xl border transition-all duration-300 flex flex-col justify-between hover:shadow-xs"
                             >
                               <div>
                                 {/* Campaign Header */}
-                                <div className="flex items-center gap-2 mb-3 pb-2.5 border-b border-slate-100">
-                                  <Target className="h-4 w-4 text-indigo-500 flex-shrink-0" />
-                                  <h4 className="text-sm font-bold text-slate-800 truncate">{campaignData.campaignName}</h4>
+                                <div className="flex items-center justify-between gap-2 mb-3">
+                                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                                    <Target className="h-4 w-4 flex-shrink-0" style={{ color: advertiserAccent }} />
+                                    <h4 className="text-sm font-extrabold text-slate-800 truncate" title={campaignData.campaignName}>
+                                      {campaignData.campaignName}
+                                    </h4>
+                                  </div>
+                                  {advertiserName && (
+                                    <span
+                                      className="text-[9px] font-black px-1.5 py-0.5 rounded-md flex-shrink-0 uppercase tracking-wider"
+                                      style={{
+                                        backgroundColor: hexToRgba(advertiserAccent, 0.09),
+                                        color: advertiserAccent,
+                                        border: `1px solid ${hexToRgba(advertiserAccent, 0.15)}`,
+                                      }}
+                                    >
+                                      {advertiserName}
+                                    </span>
+                                  )}
                                 </div>
 
                                 {/* Revenue & Frequency - Clean & Aligned */}
-                                <div className="grid grid-cols-2 gap-2 mb-4">
-                                  <div className="bg-slate-50/50 p-2 rounded-xl border border-slate-100">
-                                    <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Revenue</p>
-                                    <p className="text-base font-extrabold text-emerald-600">
+                                <div className="grid grid-cols-2 gap-2 mb-3">
+                                  <div className="bg-white/80 p-2 rounded-xl border border-slate-100 flex flex-col justify-between">
+                                    <p className="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest mb-1 leading-none">Revenue</p>
+                                    <p className="text-[14px] font-black text-emerald-600 leading-none">
                                       ${campaignData.campaignRevenue.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                                     </p>
                                   </div>
-                                  <div className="bg-slate-50/50 p-2 rounded-xl border border-slate-100">
-                                    <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Frequency</p>
-                                    <p className="text-base font-extrabold text-slate-700">
+                                  <div className="bg-white/80 p-2 rounded-xl border border-slate-100 flex flex-col justify-between">
+                                    <p className="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest mb-1 leading-none">Frequency</p>
+                                    <p className="text-[14px] font-black text-slate-700 leading-none">
                                       {campaignFrequency}
                                     </p>
                                   </div>
@@ -3282,10 +3387,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                               </div>
 
                               {/* Active Creatives Chips */}
-                              <div>
+                              <div className="mt-0.5">
                                 <div className="flex items-center gap-1 mb-1.5">
                                   <Users className="h-3 w-3 text-slate-400" />
-                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
                                     Creatives ({campaignData.creatives.length})
                                   </span>
                                 </div>
@@ -3293,14 +3398,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                                   {campaignData.creatives.slice(0, 4).map((creative, idx) => (
                                     <span
                                       key={idx}
-                                      className="px-2 py-0.5 rounded-lg text-[9.5px] font-semibold bg-indigo-50/60 text-indigo-600 border border-indigo-100/50"
+                                      className="px-1.5 py-0.5 rounded-lg text-[9px] font-semibold bg-indigo-50/60 text-indigo-600 border border-indigo-100/50"
                                       title={creative.name}
                                     >
                                       {creative.name.length > 12 ? creative.name.substring(0, 12) + '...' : creative.name}
                                     </span>
                                   ))}
                                   {campaignData.creatives.length > 4 && (
-                                    <span className="px-1.5 py-0.5 rounded-lg text-[9.5px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
+                                    <span className="px-1.5 py-0.5 rounded-lg text-[9px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
                                       +{campaignData.creatives.length - 4}
                                     </span>
                                   )}
@@ -3326,9 +3431,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                       <div className="flex space-x-1.5 pb-2">
                         <button
                           onClick={() => setSelectedETCreativeFilter('all')}
-                          className={`px-3 py-1.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all border ${selectedETCreativeFilter === 'all'
-                            ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                            : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200/80'
+                          className={`px-2.5 py-1 text-[11px] font-bold rounded-xl whitespace-nowrap transition-all border ${selectedETCreativeFilter === 'all'
+                            ? 'bg-slate-950 text-white border-slate-950 shadow-[0_2px_6px_rgba(0,0,0,0.06)]'
+                            : 'bg-slate-50/50 hover:bg-slate-100/80 text-slate-600 border-slate-200/60'
                             }`}
                         >
                           All ({etData.creatives.length})
@@ -3347,9 +3452,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                             <button
                               key={campaign}
                               onClick={() => setSelectedETCreativeFilter(campaign)}
-                              className={`px-3 py-1.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all border ${selectedETCreativeFilter === campaign
-                                ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                                : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200/80'
+                              className={`px-2.5 py-1 text-[11px] font-bold rounded-xl whitespace-nowrap transition-all border ${selectedETCreativeFilter === campaign
+                                ? 'bg-slate-955 text-white border-slate-955 shadow-[0_2px_6px_rgba(0,0,0,0.06)] bg-slate-950'
+                                : 'bg-slate-50/50 hover:bg-slate-100/80 text-slate-600 border-slate-200/60'
                                 }`}
                             >
                               {campaign} ({campaignCreativeCount})
@@ -3372,36 +3477,68 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                               campaignData && isRecordForCampaign(record, campaignData)
                           );
                         })
-                        .map((creative, idx) => (
-                          <div
-                            key={creative.name}
-                            className="p-3.5 rounded-2xl border border-slate-200/80 bg-white hover:border-purple-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
-                          >
-                            <div>
-                              <div className="flex items-start justify-between mb-3 gap-2">
-                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                  <FileText className="h-4 w-4 text-purple-500 flex-shrink-0" />
-                                  <h5 className="font-semibold text-xs text-slate-800 truncate" title={creative.name}>{creative.name}</h5>
-                                </div>
-                                {idx === 0 && (
-                                  <span className="p-0.5 rounded-md bg-amber-50 text-amber-500 border border-amber-200 flex-shrink-0" title="Top Performing">
-                                    <Crown className="h-3 w-3" />
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between mt-2 pt-2.5 border-t border-slate-100">
+                        .map((creative, idx) => {
+                          const creativeRecord = data.records.find(r => r.creative === creative.name);
+                          const creativeAdvertiser = creativeRecord?.advertiser || '';
+                          const creativeColor = getAdvertiserAccent(creativeAdvertiser);
+                          const bgRgba = hexToRgba(creativeColor, 0.045);
+                          const borderRgba = hexToRgba(creativeColor, 0.16);
+
+                          return (
+                            <div
+                              key={creative.name}
+                              style={{
+                                backgroundColor: bgRgba,
+                                borderColor: borderRgba
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = hexToRgba(creativeColor, 0.35);
+                                e.currentTarget.style.backgroundColor = hexToRgba(creativeColor, 0.075);
+                                e.currentTarget.style.boxShadow = `0 8px 16px -4px ${hexToRgba(creativeColor, 0.1)}, 0 4px 6px -4px ${hexToRgba(creativeColor, 0.1)}`;
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = borderRgba;
+                                e.currentTarget.style.backgroundColor = bgRgba;
+                                e.currentTarget.style.boxShadow = 'none';
+                              }}
+                              className="p-3 rounded-2xl border transition-all duration-300 flex flex-col justify-between hover:shadow-xs"
+                            >
                               <div>
-                                <p className="text-base font-extrabold text-purple-600">
-                                  ${creative.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </p>
-                                <p className="text-[10px] font-semibold text-slate-400 mt-0.5">
-                                  {creative.frequency} {creative.frequency === 1 ? 'occurrence' : 'occurrences'}
-                                </p>
+                                <div className="flex items-start justify-between mb-2 gap-2">
+                                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                                    <FileText className="h-3.5 w-3.5 flex-shrink-0" style={{ color: creativeColor }} />
+                                    <h5 className="font-bold text-xs text-slate-800 truncate" title={creative.name}>
+                                      {creative.name}
+                                    </h5>
+                                  </div>
+                                  {idx === 0 && (
+                                    <span
+                                      className="p-0.75 rounded-md flex-shrink-0 flex items-center justify-center"
+                                      style={{
+                                        backgroundColor: hexToRgba('#F59E0B', 0.08),
+                                        color: '#F59E0B',
+                                        border: `1px solid ${hexToRgba('#F59E0B', 0.18)}`
+                                      }}
+                                      title="Top Performing"
+                                    >
+                                      <Crown className="h-3 w-3" />
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between mt-2.5">
+                                <div>
+                                  <p className="text-[15px] font-black" style={{ color: creativeColor }}>
+                                    ${creative.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                  </p>
+                                  <p className="text-[9px] font-bold text-slate-400 mt-0.5">
+                                    {creative.frequency} {creative.frequency === 1 ? 'occurrence' : 'occurrences'}
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                     </div>
                   </div>
                 </div>
@@ -3475,19 +3612,74 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                 {selectedETData.advertisersArray && selectedETData.advertisersArray.length > 0 && (
                   <div className="mb-6">
                     <div className="flex items-center mb-4 gap-3">
-                      <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100">
+                      <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm">
                         <Building2 className="h-5 w-5" />
                       </div>
-                      <h4 className="text-lg font-bold text-gray-900">Advertiser-Wise Revenue Breakdown</h4>
+                      <h4 className="text-lg font-extrabold text-slate-800 tracking-tight">Advertiser-Wise Revenue Breakdown</h4>
                     </div>
-                    <div className="flex flex-wrap gap-2.5">
-                      {selectedETData.advertisersArray.map(ad => (
-                        <div key={ad.name} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/60 shadow-xs hover:bg-slate-100/40 transition-colors">
-                          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getAdvertiserAccent(ad.name) }} />
-                          <span className="text-xs font-bold text-slate-700">{ad.name}</span>
-                          <span className="text-xs font-black text-slate-900">${ad.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                        </div>
-                      ))}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
+                      {selectedETData.advertisersArray.map(ad => {
+                        const accent = getAdvertiserAccent(ad.name);
+                        const percent = selectedETData.revenue > 0 ? (ad.revenue / selectedETData.revenue) * 100 : 0;
+                        return (
+                          <div
+                            key={ad.name}
+                            className="relative p-3.5 rounded-2xl border transition-all duration-300 flex flex-col justify-between gap-2 hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.08)] hover:scale-[1.01] group bg-white"
+                            style={{
+                              background: `linear-gradient(135deg, ${hexToRgba(accent, 0.05)} 0%, ${hexToRgba(accent, 0.015)} 100%)`,
+                              borderColor: hexToRgba(accent, 0.15),
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.borderColor = hexToRgba(accent, 0.35);
+                              e.currentTarget.style.boxShadow = `0 10px 15px -3px ${hexToRgba(accent, 0.08)}, 0 4px 6px -4px ${hexToRgba(accent, 0.08)}`;
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = hexToRgba(accent, 0.15);
+                              e.currentTarget.style.boxShadow = 'none';
+                            }}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span
+                                  className="w-2 h-2 rounded-full flex-shrink-0"
+                                  style={{
+                                    backgroundColor: accent,
+                                    boxShadow: `0 0 6px ${hexToRgba(accent, 0.4)}`,
+                                  }}
+                                />
+                                <span className="text-xs font-bold text-slate-700 truncate group-hover:text-slate-900 transition-colors">
+                                  {ad.name}
+                                </span>
+                              </div>
+                              <span
+                                className="text-[10px] font-black px-1.5 py-0.5 rounded-md flex-shrink-0"
+                                style={{
+                                  backgroundColor: hexToRgba(accent, 0.09),
+                                  color: accent,
+                                  border: `1px solid ${hexToRgba(accent, 0.15)}`,
+                                }}
+                              >
+                                {percent.toFixed(1)}%
+                              </span>
+                            </div>
+                            <div className="mt-1 flex items-baseline">
+                              <span className="text-base font-black text-slate-900 tracking-tight">
+                                ${ad.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                            <div className="w-full h-1.5 bg-slate-100/70 rounded-full overflow-hidden mt-1.5">
+                              <div
+                                className="h-full rounded-full transition-all duration-500 ease-out"
+                                style={{
+                                  width: `${percent}%`,
+                                  backgroundColor: accent,
+                                  boxShadow: `0 0 4px ${hexToRgba(accent, 0.25)}`,
+                                }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -3524,34 +3716,66 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                             }
                             return acc;
                           }, [] as { name: string; frequency: number; revenue: number }[]);
-                        return { campaignName, campaignRevenue, creatives };
+                        return { campaignName, campaignRevenue, creatives, advertiser: campaignData?.advertiser };
                       })
                       .sort((a, b) => b.campaignRevenue - a.campaignRevenue)
                       .map((campaignData) => {
                         const campaignFrequency = campaignData.creatives.reduce((sum, c) => sum + c.frequency, 0);
+                        const advertiserName = campaignData?.advertiser;
+                        const advertiserAccent = getAdvertiserAccent(advertiserName || '');
                         return (
                           <div
                             key={campaignData.campaignName}
-                            className="p-4 rounded-2xl border border-slate-200/80 bg-white hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
+                            style={{
+                              backgroundColor: hexToRgba(advertiserAccent, 0.045),
+                              borderColor: hexToRgba(advertiserAccent, 0.16)
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.borderColor = hexToRgba(advertiserAccent, 0.35);
+                              e.currentTarget.style.backgroundColor = hexToRgba(advertiserAccent, 0.075);
+                              e.currentTarget.style.boxShadow = `0 8px 16px -4px ${hexToRgba(advertiserAccent, 0.1)}, 0 4px 6px -4px ${hexToRgba(advertiserAccent, 0.1)}`;
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = hexToRgba(advertiserAccent, 0.16);
+                              e.currentTarget.style.backgroundColor = hexToRgba(advertiserAccent, 0.045);
+                              e.currentTarget.style.boxShadow = 'none';
+                            }}
+                            className="p-3.5 rounded-2xl border transition-all duration-300 flex flex-col justify-between hover:shadow-xs"
                           >
                             <div>
                               {/* Campaign Header */}
-                              <div className="flex items-center gap-2 mb-3 pb-2.5 border-b border-slate-100">
-                                <Target className="h-4 w-4 text-indigo-500 flex-shrink-0" />
-                                <h4 className="text-sm font-bold text-slate-800 truncate">{campaignData.campaignName}</h4>
+                              <div className="flex items-center justify-between gap-2 mb-3">
+                                <div className="flex items-center gap-2 min-w-0 flex-1">
+                                  <Target className="h-4 w-4 flex-shrink-0" style={{ color: advertiserAccent }} />
+                                  <h4 className="text-sm font-extrabold text-slate-800 truncate" title={campaignData.campaignName}>
+                                    {campaignData.campaignName}
+                                  </h4>
+                                </div>
+                                {advertiserName && (
+                                  <span
+                                    className="text-[9px] font-black px-1.5 py-0.5 rounded-md flex-shrink-0 uppercase tracking-wider"
+                                    style={{
+                                      backgroundColor: hexToRgba(advertiserAccent, 0.09),
+                                      color: advertiserAccent,
+                                      border: `1px solid ${hexToRgba(advertiserAccent, 0.15)}`,
+                                    }}
+                                  >
+                                    {advertiserName}
+                                  </span>
+                                )}
                               </div>
 
                               {/* Revenue & Frequency - Clean & Aligned */}
-                              <div className="grid grid-cols-2 gap-2 mb-4">
-                                <div className="bg-slate-50/50 p-2 rounded-xl border border-slate-100">
-                                  <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Revenue</p>
-                                  <p className="text-base font-extrabold text-emerald-600">
+                              <div className="grid grid-cols-2 gap-2 mb-3">
+                                <div className="bg-white/80 p-2 rounded-xl border border-slate-100 flex flex-col justify-between">
+                                  <p className="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest mb-1 leading-none">Revenue</p>
+                                  <p className="text-[14px] font-black text-emerald-600 leading-none">
                                     ${campaignData.campaignRevenue.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                                   </p>
                                 </div>
-                                <div className="bg-slate-50/50 p-2 rounded-xl border border-slate-100">
-                                  <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Frequency</p>
-                                  <p className="text-base font-extrabold text-slate-700">
+                                <div className="bg-white/80 p-2 rounded-xl border border-slate-100 flex flex-col justify-between">
+                                  <p className="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest mb-1 leading-none">Frequency</p>
+                                  <p className="text-[14px] font-black text-slate-700 leading-none">
                                     {campaignFrequency}
                                   </p>
                                 </div>
@@ -3559,10 +3783,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                             </div>
 
                             {/* Active Creatives Chips */}
-                            <div>
+                            <div className="mt-0.5">
                               <div className="flex items-center gap-1 mb-1.5">
                                 <Users className="h-3 w-3 text-slate-400" />
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
                                   Creatives ({campaignData.creatives.length})
                                 </span>
                               </div>
@@ -3570,14 +3794,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                                 {campaignData.creatives.slice(0, 4).map((creative, idx) => (
                                   <span
                                     key={idx}
-                                    className="px-2 py-0.5 rounded-lg text-[9.5px] font-semibold bg-indigo-50/60 text-indigo-600 border border-indigo-100/50"
+                                    className="px-1.5 py-0.5 rounded-lg text-[9px] font-semibold bg-indigo-50/60 text-indigo-600 border border-indigo-100/50"
                                     title={creative.name}
                                   >
                                     {creative.name.length > 12 ? creative.name.substring(0, 12) + '...' : creative.name}
                                   </span>
                                 ))}
                                 {campaignData.creatives.length > 4 && (
-                                  <span className="px-1.5 py-0.5 rounded-lg text-[9.5px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
+                                  <span className="px-1.5 py-0.5 rounded-lg text-[9px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
                                     +{campaignData.creatives.length - 4}
                                   </span>
                                 )}
@@ -3603,9 +3827,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                     <div className="flex space-x-1.5 pb-2">
                       <button
                         onClick={() => setSelectedETCreativeFilter('all')}
-                        className={`px-3 py-1.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all border ${selectedETCreativeFilter === 'all'
-                          ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                          : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200/80'
+                        className={`px-2.5 py-1 text-[11px] font-bold rounded-xl whitespace-nowrap transition-all border ${selectedETCreativeFilter === 'all'
+                          ? 'bg-slate-950 text-white border-slate-955 shadow-[0_2px_6px_rgba(0,0,0,0.06)] border-slate-950'
+                          : 'bg-slate-50/50 hover:bg-slate-100/80 text-slate-600 border-slate-200/60'
                           }`}
                       >
                         All ({selectedETData.creatives.length})
@@ -3624,9 +3848,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                           <button
                             key={campaign}
                             onClick={() => setSelectedETCreativeFilter(campaign)}
-                            className={`px-3 py-1.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all border ${selectedETCreativeFilter === campaign
-                              ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                              : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200/80'
+                            className={`px-2.5 py-1 text-[11px] font-bold rounded-xl whitespace-nowrap transition-all border ${selectedETCreativeFilter === campaign
+                              ? 'bg-slate-955 text-white border-slate-955 shadow-[0_2px_6px_rgba(0,0,0,0.06)] bg-slate-950 border-slate-955'
+                              : 'bg-slate-50/50 hover:bg-slate-100/80 text-slate-600 border-slate-200/60'
                               }`}
                           >
                             {campaign} ({campaignCreativeCount})
@@ -3649,36 +3873,68 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                             campaignData && isRecordForCampaign(record, campaignData)
                         );
                       })
-                      .map((creative, idx) => (
-                        <div
-                          key={creative.name}
-                          className="p-3.5 rounded-2xl border border-slate-200/80 bg-white hover:border-purple-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
-                        >
-                          <div>
-                            <div className="flex items-start justify-between mb-3 gap-2">
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <FileText className="h-4 w-4 text-purple-500 flex-shrink-0" />
-                                <h5 className="font-semibold text-xs text-slate-800 truncate" title={creative.name}>{creative.name}</h5>
-                              </div>
-                              {idx === 0 && (
-                                <span className="p-0.5 rounded-md bg-amber-50 text-amber-500 border border-amber-200 flex-shrink-0" title="Top Performing">
-                                  <Crown className="h-3 w-3" />
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between mt-2 pt-2.5 border-t border-slate-100">
+                      .map((creative, idx) => {
+                        const creativeRecord = data.records.find(r => r.creative === creative.name);
+                        const creativeAdvertiser = creativeRecord?.advertiser || '';
+                        const creativeColor = getAdvertiserAccent(creativeAdvertiser);
+                        const bgRgba = hexToRgba(creativeColor, 0.045);
+                        const borderRgba = hexToRgba(creativeColor, 0.16);
+
+                        return (
+                          <div
+                            key={creative.name}
+                            style={{
+                              backgroundColor: bgRgba,
+                              borderColor: borderRgba
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.borderColor = hexToRgba(creativeColor, 0.35);
+                              e.currentTarget.style.backgroundColor = hexToRgba(creativeColor, 0.075);
+                              e.currentTarget.style.boxShadow = `0 8px 16px -4px ${hexToRgba(creativeColor, 0.1)}, 0 4px 6px -4px ${hexToRgba(creativeColor, 0.1)}`;
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = borderRgba;
+                              e.currentTarget.style.backgroundColor = bgRgba;
+                              e.currentTarget.style.boxShadow = 'none';
+                            }}
+                            className="p-3 rounded-2xl border transition-all duration-300 flex flex-col justify-between hover:shadow-xs"
+                          >
                             <div>
-                              <p className="text-base font-extrabold text-purple-600">
-                                ${creative.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                              </p>
-                              <p className="text-[10px] font-semibold text-slate-400 mt-0.5">
-                                {creative.frequency} {creative.frequency === 1 ? 'occurrence' : 'occurrences'}
-                              </p>
+                              <div className="flex items-start justify-between mb-2 gap-2">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  <FileText className="h-3.5 w-3.5 flex-shrink-0" style={{ color: creativeColor }} />
+                                  <h5 className="font-bold text-xs text-slate-800 truncate" title={creative.name}>
+                                    {creative.name}
+                                  </h5>
+                                </div>
+                                {idx === 0 && (
+                                  <span
+                                    className="p-0.75 rounded-md flex-shrink-0 flex items-center justify-center"
+                                    style={{
+                                      backgroundColor: hexToRgba('#F59E0B', 0.08),
+                                      color: '#F59E0B',
+                                      border: `1px solid ${hexToRgba('#F59E0B', 0.18)}`
+                                    }}
+                                    title="Top Performing"
+                                  >
+                                    <Crown className="h-3 w-3" />
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between mt-2.5">
+                              <div>
+                                <p className="text-[15px] font-black" style={{ color: creativeColor }}>
+                                  ${creative.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </p>
+                                <p className="text-[9px] font-bold text-slate-400 mt-0.5">
+                                  {creative.frequency} {creative.frequency === 1 ? 'occurrence' : 'occurrences'}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                   </div>
                 </div>
               </div>
