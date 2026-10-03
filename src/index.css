@@ -1449,3 +1449,31 @@ body {
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out forwards;
 }
+
+/* Progress Bar Shimmer & Fill Animations */
+@keyframes progressShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-progress-shimmer {
+  animation: progressShimmer 2.5s infinite linear;
+}
+
+@keyframes lineFill {
+  0% {
+    width: 0%;
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-line-fill {
+  animation: lineFill 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

@@ -305,23 +305,23 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
   // 🎯 Target revenue map (keys stored normalized)
   const rawTargetRevenueMap: Record<string, string> = {
-    "C30": "$200",
-    "JSG26MET": "$800",
-    "JSG43NC": "$200",
-    "JSG44NC": "$200",
-    "JSG48MET": "$800",
-    "JSG36MET": "$1300",
-    "C36": "250",
-    "JSG38N": "$1300",
-    "JSG38NR": "$1300",
-    "JSG53NC": "$200",
-    "JSG34NC": "$500",
-    "JSG41MET": "$700",
-    "JSG45": "$700",
-    "JSG50": "$1000",
-    "JSG52": "$1300",
-    "JSG55": "$500",
-    "C47MET": "$300",
+    // "C30": "$200",
+    // "JSG26MET": "$800",
+    // "JSG43NC": "$200",
+    // "JSG44NC": "$200",
+    // "JSG48MET": "$800",
+    // "JSG36MET": "$1300",
+    // "C36": "250",
+    // "JSG38N": "$1300",
+    // "JSG38NR": "$1300",
+    // "JSG53NC": "$200",
+    // "JSG34NC": "$500",
+    // "JSG41MET": "$700",
+    // "JSG45": "$700",
+    // "JSG50": "$1000",
+    // "JSG52": "$1300",
+    // "JSG55": "$500",
+    // "C47MET": "$300",
   };
 
 
@@ -471,10 +471,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG41MET": { stack: "S1", manager: "Satyam S." },
     "JSG48MET": { stack: "S1", manager: "Abhay S." },
     "C48MET": { stack: "S1", manager: "Abhay S." },
+    "C41MET": { stack: "S1", manager: "Abhay S." },
     "JSG55": { stack: "S1", manager: "Kaif K." },
 
     // S4
     "JSG34NC": { stack: "S4", manager: "Keshav T." },
+    "JSG34C": { stack: "S4", manager: "Abhay S." },
 
     // S6
     "JSG36MET": { stack: "S6", manager: "Aditya G." },
@@ -498,6 +500,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG53MET": { stack: "S11", manager: "Harsh G." },
     "JSG53NC": { stack: "S11", manager: "Harsh G." },
     "JSG56": { stack: "S11", manager: "Abhay S." },
+    "C56MET": { stack: "S11", manager: "Abhay S." },
 
     // S12
     "JSG38N": { stack: "S12", manager: "Kaif K." },
@@ -2218,84 +2221,83 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                     })()}
                   </div>
 
-                  {/* Main Content Section */}
-                  <div className="relative z-10 flex flex-col gap-4 py-1">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-2xl font-black mb-1 leading-none tracking-tight text-gray-900 drop-shadow-md">
-                          ${et.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
-                        <p className="text-[9px] font-bold text-yellow-900/80 uppercase tracking-wider">
-                          {et.name.includes('+') ? 'Combined Revenue' : 'Today Revenue'}
-                        </p>
+                  {/* Middle Section: Side-by-side Today Revenue & Daily Target */}
+                  <div className="relative z-10 grid grid-cols-2 gap-3 py-3 border-y border-yellow-900/20">
+                    {/* Left Column: Today Revenue */}
+                    <div className="flex flex-col justify-center">
+                      <p className="text-xl font-black leading-tight tracking-tight text-gray-900 drop-shadow-md">
+                        ${et.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-[9px] font-bold text-yellow-900/80 uppercase tracking-wider mt-0.5">
+                        {et.name.includes('+') ? 'Combined Revenue' : 'Today Revenue'}
+                      </p>
 
-                        {et.name.includes('+') && (
-                          <div className="mt-2.5 flex flex-col gap-1 border-l-2 border-yellow-900/30 pl-2">
-                            {(et as any).et1Name && (
-                              <span className="text-[9px] font-bold text-yellow-900/80">
-                                {(et as any).et1Name}: <span className="font-black text-gray-900 drop-shadow-sm">${((et as any).et1Revenue ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                              </span>
-                            )}
-                            {(et as any).et2Name && (
-                              <span className="text-[9px] font-bold text-yellow-900/80">
-                                {(et as any).et2Name}: <span className="font-black text-gray-900 drop-shadow-sm">${((et as any).et2Revenue ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      {hasValidTarget ? (
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                          <span className="text-[10px] font-black text-yellow-950 leading-none">
-                            {percentAchieved}%
-                          </span>
-                          <div className="flex-shrink-0">
-                            {(() => {
-                              const { points } = getETTrendAndPoints(et.name);
-                              return renderSparkline(points, "#78350f", et.name);
-                            })()}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                          <div className="flex-shrink-0">
-                            {(() => {
-                              const { points } = getETTrendAndPoints(et.name);
-                              return renderSparkline(points, "#78350f", et.name);
-                            })()}
-                          </div>
-                          <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 shadow-sm flex-shrink-0">
-                            <Award className="w-5.5 h-5.5 text-yellow-950/80 drop-shadow-sm" />
-                          </div>
+                      {et.name.includes('+') && (
+                        <div className="mt-1 flex flex-col gap-0.5 border-l-2 border-yellow-900/30 pl-1.5 text-[9px]">
+                          {(et as any).et1Name && (
+                            <span className="font-bold text-yellow-900/80">
+                              {(et as any).et1Name}: <span className="font-black text-gray-900">${((et as any).et1Revenue ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            </span>
+                          )}
+                          {(et as any).et2Name && (
+                            <span className="font-bold text-yellow-900/80">
+                              {(et as any).et2Name}: <span className="font-black text-gray-900">${((et as any).et2Revenue ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            </span>
+                          )}
                         </div>
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between pt-3 border-t border-yellow-900/20">
-                      <span className="text-[9px] font-bold text-yellow-900/80 uppercase tracking-wider">
-                        Daily Target
+                    {/* Right Column: Daily Target */}
+                    <div className="flex flex-col justify-center border-l border-yellow-900/20 pl-3">
+                      <span className="text-xl font-black text-gray-900 leading-tight drop-shadow-sm">
+                        {displayTargetRevenue(et.name, analytics.totalRevenue)}
                       </span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-extrabold text-gray-900 leading-none drop-shadow-sm">
-                          {displayTargetRevenue(et.name, analytics.totalRevenue)}
-                        </span>
-                        {renderTargetComparison(et.name, et.revenue, analytics.totalRevenue, true)}
-                      </div>
+                      <p className="text-[9px] font-bold text-yellow-900/80 uppercase tracking-wider mt-0.5">
+                        Daily Target
+                      </p>
                     </div>
                   </div>
 
-                  {/* Info Tags - Subtle Footer */}
-                  <div className="relative z-10 flex items-center gap-3 pt-3 border-t border-yellow-900/20 text-xs text-yellow-950/80">
-                    <span className="flex items-center gap-1.5">
-                      <Layers className="h-3.5 w-3.5 text-yellow-900" />
-                      <span className="font-semibold text-gray-900">{et.creatives.length}</span> <span className="text-yellow-900/80">Cr</span>
-                    </span>
-                    <span className="text-yellow-900/20">•</span>
-                    <span className="flex items-center gap-1.5">
-                      <Target className="h-3.5 w-3.5 text-yellow-900" />
-                      <span className="font-semibold text-gray-900">{et.campaigns.length}</span> <span className="text-yellow-900/80">Camp</span>
-                    </span>
+                  {/* Target Achievement Line (Progress Bar) & Info Footer */}
+                  <div className="relative z-10 flex flex-col gap-3">
+                    {hasValidTarget ? (
+                      <div>
+                        <div className="flex items-center justify-between text-[10px] font-extrabold text-yellow-950 mb-1.5 gap-1">
+                          <span className="uppercase tracking-wider text-[9px] text-yellow-900/90 font-extrabold flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-yellow-900 animate-pulse"></span>
+                            Target Achieved
+                          </span>
+                          {renderTargetComparison(et.name, et.revenue, analytics.totalRevenue, true)}
+                          <span className="font-black drop-shadow-sm text-yellow-950 text-xs">{percentAchieved}%</span>
+                        </div>
+                        <div className="w-full h-2.5 bg-black/15 rounded-full overflow-hidden p-0.5 border border-white/30 shadow-inner relative">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-yellow-900 via-amber-700 to-yellow-950 shadow-[0_0_10px_rgba(120,53,15,0.35)] transition-all duration-1000 ease-out animate-line-fill relative overflow-hidden"
+                            style={{ width: `${Math.min(percentAchieved, 100)}%` }}
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-progress-shimmer pointer-events-none" />
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between text-[10px] font-bold text-yellow-900/80">
+                        <span className="uppercase tracking-wider text-[9px]">Target</span>
+                        <span className="font-semibold text-yellow-950 bg-white/20 px-2 py-0.5 rounded-md border border-white/20 text-[9px]">No Target Set</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-3 pt-2 border-t border-yellow-900/20 text-xs text-yellow-950/80">
+                      <span className="flex items-center gap-1.5">
+                        <Layers className="h-3.5 w-3.5 text-yellow-900" />
+                        <span className="font-semibold text-gray-900">{et.creatives.length}</span> <span className="text-yellow-900/80">Cr</span>
+                      </span>
+                      <span className="text-yellow-900/20">•</span>
+                      <span className="flex items-center gap-1.5">
+                        <Target className="h-3.5 w-3.5 text-yellow-900" />
+                        <span className="font-semibold text-gray-900">{et.campaigns.length}</span> <span className="text-yellow-900/80">Camp</span>
+                      </span>
+                    </div>
                   </div>
                 </div>
               );
@@ -2362,7 +2364,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
               <div
                 key={et.name}
 
-                className={`rounded-3xl border ${borderClass} ${cardBgClass} p-5 shadow-[0_8px_30px_rgba(0,0,0,0.015)] transition-all duration-300 ${hoverClass} flex flex-col justify-between gap-5`}
+                className={`rounded-3xl border ${borderClass} ${cardBgClass} p-5 shadow-[0_8px_30px_rgba(0,0,0,0.015)] transition-all duration-300 ${hoverClass} flex flex-col justify-between gap-4`}
               >
                 {/* Header Section */}
                 <div className="flex items-center justify-between">
@@ -2393,99 +2395,96 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                   })()}
                 </div>
 
-                {/* Main Content Section */}
-                <div className="flex flex-col gap-4 py-1">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className={`text-2xl font-black mb-1 leading-none tracking-tight ${isCombined ? 'text-purple-600' : 'text-indigo-600'}`}>
-                        ${et.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </p>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
-                        {isCombined ? 'Combined Revenue' : 'Today Revenue'}
-                      </p>
+                {/* Middle Section: Side-by-side Today Revenue & Daily Target */}
+                <div className="grid grid-cols-2 gap-3 py-3 border-y border-slate-100/80">
+                  {/* Left Column: Today Revenue */}
+                  <div className="flex flex-col justify-center">
+                    <p className={`text-xl font-black leading-tight tracking-tight ${isCombined ? 'text-purple-600' : 'text-indigo-600'}`}>
+                      ${et.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
+                      {isCombined ? 'Combined Revenue' : 'Today Revenue'}
+                    </p>
 
-                      {isCombined && (
-                        <div className="mt-2.5 flex flex-col gap-1 border-l-2 border-purple-100 pl-2">
-                          {(et as any).et1Name && (
-                            <span className="text-[9px] font-bold text-slate-500">
-                              {(et as any).et1Name}: <span className="font-black text-slate-800">${((et as any).et1Revenue ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                            </span>
-                          )}
-                          {(et as any).et2Name && (
-                            <span className="text-[9px] font-bold text-slate-500">
-                              {(et as any).et2Name}: <span className="font-black text-slate-800">${((et as any).et2Revenue ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    {hasValidTarget ? (
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className={`text-[10px] font-black leading-none ${targetStatus === 'met'
-                          ? 'text-emerald-600'
-                          : percentAchieved >= 70
-                            ? 'text-amber-600'
-                            : 'text-rose-500'
-                          }`}>
-                          {percentAchieved}%
-                        </span>
-                        <div className="flex-shrink-0">
-                          {(() => {
-                            const { points } = getETTrendAndPoints(et.name);
-                            const accentColor = targetStatus === 'met'
-                              ? '#10B981'
-                              : percentAchieved >= 70
-                                ? '#F59E0B'
-                                : '#EF4444';
-                            return renderSparkline(points, accentColor, et.name);
-                          })()}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <div className="flex flex-col items-end flex-shrink-0">
-                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-                            Rank
+                    {isCombined && (
+                      <div className="mt-1 flex flex-col gap-0.5 border-l-2 border-purple-100 pl-1.5 text-[9px]">
+                        {(et as any).et1Name && (
+                          <span className="font-medium text-slate-500">
+                            {(et as any).et1Name}: <span className="font-black text-slate-800">${((et as any).et1Revenue ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                           </span>
-                          <span className="text-sm font-black text-slate-600 mt-1 leading-none bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-lg">
-                            #{index + 4}
+                        )}
+                        {(et as any).et2Name && (
+                          <span className="font-medium text-slate-500">
+                            {(et as any).et2Name}: <span className="font-black text-slate-800">${((et as any).et2Revenue ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                           </span>
-                        </div>
-                        <div className="flex-shrink-0">
-                          {(() => {
-                            const { points } = getETTrendAndPoints(et.name);
-                            return renderSparkline(points, isCombined ? '#8B5CF6' : '#6366F1', et.name);
-                          })()}
-                        </div>
+                        )}
                       </div>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-50">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
-                      Daily Target
+                  {/* Right Column: Daily Target */}
+                  <div className="flex flex-col justify-center border-l border-slate-100 pl-3">
+                    <span className="text-xl font-black text-slate-800 leading-tight tracking-tight">
+                      {displayTargetRevenue(et.name, analytics.totalRevenue)}
                     </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-extrabold text-slate-800 leading-none">
-                        {displayTargetRevenue(et.name, analytics.totalRevenue)}
-                      </span>
-                      {renderTargetComparison(et.name, et.revenue, analytics.totalRevenue, false)}
-                    </div>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
+                      Daily Target
+                    </p>
                   </div>
                 </div>
 
-                {/* Info Tags - Subtle Footer */}
-                <div className="flex items-center gap-3 pt-3 border-t border-slate-100/60 text-xs text-slate-400">
-                  <span className="flex items-center gap-1.5">
-                    <Layers className="h-3.5 w-3.5 text-slate-400" />
-                    <span className="font-semibold text-slate-600">{et.creatives.length}</span> <span className="text-slate-400/80">Cr</span>
-                  </span>
-                  <span className="text-slate-200">•</span>
-                  <span className="flex items-center gap-1.5">
-                    <Target className="h-3.5 w-3.5 text-slate-400" />
-                    <span className="font-semibold text-slate-600">{et.campaigns.length}</span> <span className="text-slate-400/80">Camp</span>
-                  </span>
+                {/* Target Achievement Line (Progress Bar) & Info Footer */}
+                <div className="flex flex-col gap-3">
+                  {hasValidTarget ? (
+                    <div>
+                      <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 mb-1.5 gap-1">
+                        <span className="uppercase tracking-wider text-[9px] text-slate-400 font-extrabold flex items-center gap-1">
+                          <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${targetStatus === 'met' ? 'bg-emerald-500' : percentAchieved >= 70 ? 'bg-amber-500' : 'bg-rose-500'
+                            }`}></span>
+                          Target Achieved
+                        </span>
+                        {renderTargetComparison(et.name, et.revenue, analytics.totalRevenue, false)}
+                        <span className={`font-black text-xs ${targetStatus === 'met'
+                            ? 'text-emerald-600'
+                            : percentAchieved >= 70
+                              ? 'text-amber-600'
+                              : 'text-rose-500'
+                          }`}>
+                          {percentAchieved}%
+                        </span>
+                      </div>
+                      <div className="w-full h-2.5 bg-slate-100/90 rounded-full overflow-hidden p-0.5 border border-slate-200/60 shadow-inner relative">
+                        <div
+                          className={`h-full rounded-full transition-all duration-1000 ease-out animate-line-fill relative overflow-hidden ${targetStatus === 'met'
+                              ? 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.35)]'
+                              : percentAchieved >= 70
+                                ? 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.35)]'
+                                : 'bg-gradient-to-r from-rose-500 via-pink-400 to-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.35)]'
+                            }`}
+                          style={{ width: `${Math.min(percentAchieved, 100)}%` }}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-progress-shimmer pointer-events-none" />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between text-[10px] font-bold text-slate-400">
+                      <span className="uppercase tracking-wider text-[9px]">Target</span>
+                      <span className="font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md text-[9px]">No Target Set</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3 pt-2 border-t border-slate-100/60 text-xs text-slate-400">
+                    <span className="flex items-center gap-1.5">
+                      <Layers className="h-3.5 w-3.5 text-slate-400" />
+                      <span className="font-semibold text-slate-600">{et.creatives.length}</span> <span className="text-slate-400/80">Cr</span>
+                    </span>
+                    <span className="text-slate-200">•</span>
+                    <span className="flex items-center gap-1.5">
+                      <Target className="h-3.5 w-3.5 text-slate-400" />
+                      <span className="font-semibold text-slate-600">{et.campaigns.length}</span> <span className="text-slate-400/80">Camp</span>
+                    </span>
+                  </div>
                 </div>
               </div>
             );
