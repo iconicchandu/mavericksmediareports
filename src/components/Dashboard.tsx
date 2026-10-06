@@ -305,23 +305,19 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
   // 🎯 Target revenue map (keys stored normalized)
   const rawTargetRevenueMap: Record<string, string> = {
-    // "C30": "$200",
-    // "JSG26MET": "$800",
-    // "JSG43NC": "$200",
-    // "JSG44NC": "$200",
-    // "JSG48MET": "$800",
-    // "JSG36MET": "$1300",
-    // "C36": "250",
-    // "JSG38N": "$1300",
-    // "JSG38NR": "$1300",
-    // "JSG53NC": "$200",
-    // "JSG34NC": "$500",
-    // "JSG41MET": "$700",
-    // "JSG45": "$700",
-    // "JSG50": "$1000",
-    // "JSG52": "$1300",
-    // "JSG55": "$500",
-    // "C47MET": "$300",
+    "JSG26MET": "$1200",
+    "JSG50": "$1200",
+    "JSG34NC": "$500",
+    "JSG52": "$1200",
+    "JSG38NR": "$1200",
+    "JSG60": "$1000",
+    "JSG30MET": "$1000",
+    "JSG47": "$1000",
+    "JSG36MET": "$1000",
+    "COMCAST": "$1000",
+    "JSG41MET": "$500",
+    "JSG55": "$500",
+    "JSG48MET": "$500"
   };
 
 
@@ -2445,10 +2441,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                         </span>
                         {renderTargetComparison(et.name, et.revenue, analytics.totalRevenue, false)}
                         <span className={`font-black text-xs ${targetStatus === 'met'
-                            ? 'text-emerald-600'
-                            : percentAchieved >= 70
-                              ? 'text-amber-600'
-                              : 'text-rose-500'
+                          ? 'text-emerald-600'
+                          : percentAchieved >= 70
+                            ? 'text-amber-600'
+                            : 'text-rose-500'
                           }`}>
                           {percentAchieved}%
                         </span>
@@ -2456,10 +2452,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                       <div className="w-full h-2.5 bg-slate-100/90 rounded-full overflow-hidden p-0.5 border border-slate-200/60 shadow-inner relative">
                         <div
                           className={`h-full rounded-full transition-all duration-1000 ease-out animate-line-fill relative overflow-hidden ${targetStatus === 'met'
-                              ? 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.35)]'
-                              : percentAchieved >= 70
-                                ? 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.35)]'
-                                : 'bg-gradient-to-r from-rose-500 via-pink-400 to-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.35)]'
+                            ? 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.35)]'
+                            : percentAchieved >= 70
+                              ? 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.35)]'
+                              : 'bg-gradient-to-r from-rose-500 via-pink-400 to-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.35)]'
                             }`}
                           style={{ width: `${Math.min(percentAchieved, 100)}%` }}
                         >
