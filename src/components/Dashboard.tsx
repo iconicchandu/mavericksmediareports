@@ -136,6 +136,22 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
   const [expandedETs, setExpandedETs] = useState<Set<string>>(new Set());
   const [hoveredAdv, setHoveredAdv] = useState<string | null>(null);
 
+  // Expanded Stack state for stack-wise revenue breakdown
+  const [isStackSectionExpanded, setIsStackSectionExpanded] = useState<boolean>(false);
+  const [expandedStacks, setExpandedStacks] = useState<Set<string>>(new Set());
+
+  const toggleStackExpand = (stackName: string) => {
+    setExpandedStacks(prev => {
+      const next = new Set(prev);
+      if (next.has(stackName)) {
+        next.delete(stackName);
+      } else {
+        next.add(stackName);
+      }
+      return next;
+    });
+  };
+
   // Campaign filter for ET creative view
   const [selectedETCreativeFilter, setSelectedETCreativeFilter] = useState<string>('all');
 
@@ -314,7 +330,6 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG30MET": "$1000",
     "JSG47": "$1000",
     "JSG36MET": "$1000",
-    "COMCAST": "$1000",
     "JSG41MET": "$500",
     "JSG55": "$500",
     "JSG48MET": "$500"
@@ -884,6 +899,158 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         .sort((a, b) => b.value - a.value), // 👈 sorts descending by revenue
     };
   }, [data]);
+
+  // 📊 Calculate Stack-wise Revenue, Combined Targets, & Managers from etInfoMap & rawTargetRevenueMap
+  const stackAnalytics = useMemo(() => {
+    // Collect stack data: key -> stack name (e.g. S1, S4, S6, S7, S10, S11, S12, S13)
+    const stackMap = new Map<
+      string,
+      {
+        stackName: string;
+        totalRevenue: number;
+        totalTarget: number;
+        ets: {
+          etName: string;
+          revenue: number;
+          target: number;
+          manager: string;
+        }[];
+        managers: Set<string>;
+      }
+    >();
+
+    // Pre-seed known stacks from etInfoMap
+    Object.values(etInfoMap).forEach((info) => {
+      if (info.stack && !stackMap.has(info.stack)) {
+        stackMap.set(info.stack, {
+          stackName: info.stack,
+          totalRevenue: 0,
+          totalTarget: 0,
+          ets: [],
+          managers: new Set(),
+        });
+      }
+    });
+
+    // Determine target scale multiplier (7 if overall revenue >= 40000)
+    const targetMultiplier = analytics.totalRevenue >= 40000 ? 7 : 1;
+
+    // Parse ET targets from rawTargetRevenueMap
+    const etTargetMap = new Map<string, number>();
+    Object.entries(rawTargetRevenueMap).forEach(([rawEtName, targetStr]) => {
+      const etNameUpper = rawEtName.trim().toUpperCase();
+      const num = parseFloat(targetStr.replace(/[$,\s]/g, ''));
+      if (!isNaN(num) && isFinite(num)) {
+        etTargetMap.set(etNameUpper, num * targetMultiplier);
+      }
+    });
+
+    // Add targets to stack totals based on ET -> Stack mapping in etInfoMap
+    etTargetMap.forEach((targetVal, etNameUpper) => {
+      const etInfo = getETInfo(etNameUpper);
+      const stackName = etInfo?.stack || 'Other';
+      if (!stackMap.has(stackName)) {
+        stackMap.set(stackName, {
+          stackName,
+          totalRevenue: 0,
+          totalTarget: 0,
+          ets: [],
+          managers: new Set(),
+        });
+      }
+      const stackData = stackMap.get(stackName)!;
+      stackData.totalTarget += targetVal;
+    });
+
+    // Aggregate ET revenue & stats from analytics.etStats into stacks
+    analytics.etStats.forEach((etStat) => {
+      const constituentNames = etStat.name.includes('+')
+        ? etStat.name.split('+').map(s => s.trim())
+        : [etStat.name];
+
+      let stackName = 'Other';
+      let mainManager = 'Unassigned';
+
+      for (const name of constituentNames) {
+        const info = getETInfo(name);
+        if (info) {
+          stackName = info.stack;
+          mainManager = info.manager;
+          break;
+        }
+      }
+
+      if (!stackMap.has(stackName)) {
+        stackMap.set(stackName, {
+          stackName,
+          totalRevenue: 0,
+          totalTarget: 0,
+          ets: [],
+          managers: new Set(),
+        });
+      }
+
+      const stackData = stackMap.get(stackName)!;
+      stackData.totalRevenue += etStat.revenue;
+
+      // Sum targets for constituent ETs if combined
+      let etTarget = 0;
+      constituentNames.forEach(name => {
+        etTarget += etTargetMap.get(name.toUpperCase()) || 0;
+        const info = getETInfo(name);
+        if (info?.manager) {
+          stackData.managers.add(info.manager);
+        }
+      });
+
+      stackData.ets.push({
+        etName: etStat.name,
+        revenue: etStat.revenue,
+        target: etTarget,
+        manager: mainManager,
+      });
+    });
+
+    // Ensure all ETs mapped in etInfoMap are accounted for in their stack's ET list
+    Object.entries(etInfoMap).forEach(([etNameUpper, info]) => {
+      const stackData = stackMap.get(info.stack);
+      if (stackData) {
+        if (info.manager) {
+          stackData.managers.add(info.manager);
+        }
+        const alreadyAdded = stackData.ets.some(e => e.etName.toUpperCase() === etNameUpper);
+        if (!alreadyAdded) {
+          const targetVal = etTargetMap.get(etNameUpper) || 0;
+          if (targetVal > 0) {
+            stackData.ets.push({
+              etName: etNameUpper,
+              revenue: 0,
+              target: targetVal,
+              manager: info.manager,
+            });
+          }
+        }
+      }
+    });
+
+    // Sort ETs within each stack descending by revenue
+    stackMap.forEach((stackData) => {
+      stackData.ets.sort((a, b) => b.revenue - a.revenue);
+    });
+
+    // Sort stacks by natural stack order: S1, S4, S6, S7, S10, S11, S12, S13
+    const stackOrder = ['S1', 'S4', 'S6', 'S7', 'S10', 'S11', 'S12', 'S13'];
+    return Array.from(stackMap.values())
+      .filter(s => s.totalRevenue > 0 || s.totalTarget > 0)
+      .sort((a, b) => {
+        const indexA = stackOrder.indexOf(a.stackName);
+        const indexB = stackOrder.indexOf(b.stackName);
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        if (indexA !== -1) return -1;
+        if (indexB !== -1) return 1;
+        return b.totalRevenue - a.totalRevenue;
+      });
+  }, [analytics, data]);
 
   // Helper to get the display name of a campaign for a record
   const getRecordCampaignDisplayName = (record: DataRecord) => {
@@ -1874,6 +2041,171 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       </div>
 
       {/* End: Advertiser Revenue Breakdown */}
+
+      {/* Stack-Wise Revenue & Target Breakdown */}
+      <div className="p-6 rounded-2xl border border-slate-100/90 shadow-[0_8px_30px_rgb(0,0,0,0.015)] bg-white mt-6 transition-all duration-300">
+        {/* Header */}
+        <div
+          onClick={() => setIsStackSectionExpanded(prev => !prev)}
+          className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer select-none ${
+            isStackSectionExpanded ? 'mb-6' : 'mb-0'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100/80 shadow-2xs">
+              <Layers className="h-5 w-5" strokeWidth={2.5} />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2">
+                Stack-Wise Revenue & Target Breakdown
+              </h3>
+              <p className="text-[11px] font-semibold text-slate-400 mt-0.5">
+                Aggregated revenue, targets, & performance grouped by ET Stacks
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/60 text-slate-700 text-xs font-bold flex items-center gap-1.5 shadow-3xs">
+              <span className="text-[10px] text-slate-400 uppercase tracking-widest font-black">Active Stacks:</span>
+              <span className="font-black text-indigo-600 text-sm">{stackAnalytics.length}</span>
+            </div>
+
+            <button
+              type="button"
+              className="p-1.5 rounded-xl border border-slate-200/60 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors shadow-3xs flex items-center gap-1.5 text-xs font-extrabold px-3.5"
+            >
+              <span>{isStackSectionExpanded ? 'Minimize' : 'Expand'}</span>
+              {isStackSectionExpanded ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Grid of Stack Cards (Collapsible) */}
+        {isStackSectionExpanded && (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 animate-in fade-in zoom-in-95 duration-200">
+            {stackAnalytics.map((stack) => {
+              const hasTarget = stack.totalTarget > 0;
+              const progress = hasTarget ? Math.min(100, Math.round((stack.totalRevenue / stack.totalTarget) * 100)) : 0;
+              const diff = stack.totalRevenue - stack.totalTarget;
+              const isTargetMet = hasTarget && diff >= 0;
+
+              const getStackAccent = (sName: string) => {
+                switch (sName) {
+                  case 'S1': return { bg: '#4F46E5', soft: 'rgba(79, 70, 229, 0.05)', border: 'rgba(79, 70, 229, 0.18)', text: '#4338CA', lightBg: 'bg-indigo-50', badge: 'bg-indigo-600 text-white' };
+                  case 'S4': return { bg: '#0EA5E9', soft: 'rgba(14, 165, 233, 0.05)', border: 'rgba(14, 165, 233, 0.18)', text: '#0284C7', lightBg: 'bg-sky-50', badge: 'bg-sky-600 text-white' };
+                  case 'S6': return { bg: '#8B5CF6', soft: 'rgba(139, 92, 246, 0.05)', border: 'rgba(139, 92, 246, 0.18)', text: '#7C3AED', lightBg: 'bg-purple-50', badge: 'bg-purple-600 text-white' };
+                  case 'S7': return { bg: '#10B981', soft: 'rgba(16, 185, 129, 0.05)', border: 'rgba(16, 185, 129, 0.18)', text: '#059669', lightBg: 'bg-emerald-50', badge: 'bg-emerald-600 text-white' };
+                  case 'S10': return { bg: '#F59E0B', soft: 'rgba(245, 158, 11, 0.05)', border: 'rgba(245, 158, 11, 0.18)', text: '#D97706', lightBg: 'bg-amber-50', badge: 'bg-amber-600 text-white' };
+                  case 'S11': return { bg: '#EC4899', soft: 'rgba(236, 72, 153, 0.05)', border: 'rgba(236, 72, 153, 0.18)', text: '#DB2777', lightBg: 'bg-pink-50', badge: 'bg-pink-600 text-white' };
+                  case 'S12': return { bg: '#6366F1', soft: 'rgba(99, 102, 241, 0.05)', border: 'rgba(99, 102, 241, 0.18)', text: '#4F46E5', lightBg: 'bg-violet-50', badge: 'bg-indigo-600 text-white' };
+                  case 'S13': return { bg: '#14B8A6', soft: 'rgba(20, 184, 166, 0.05)', border: 'rgba(20, 184, 166, 0.18)', text: '#0D9488', lightBg: 'bg-teal-50', badge: 'bg-teal-600 text-white' };
+                  default: return { bg: '#64748B', soft: 'rgba(100, 116, 139, 0.05)', border: 'rgba(100, 116, 139, 0.18)', text: '#475569', lightBg: 'bg-slate-50', badge: 'bg-slate-600 text-white' };
+                }
+              };
+
+              const accent = getStackAccent(stack.stackName);
+
+              return (
+                <div
+                  key={stack.stackName}
+                  className="p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between gap-3 shadow-3xs hover:shadow-md h-full"
+                  style={{
+                    background: `linear-gradient(135deg, ${accent.soft} 0%, rgba(255, 255, 255, 0.95) 100%)`,
+                    borderColor: accent.border,
+                  }}
+                >
+                  {/* Header Row */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <span className={`px-2.5 py-1 rounded-xl text-xs font-black tracking-wide shadow-3xs ${accent.badge}`}>
+                        {stack.stackName}
+                      </span>
+                      <h4 className="font-extrabold text-sm text-slate-900 leading-tight">
+                        Stack {stack.stackName}
+                      </h4>
+                    </div>
+
+                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white/90 text-slate-600 border border-slate-200/60 shadow-3xs">
+                      {stack.ets.length} ET{stack.ets.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+
+                  {/* Combined Revenue & Target Stats */}
+                  <div className="flex items-end justify-between mt-1">
+                    <div>
+                      <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 mb-0.5">Combined Revenue</p>
+                      <p className="text-xl font-black text-slate-950 tracking-tight leading-none">
+                        ${stack.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                    </div>
+
+                    {hasTarget ? (
+                      <div className="text-right">
+                        <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 mb-0.5">Target Revenue</p>
+                        <p className="text-xs font-bold text-slate-600 leading-none">
+                          ${stack.totalTarget.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="text-right">
+                        <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 mb-0.5">Target Revenue</p>
+                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-slate-100 text-slate-400 border border-slate-200/50">
+                          N/A
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Target Progress Bar or No-Target Status Footer */}
+                  {hasTarget ? (
+                    <div className="mt-1 space-y-1.5">
+                      <div className="flex items-center justify-between text-[10px] font-extrabold">
+                        <span className="text-slate-500">Progress</span>
+                        <div className="flex items-center gap-1.5">
+                          <span style={{ color: accent.text }}>{progress}%</span>
+                          {isTargetMet ? (
+                            <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[9px] font-black">
+                              +${Math.abs(diff).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                            </span>
+                          ) : (
+                            <span className="px-1.5 py-0.5 rounded-md bg-rose-100 text-rose-700 text-[9px] font-black">
+                              -${Math.abs(diff).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="w-full bg-slate-200/70 h-2 rounded-full overflow-hidden p-0.5">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            isTargetMet
+                              ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
+                              : progress >= 75
+                              ? 'bg-gradient-to-r from-amber-500 to-yellow-400'
+                              : 'bg-gradient-to-r from-indigo-500 to-purple-500'
+                          }`}
+                          style={{ width: `${Math.min(100, progress)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-1 pt-1.5 border-t border-slate-200/40 flex items-center justify-between text-[10px] font-extrabold">
+                      <span className="text-slate-400">Target Status</span>
+                      <span className="text-[9px] font-black px-2 py-0.5 rounded-md bg-white/80 text-slate-500 border border-slate-200/60 shadow-3xs">
+                        No Target Configured
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Advertiser Details Popup */}
       {advertiserPopup.isOpen && advertiserPopup.name && (
