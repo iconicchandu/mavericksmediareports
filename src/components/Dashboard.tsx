@@ -332,6 +332,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
     "JSG36MET": "$1000",
     "JSG41MET": "$500",
     "JSG55": "$500",
+    "JSG34C": "$500",
+    "C56MET": "$500",
+    "C41MET": "$500",
     "JSG48MET": "$500"
   };
 
@@ -1832,99 +1835,109 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
           : 0;
 
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5">
-            {/* Card 1: Total Revenue (Spans 2 columns on lg screens) */}
-            <div className="p-5 rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/40 via-white to-teal-50/20 shadow-sm transition-all hover:shadow-[0_15px_30px_-5px_rgba(16,185,129,0.08)] hover:border-emerald-300 lg:col-span-2 md:col-span-2 flex flex-col justify-between min-h-[110px]">
-              <div className="flex items-center gap-4">
-                <div className="p-3.5 rounded-2xl bg-emerald-500 text-white shadow-md shadow-emerald-500/20">
-                  <DollarSign className="h-6 w-6" strokeWidth={2.5} />
+          <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-4">
+            {/* Card 1: Total Revenue (Spans 3 cols = 25% width) */}
+            <div className="p-5 rounded-2xl border border-emerald-100/90 bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/30 shadow-[0_4px_20px_-2px_rgba(16,185,129,0.06)] hover:shadow-[0_10px_25px_-3px_rgba(16,185,129,0.12)] hover:border-emerald-300 transition-all duration-300 lg:col-span-3 md:col-span-6 flex flex-col justify-between min-h-[120px]">
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 shrink-0">
+                  <DollarSign className="h-5 w-5" strokeWidth={2.5} />
                 </div>
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Total Revenue</p>
-                  <p className="text-3xl font-black text-emerald-950 leading-none">${analytics.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5 truncate">Total Revenue</p>
+                  <p className="text-2xl xl:text-3xl font-black text-emerald-950 tracking-tight leading-none truncate">
+                    ${analytics.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
                 </div>
               </div>
-              <div className="mt-4 pt-3 border-t border-emerald-100/50 flex items-center justify-between text-[10px] font-bold text-slate-500 leading-none">
-                <span>Aggregated Performance</span>
-                <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/50">{uploadedFiles.length} file{uploadedFiles.length > 1 ? 's' : ''} analyzed</span>
+              <div className="mt-4 pt-3 border-t border-emerald-100/60 flex items-center justify-between text-[10px] font-bold text-slate-400 leading-none gap-2">
+                <span className="truncate">Aggregated Performance</span>
+                <span className="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60 text-[9.5px] font-extrabold whitespace-nowrap shadow-2xs">
+                  {uploadedFiles.length} file{uploadedFiles.length > 1 ? 's' : ''} analyzed
+                </span>
               </div>
             </div>
 
-            {/* Card 2: Daily Target */}
-            <div className="p-5 rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/20 via-white to-indigo-50/10 shadow-sm transition-all hover:shadow-[0_15px_30px_-5px_rgba(59,130,246,0.08)] hover:border-blue-300 lg:col-span-1 flex flex-col justify-between min-h-[110px]">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100/50">
-                  <Target className="h-6 w-6" strokeWidth={2.5} />
+            {/* Card 2: Daily Target (Spans 3 cols = 25% width) */}
+            <div className="p-5 rounded-2xl border border-blue-100/90 bg-gradient-to-br from-blue-50/40 via-white to-indigo-50/20 shadow-[0_4px_20px_-2px_rgba(59,130,246,0.06)] hover:shadow-[0_10px_25px_-3px_rgba(59,130,246,0.12)] hover:border-blue-300 transition-all duration-300 lg:col-span-3 md:col-span-6 flex flex-col justify-between min-h-[120px]">
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
+                  <Target className="h-5 w-5" strokeWidth={2.5} />
                 </div>
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Daily Target</p>
-                  <p className="text-2xl font-black text-blue-950 leading-none">${displayedTotalTargetRevenue.toLocaleString()}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5 truncate">Daily Target</p>
+                  <p className="text-2xl xl:text-3xl font-black text-blue-950 tracking-tight leading-none truncate">
+                    ${displayedTotalTargetRevenue.toLocaleString()}
+                  </p>
                 </div>
               </div>
-              {displayedTotalTargetRevenue > 0 && (
-                <div className="mt-3">
-                  <div className="flex items-center justify-between text-[9px] font-black text-slate-400 mb-1">
-                    <span>ACHIEVED</span>
-                    <span className="text-blue-600 font-extrabold">{targetPercentage}%</span>
+              {displayedTotalTargetRevenue > 0 ? (
+                <div className="mt-3.5">
+                  <div className="flex items-center justify-between text-[9.5px] font-black text-slate-400 mb-1.5">
+                    <span className="uppercase tracking-wider">Target Achieved</span>
+                    <span className="text-blue-600 font-extrabold bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100/80">{targetPercentage}%</span>
                   </div>
-                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/50 shadow-inner">
                     <div
-                      className="h-full bg-blue-500 rounded-full transition-all duration-1000"
+                      className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-1000 shadow-sm"
                       style={{ width: `${Math.min(targetPercentage, 100)}%` }}
                     />
                   </div>
                 </div>
+              ) : (
+                <div className="mt-4 pt-3 border-t border-blue-100/60 text-[10px] font-bold text-slate-400 leading-none">
+                  No Target Set
+                </div>
               )}
             </div>
 
-            {/* Card 3: Campaigns */}
-            <div className="p-5 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/20 via-white to-purple-50/10 shadow-sm transition-all hover:shadow-[0_15px_30px_-5px_rgba(99,102,241,0.08)] hover:border-indigo-300 lg:col-span-1 flex flex-col justify-between min-h-[110px]">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100/50">
-                  <Layers className="h-6 w-6" strokeWidth={2.5} />
+            {/* Card 3: Campaigns (Spans 2 cols = 16.6% width) */}
+            <div className="p-5 rounded-2xl border border-indigo-100/90 bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/20 shadow-[0_4px_20px_-2px_rgba(99,102,241,0.05)] hover:shadow-[0_10px_25px_-3px_rgba(99,102,241,0.1)] hover:border-indigo-300 transition-all duration-300 lg:col-span-2 md:col-span-4 flex flex-col justify-between min-h-[120px]">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100/80 flex items-center justify-center shrink-0">
+                  <Layers className="h-4.5 w-4.5" strokeWidth={2.5} />
                 </div>
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Campaigns</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5 truncate">Campaigns</p>
                   <p className="text-2xl font-black text-indigo-950 leading-none">{analytics.campaignStats.length}</p>
                 </div>
               </div>
-              <div className="mt-4 text-[10px] font-bold text-slate-400 leading-none">
+              <div className="mt-4 pt-3 border-t border-indigo-100/40 text-[10px] font-bold text-slate-400 leading-none truncate">
                 Active ad channels
               </div>
             </div>
 
-            {/* Card 4: ETs Active */}
-            <div className="p-5 rounded-2xl border border-purple-100 bg-gradient-to-br from-purple-50/20 via-white to-pink-50/10 shadow-sm transition-all hover:shadow-[0_15px_30px_-5px_rgba(139,92,246,0.08)] hover:border-purple-300 lg:col-span-1 flex flex-col justify-between min-h-[110px]">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl bg-purple-50 text-purple-600 border border-purple-100/50">
-                  <Users className="h-6 w-6" strokeWidth={2.5} />
+            {/* Card 4: ETs Active (Spans 2 cols = 16.6% width) */}
+            <div className="p-5 rounded-2xl border border-purple-100/90 bg-gradient-to-br from-purple-50/30 via-white to-pink-50/20 shadow-[0_4px_20px_-2px_rgba(139,92,246,0.05)] hover:shadow-[0_10px_25px_-3px_rgba(139,92,246,0.1)] hover:border-purple-300 transition-all duration-300 lg:col-span-2 md:col-span-4 flex flex-col justify-between min-h-[120px]">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 border border-purple-100/80 flex items-center justify-center shrink-0">
+                  <Users className="h-4.5 w-4.5" strokeWidth={2.5} />
                 </div>
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">ETs Active</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5 truncate">ETs Active</p>
                   <p className="text-2xl font-black text-purple-950 leading-none">{analytics.etStats.length}</p>
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-1.5 leading-none">
-                <span className="relative flex h-2 w-2">
+              <div className="mt-4 pt-3 border-t border-purple-100/40 flex items-center gap-1.5 leading-none">
+                <span className="relative flex h-2 w-2 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Live Monitoring</span>
+                <span className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider truncate">Live Monitoring</span>
               </div>
             </div>
 
-            {/* Card 5: Creatives */}
-            <div className="p-5 rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50/20 via-white to-yellow-50/10 shadow-sm transition-all hover:shadow-[0_15px_30px_-5px_rgba(245,158,11,0.08)] hover:border-amber-300 lg:col-span-1 flex flex-col justify-between min-h-[110px]">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100/50">
-                  <Activity className="h-6 w-6" strokeWidth={2.5} />
+            {/* Card 5: Creatives (Spans 2 cols = 16.6% width) */}
+            <div className="p-5 rounded-2xl border border-amber-100/90 bg-gradient-to-br from-amber-50/30 via-white to-yellow-50/20 shadow-[0_4px_20px_-2px_rgba(245,158,11,0.05)] hover:shadow-[0_10px_25px_-3px_rgba(245,158,11,0.1)] hover:border-amber-300 transition-all duration-300 lg:col-span-2 md:col-span-4 flex flex-col justify-between min-h-[120px]">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 border border-amber-100/80 flex items-center justify-center shrink-0">
+                  <Activity className="h-4.5 w-4.5" strokeWidth={2.5} />
                 </div>
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Creatives</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5 truncate">Creatives</p>
                   <p className="text-2xl font-black text-amber-950 leading-none">{data.creatives.size}</p>
                 </div>
               </div>
-              <div className="mt-4 text-[10px] font-bold text-slate-400 leading-none">
+              <div className="mt-4 pt-3 border-t border-amber-100/40 text-[10px] font-bold text-slate-400 leading-none truncate">
                 Unique creative assets
               </div>
             </div>
@@ -2047,9 +2060,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         {/* Header */}
         <div
           onClick={() => setIsStackSectionExpanded(prev => !prev)}
-          className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer select-none ${
-            isStackSectionExpanded ? 'mb-6' : 'mb-0'
-          }`}
+          className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer select-none ${isStackSectionExpanded ? 'mb-6' : 'mb-0'
+            }`}
         >
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100/80 shadow-2xs">
@@ -2181,13 +2193,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                       </div>
                       <div className="w-full bg-slate-200/70 h-2 rounded-full overflow-hidden p-0.5">
                         <div
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            isTargetMet
-                              ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
-                              : progress >= 75
+                          className={`h-full rounded-full transition-all duration-500 ${isTargetMet
+                            ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
+                            : progress >= 75
                               ? 'bg-gradient-to-r from-amber-500 to-yellow-400'
                               : 'bg-gradient-to-r from-indigo-500 to-purple-500'
-                          }`}
+                            }`}
                           style={{ width: `${Math.min(100, progress)}%` }}
                         />
                       </div>
@@ -2480,15 +2491,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {analytics.etStats.slice(0, 3).map((et, index) => {
               const targetStatus = checkTargetStatus(et.name, et.revenue, analytics.totalRevenue);
-              let borderClass = 'border-yellow-300/40';
-              let hoverClass = 'hover:shadow-xl';
-              if (targetStatus === 'met') {
-                borderClass = 'border-emerald-400/65';
-                hoverClass = 'hover:shadow-emerald-500/15 hover:shadow-2xl';
-              } else if (targetStatus === 'not-met') {
-                borderClass = 'border-rose-400/65';
-                hoverClass = 'hover:shadow-rose-500/15 hover:shadow-2xl';
-              }
+              // Shining golden borders for Top Revenue ETs cards instead of red/green lines
+              const borderClass = 'border-amber-300/80 shadow-[0_0_15px_rgba(245,158,11,0.25)]';
+              const hoverClass = 'hover:border-amber-200 hover:shadow-[0_0_25px_rgba(251,191,36,0.4)] hover:shadow-2xl';
 
               const rawTargetValue = getTargetRevenue(et.name);
               let targetVal = 0;
@@ -2550,7 +2555,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                   </div>
 
                   {/* Middle Section: Side-by-side Today Revenue & Daily Target */}
-                  <div className="relative z-10 grid grid-cols-2 gap-3 py-3 border-y border-yellow-900/20">
+                  <div className="relative z-10 grid grid-cols-2 gap-3 py-3 border-y border-amber-800/25">
                     {/* Left Column: Today Revenue */}
                     <div className="flex flex-col justify-center">
                       <p className="text-xl font-black leading-tight tracking-tight text-gray-900 drop-shadow-md">
@@ -2577,7 +2582,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                     </div>
 
                     {/* Right Column: Daily Target */}
-                    <div className="flex flex-col justify-center border-l border-yellow-900/20 pl-3">
+                    <div className="flex flex-col justify-center border-l border-amber-800/25 pl-3">
                       <span className="text-xl font-black text-gray-900 leading-tight drop-shadow-sm">
                         {displayTargetRevenue(et.name, analytics.totalRevenue)}
                       </span>
@@ -2599,12 +2604,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                           {renderTargetComparison(et.name, et.revenue, analytics.totalRevenue, true)}
                           <span className="font-black drop-shadow-sm text-yellow-950 text-xs">{percentAchieved}%</span>
                         </div>
-                        <div className="w-full h-2.5 bg-black/15 rounded-full overflow-hidden p-0.5 border border-white/30 shadow-inner relative">
+                        <div className="w-full h-2.5 bg-black/20 rounded-full overflow-hidden p-0.5 border border-amber-200/50 shadow-inner relative">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-yellow-900 via-amber-700 to-yellow-950 shadow-[0_0_10px_rgba(120,53,15,0.35)] transition-all duration-1000 ease-out animate-line-fill relative overflow-hidden"
+                            className="h-full rounded-full bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500 shadow-[0_0_12px_rgba(251,191,36,0.8)] transition-all duration-1000 ease-out animate-line-fill relative overflow-hidden"
                             style={{ width: `${Math.min(percentAchieved, 100)}%` }}
                           >
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-progress-shimmer pointer-events-none" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/70 to-transparent animate-progress-shimmer pointer-events-none" />
                           </div>
                         </div>
                       </div>
@@ -2615,7 +2620,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
                       </div>
                     )}
 
-                    <div className="flex items-center gap-3 pt-2 border-t border-yellow-900/20 text-xs text-yellow-950/80">
+                    <div className="flex items-center gap-3 pt-2 border-t border-amber-800/25 text-xs text-yellow-950/80">
                       <span className="flex items-center gap-1.5">
                         <Layers className="h-3.5 w-3.5 text-yellow-900" />
                         <span className="font-semibold text-gray-900">{et.creatives.length}</span> <span className="text-yellow-900/80">Cr</span>
