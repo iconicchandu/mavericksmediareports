@@ -1528,4 +1528,233 @@ body {
 
 .animate-pulse-glow {
   animation: pulseGlow 6s ease-in-out infinite;
-}
+}
+
+/* ═══════════════════════════════════════════════════════
+   DIWALI FESTIVAL OF LIGHTS THEME SYSTEM
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Realistic Diya Flame Flickering Animation ── */
+@keyframes flameFlicker {
+  0%, 100% {
+    transform: scale(1, 1) rotate(-0.5deg);
+    filter: drop-shadow(0 0 7px rgba(245, 158, 11, 0.85)) drop-shadow(0 0 14px rgba(239, 68, 68, 0.6));
+  }
+  25% {
+    transform: scale(1.06, 1.14) rotate(1.5deg);
+    filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.95)) drop-shadow(0 0 18px rgba(249, 115, 22, 0.75));
+  }
+  50% {
+    transform: scale(0.95, 0.93) rotate(-1.5deg);
+    filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.75)) drop-shadow(0 0 11px rgba(239, 68, 68, 0.5));
+  }
+  75% {
+    transform: scale(1.03, 1.07) rotate(0.8deg);
+    filter: drop-shadow(0 0 9px rgba(251, 191, 36, 0.9)) drop-shadow(0 0 15px rgba(249, 115, 22, 0.7));
+  }
+}
+
+.animate-flame-flicker {
+  animation: flameFlicker 1.6s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+/* ── Twinkling Fairy Light Bulbs ── */
+@keyframes fairyTwinkle1 {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1.2) drop-shadow(0 0 8px currentColor);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.85);
+    filter: brightness(0.7) drop-shadow(0 0 1px currentColor);
+  }
+}
+
+@keyframes fairyTwinkle2 {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+    filter: brightness(0.7) drop-shadow(0 0 1px currentColor);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+    filter: brightness(1.3) drop-shadow(0 0 9px currentColor);
+  }
+}
+
+@keyframes fairyTwinkle3 {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(0.95);
+  }
+  33% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  66% {
+    opacity: 1;
+    transform: scale(1.15);
+    filter: brightness(1.4) drop-shadow(0 0 10px currentColor);
+  }
+}
+
+.animate-fairy-1 {
+  animation: fairyTwinkle1 1.7s ease-in-out infinite;
+}
+
+.animate-fairy-2 {
+  animation: fairyTwinkle2 2.2s ease-in-out infinite;
+}
+
+.animate-fairy-3 {
+  animation: fairyTwinkle3 2.8s ease-in-out infinite;
+}
+
+/* ── Traditional Diwali Kandil Lantern Sway ── */
+@keyframes lanternSway {
+  0%, 100% {
+    transform: rotate(-3.5deg);
+  }
+  50% {
+    transform: rotate(3.5deg);
+  }
+}
+
+.animate-lantern-sway {
+  animation: lanternSway 4.2s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+/* ── Diwali Theme Atmosphere Overrides ── */
+.diwali-mode {
+  background: radial-gradient(circle at 50% 0%, rgba(254, 243, 199, 0.45) 0%, rgba(255, 255, 255, 0.95) 50%, #ffffff 100%);
+}
+
+.diwali-mode .app-bg {
+  background: radial-gradient(circle at 50% 0%, rgba(254, 243, 199, 0.35) 0%, #ffffff 60%);
+}
+
+.diwali-mode header {
+  background: rgba(255, 253, 245, 0.88) !important;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.25) !important;
+  box-shadow: 0 4px 25px rgba(245, 158, 11, 0.08) !important;
+}
+
+.diwali-mode .report-dropzone {
+  border-color: rgba(245, 158, 11, 0.45);
+  background: linear-gradient(180deg, rgba(254, 243, 199, 0.4) 0%, rgba(255, 255, 255, 0.8) 100%);
+  box-shadow: 0 10px 30px -10px rgba(245, 158, 11, 0.15);
+}
+
+.diwali-mode .report-dropzone:hover {
+  border-color: #f59e0b;
+  box-shadow: 0 12px 35px -10px rgba(245, 158, 11, 0.25), 0 0 0 3px rgba(251, 191, 36, 0.2);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DUSSEHRA (VIJAYADASHAMI) THEME ANIMATIONS & STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+/* Marigold Toran Gentle Breeze Sway */
+@keyframes toranSway {
+  0%, 100% {
+    transform: rotate(-1.5deg);
+  }
+  50% {
+    transform: rotate(1.5deg);
+  }
+}
+
+.animate-toran-sway {
+  animation: toranSway 5s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+/* Golden Shami Leaf Flutter & Drift */
+@keyframes shamiDrift {
+  0% {
+    transform: translateY(-20px) rotate(0deg) scale(0.9);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(45vh) rotate(180deg) translateX(30px) scale(1);
+    opacity: 0.8;
+  }
+  85% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(98vh) rotate(360deg) translateX(-20px) scale(0.85);
+    opacity: 0;
+  }
+}
+
+.animate-shami-leaf {
+  animation: shamiDrift 13s linear infinite;
+}
+
+/* Divine Golden Bow & Arrow Solar Aura */
+@keyframes divineAura {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6)) drop-shadow(0 0 16px rgba(234, 88, 12, 0.3));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 14px rgba(245, 158, 11, 0.85)) drop-shadow(0 0 24px rgba(234, 88, 12, 0.5));
+    transform: scale(1.02);
+  }
+}
+
+.animate-divine-aura {
+  animation: divineAura 3s ease-in-out infinite;
+}
+
+/* Arrow Tip Flaming Agni (Sacred Fire) */
+@keyframes arrowFlame {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+    filter: brightness(1.2) drop-shadow(0 0 6px #f97316);
+  }
+  50% {
+    transform: scale(1.15) translateY(-1px);
+    filter: brightness(1.4) drop-shadow(0 0 12px #ea580c);
+  }
+}
+
+.animate-arrow-flame {
+  animation: arrowFlame 1.2s ease-in-out infinite;
+}
+
+/* ── Dussehra Theme Atmosphere Overrides ── */
+.dussehra-mode {
+  background: radial-gradient(circle at 50% 0%, rgba(255, 237, 213, 0.55) 0%, rgba(254, 243, 199, 0.35) 35%, rgba(255, 255, 255, 0.95) 70%, #ffffff 100%);
+}
+
+.dussehra-mode .app-bg {
+  background: radial-gradient(circle at 50% 0%, rgba(255, 237, 213, 0.45) 0%, rgba(254, 243, 199, 0.25) 40%, #ffffff 75%);
+}
+
+.dussehra-mode header {
+  background: rgba(255, 251, 245, 0.9) !important;
+  border-bottom: 1px solid rgba(234, 88, 12, 0.25) !important;
+  box-shadow: 0 4px 25px rgba(234, 88, 12, 0.08) !important;
+}
+
+.dussehra-mode .report-dropzone {
+  border-color: rgba(234, 88, 12, 0.45);
+  background: linear-gradient(180deg, rgba(255, 237, 213, 0.4) 0%, rgba(255, 255, 255, 0.85) 100%);
+  box-shadow: 0 10px 30px -10px rgba(234, 88, 12, 0.15);
+}
+
+.dussehra-mode .report-dropzone:hover {
+  border-color: #ea580c;
+  box-shadow: 0 12px 35px -10px rgba(234, 88, 12, 0.28), 0 0 0 3px rgba(249, 115, 22, 0.2);
+}
+

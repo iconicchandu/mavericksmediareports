@@ -2,6 +2,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend, AreaChart, Area } from 'recharts';
 import { Download, FileText, TrendingUp, Users, Target, DollarSign, RefreshCw, Building2, Zap, Globe, Wifi, Award, Trophy, BarChart3, Search, X, Star, Activity, Layers, Hash, Calendar, AtSign, ChevronUp, ChevronDown, Crown, MoreVertical } from 'lucide-react';
 import { ProcessedData, DataRecord, CreativeStats, CampaignStats, ETStats, AdvertiserStats } from '../types';
+import { isDiwaliMode } from '../config/themeConfig';
+import { FloatingKandil } from './DiwaliDecorations';
 
 interface UploadedFile {
   name: string;
@@ -1947,7 +1949,17 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       {/* End: Summary Cards */}
 
       {/* Advertiser Revenue Breakdown (redesigned cards) */}
-      <div className="p-6 rounded-2xl border border-slate-100/90 shadow-[0_8px_30px_rgb(0,0,0,0.015)] bg-white">
+      <div className="p-6 rounded-2xl border border-slate-100/90 shadow-[0_8px_30px_rgb(0,0,0,0.015)] bg-white relative">
+        {isDiwaliMode && (
+          <>
+            <div className="absolute -top-6 left-6 z-20 pointer-events-none select-none transition-transform duration-300 hover:scale-110 drop-shadow-[0_8px_20px_rgba(245,158,11,0.5)]">
+              <FloatingKandil size={32} threadLength={12} glow />
+            </div>
+            <div className="absolute -top-6 right-6 z-20 pointer-events-none select-none transition-transform duration-300 hover:scale-110 drop-shadow-[0_8px_20px_rgba(245,158,11,0.5)]">
+              <FloatingKandil size={32} threadLength={12} glow />
+            </div>
+          </>
+        )}
         <div className="flex items-center mb-6 justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-red-50 text-red-500 border border-red-100">
@@ -2056,7 +2068,17 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       {/* End: Advertiser Revenue Breakdown */}
 
       {/* Stack-Wise Revenue & Target Breakdown */}
-      <div className="p-6 rounded-2xl border border-slate-100/90 shadow-[0_8px_30px_rgb(0,0,0,0.015)] bg-white mt-6 transition-all duration-300">
+      <div className="p-6 rounded-2xl border border-slate-100/90 shadow-[0_8px_30px_rgb(0,0,0,0.015)] bg-white mt-6 transition-all duration-300 relative">
+        {isDiwaliMode && (
+          <>
+            <div className="absolute -top-6 left-6 z-20 pointer-events-none select-none transition-transform duration-300 hover:scale-110 drop-shadow-[0_8px_20px_rgba(245,158,11,0.5)]">
+              <FloatingKandil size={30} threadLength={12} glow />
+            </div>
+            <div className="absolute -top-6 right-6 z-20 pointer-events-none select-none transition-transform duration-300 hover:scale-110 drop-shadow-[0_8px_20px_rgba(245,158,11,0.5)]">
+              <FloatingKandil size={30} threadLength={12} glow />
+            </div>
+          </>
+        )}
         {/* Header */}
         <div
           onClick={() => setIsStackSectionExpanded(prev => !prev)}
@@ -2478,7 +2500,17 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
 
       {/* Top Revenue ETs Section */}
       {analytics.etStats.length > 0 && (
-        <div className="p-6 rounded-2xl border border-amber-200/50 shadow-sm bg-[#fdfbf6]">
+        <div className="p-6 rounded-2xl border border-amber-200/50 shadow-sm bg-[#fdfbf6] relative">
+          {isDiwaliMode && (
+            <>
+              <div className="absolute -top-6 left-6 z-20 pointer-events-none select-none transition-transform duration-300 hover:scale-110 drop-shadow-[0_8px_20px_rgba(245,158,11,0.5)]">
+                <FloatingKandil size={32} threadLength={12} glow />
+              </div>
+              <div className="absolute -top-6 right-6 z-20 pointer-events-none select-none transition-transform duration-300 hover:scale-110 drop-shadow-[0_8px_20px_rgba(245,158,11,0.5)]">
+                <FloatingKandil size={32} threadLength={12} glow />
+              </div>
+            </>
+          )}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <Award className="h-6 w-6 mr-3 text-amber-500" />
@@ -2640,7 +2672,17 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       )}
 
       {/* ET Revenue Breakdown - Main Section */}
-      <div className="p-6 rounded-lg border bg-white border-gray-100">
+      <div className="p-6 rounded-lg border bg-white border-gray-100 relative">
+        {isDiwaliMode && (
+          <>
+            <div className="absolute -top-6 left-6 z-20 pointer-events-none select-none transition-transform duration-300 hover:scale-110 drop-shadow-[0_8px_20px_rgba(245,158,11,0.5)]">
+              <FloatingKandil size={30} threadLength={12} glow />
+            </div>
+            <div className="absolute -top-6 right-6 z-20 pointer-events-none select-none transition-transform duration-300 hover:scale-110 drop-shadow-[0_8px_20px_rgba(245,158,11,0.5)]">
+              <FloatingKandil size={30} threadLength={12} glow />
+            </div>
+          </>
+        )}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
             <Users className="h-6 w-6 mr-3 text-blue-500" />
@@ -2828,7 +2870,17 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
       {/* End: ET Revenue Breakdown */}
 
       {/* Campaign Revenue Breakdown */}
-      <div className="p-5 rounded-2xl border bg-white shadow-sm border-gray-100">
+      <div className="p-5 rounded-2xl border bg-white shadow-sm border-gray-100 relative">
+        {isDiwaliMode && (
+          <>
+            <div className="absolute -top-6 left-6 z-20 pointer-events-none select-none transition-transform duration-300 hover:scale-110 drop-shadow-[0_8px_20px_rgba(245,158,11,0.5)]">
+              <FloatingKandil size={32} threadLength={12} glow />
+            </div>
+            <div className="absolute -top-6 right-6 z-20 pointer-events-none select-none transition-transform duration-300 hover:scale-110 drop-shadow-[0_8px_20px_rgba(245,158,11,0.5)]">
+              <FloatingKandil size={32} threadLength={12} glow />
+            </div>
+          </>
+        )}
         {/* Header Section */}
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">

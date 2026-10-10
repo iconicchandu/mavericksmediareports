@@ -14,6 +14,9 @@ import {
   Calendar,
 } from 'lucide-react';
 import { detectBatchContextMonth, detectDateFromFileName } from '../services/dateParser';
+import { isDussehraMode, isDiwaliMode } from '../config/themeConfig';
+import { SingleToranElement } from './DussehraDecorations';
+import { FloatingKandil } from './DiwaliDecorations';
 
 interface UploadedFile {
   name: string;
@@ -273,10 +276,31 @@ const FileUpload: React.FC<FileUploadProps> = ({
       : `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 
   return (
-    <div className="w-full sm:w-[475px] lg:w-[485px] xl:w-[500px] report-panel rounded-2xl p-4 sm:p-5 space-y-3.5 text-slate-800 transition-all duration-300">
+    <div className="w-full sm:w-[475px] lg:w-[485px] xl:w-[500px] report-panel rounded-2xl p-4 sm:p-5 space-y-3.5 text-slate-800 transition-all duration-300 relative">
       
+      {/* ── Dussehra Auspicious Marigold & Mango Leaves Crest (Top-Right of Upload Card) ── */}
+      {isDussehraMode && (
+        <div className="absolute -top-7 -right-3.5 sm:-right-4.5 z-20 pointer-events-none select-none transition-transform duration-300 hover:scale-110 drop-shadow-[0_8px_20px_rgba(245,158,11,0.5)]">
+          <SingleToranElement type="orange" size={68} glow />
+        </div>
+      )}
+
+      {/* ── Diwali Floating Star Lanterns (Top-Left & Top-Right of Upload Card) ── */}
+      {isDiwaliMode && (
+        <>
+          <div className="absolute -top-7 left-3 sm:left-4 z-20 pointer-events-none select-none transition-transform duration-300 hover:scale-110 drop-shadow-[0_8px_20px_rgba(245,158,11,0.5)]">
+            <FloatingKandil size={36} threadLength={14} glow />
+          </div>
+          <div className="absolute -top-7 right-3 sm:right-4 z-20 pointer-events-none select-none transition-transform duration-300 hover:scale-110 drop-shadow-[0_8px_20px_rgba(245,158,11,0.5)]">
+            <FloatingKandil size={36} threadLength={14} glow />
+          </div>
+        </>
+      )}
+
       {/* ── Console Header ── */}
-      <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+      <div className={`flex items-center justify-between pb-2 border-b border-slate-100 ${
+        isDussehraMode ? 'pr-12 sm:pr-14' : isDiwaliMode ? 'px-8 sm:px-10' : ''
+      }`}>
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-50 to-indigo-100/80 border border-indigo-200/60 flex items-center justify-center text-indigo-600 shadow-2xs">
             <FileSpreadsheet className="w-4 h-4" />

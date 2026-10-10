@@ -31,6 +31,8 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts';
+import { DiyaLamp, FloatingKandil } from './DiwaliDecorations';
+import { isDiwaliMode as defaultDiwaliMode } from '../config/themeConfig';
 import { ProcessedData, DataRecord } from '../types';
 import { detectBatchContextMonth, detectDateFromFileName, DetectedDateInfo } from '../services/dateParser';
 
@@ -44,6 +46,7 @@ interface SevenDayReportPanelProps {
   uploadedFiles: UploadedFile[];
   onSwitchToStandardView?: () => void;
   onReset: () => void;
+  isDiwaliMode?: boolean;
 }
 
 interface ETRowData {
@@ -462,6 +465,7 @@ const SevenDayReportPanel: React.FC<SevenDayReportPanelProps> = ({
   data,
   uploadedFiles,
   onReset,
+  isDiwaliMode = defaultDiwaliMode,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAdvertiser, setSelectedAdvertiser] = useState('ALL');
@@ -1070,20 +1074,34 @@ const SevenDayReportPanel: React.FC<SevenDayReportPanelProps> = ({
     <div className="space-y-6 animate-fade-in pb-16">
       
       {/* ── Top Header Navigation Bar ── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/80 shadow-xs">
+      <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl backdrop-blur-xl border transition-all ${
+        isDiwaliMode
+          ? 'bg-gradient-to-r from-amber-50/70 via-white to-orange-50/50 border-amber-300/80 shadow-[0_4px_25px_rgba(245,158,11,0.12)]'
+          : 'bg-white/80 border-slate-200/80 shadow-xs'
+      }`}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-md ${
+            isDiwaliMode
+              ? 'bg-gradient-to-tr from-amber-500 to-orange-600 text-white shadow-amber-500/30'
+              : 'bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-indigo-500/20'
+          }`}>
             <Calendar className="w-5 h-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-tight">
-                7-Day Multi-Date Report Panel
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-tight flex items-center gap-2">
+                <span>7-Day Multi-Date Report Panel</span>
+                {isDiwaliMode && <DiyaLamp size={26} glow={false} />}
               </h2>
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/70 shadow-2xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 {sortedDates.length} Dates Detected
               </span>
+              {isDiwaliMode && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-100 to-orange-100 text-amber-900 border border-amber-300/80 shadow-2xs">
+                  ✨ Shubh Deepavali
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-500 font-medium">
               ET Revenue Cross-Tab Matrix • Consolidated across {uploadedFiles.length} campaign files
@@ -1467,7 +1485,17 @@ const SevenDayReportPanel: React.FC<SevenDayReportPanelProps> = ({
       </div>
 
       {/* ── Collapsible Advertiser Multi-Day Matrix ── */}
-      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-indigo-200 hover:shadow-sm transition-all overflow-hidden">
+      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-indigo-200 hover:shadow-sm transition-all relative">
+        {isDiwaliMode && (
+          <>
+            <div className="absolute -top-6 left-6 z-20 pointer-events-none select-none transition-transform duration-300 hover:scale-110 drop-shadow-[0_8px_20px_rgba(245,158,11,0.5)]">
+              <FloatingKandil size={32} threadLength={12} glow />
+            </div>
+            <div className="absolute -top-6 right-6 z-20 pointer-events-none select-none transition-transform duration-300 hover:scale-110 drop-shadow-[0_8px_20px_rgba(245,158,11,0.5)]">
+              <FloatingKandil size={32} threadLength={12} glow />
+            </div>
+          </>
+        )}
         {/* Full Clickable Header Card */}
         <div 
           className="w-full p-4 sm:p-5 flex items-center justify-between gap-4 cursor-pointer select-none hover:bg-slate-50/70 transition-colors group"
@@ -1804,20 +1832,35 @@ const SevenDayReportPanel: React.FC<SevenDayReportPanelProps> = ({
     {/* ══════════════════════════════════════════════════════════════════════ */}
     {/* ── BOTTOM CONNECTED DUAL-FILTER ET & CAMPAIGN DEEP-DIVE EXPLORER ── */}
     {/* ══════════════════════════════════════════════════════════════════════ */}
-    <div className="bg-gradient-to-br from-white via-indigo-50/20 to-teal-50/20 rounded-2xl border border-indigo-100/70 shadow-[0_4px_20px_rgba(99,102,241,0.03)] overflow-hidden transition-all mt-6">
+    <div className={`rounded-2xl border overflow-hidden transition-all mt-6 ${
+      isDiwaliMode
+        ? 'bg-gradient-to-br from-white via-amber-50/20 to-orange-50/20 border-amber-200/80 shadow-[0_4px_25px_rgba(245,158,11,0.06)]'
+        : 'bg-gradient-to-br from-white via-indigo-50/20 to-teal-50/20 border-indigo-100/70 shadow-[0_4px_20px_rgba(99,102,241,0.03)]'
+    }`}>
       {/* Soft Colorful Header */}
-      <div className="px-5 py-4 border-b border-indigo-100/60 flex items-center justify-between gap-4 bg-white/70 backdrop-blur-sm">
+      <div className={`px-5 py-4 border-b flex items-center justify-between gap-4 backdrop-blur-sm ${
+        isDiwaliMode ? 'border-amber-100/80 bg-amber-50/25' : 'border-indigo-100/60 bg-white/70'
+      }`}>
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500/15 via-violet-500/15 to-teal-500/15 text-indigo-700 flex items-center justify-center border border-indigo-200/60 shadow-2xs flex-shrink-0">
+          <div className={`w-8 h-8 rounded-xl flex items-center justify-center border shadow-2xs flex-shrink-0 ${
+            isDiwaliMode
+              ? 'bg-gradient-to-tr from-amber-500/20 via-orange-500/20 to-yellow-500/20 text-amber-800 border-amber-300/80'
+              : 'bg-gradient-to-tr from-indigo-500/15 via-violet-500/15 to-teal-500/15 text-indigo-700 border border-indigo-200/60'
+          }`}>
             <SlidersHorizontal className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
-                ET & Campaign Explorer
+              <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight flex items-center gap-1.5">
+                <span>ET & Campaign Explorer</span>
+                {isDiwaliMode && <DiyaLamp size={22} glow={false} />}
               </h3>
-              <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-2 py-0.5 rounded-full shadow-2xs">
-                Connected
+              <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-2xs ${
+                isDiwaliMode
+                  ? 'text-amber-800 bg-amber-100/80 border border-amber-300'
+                  : 'text-indigo-700 bg-indigo-50 border border-indigo-200/60'
+              }`}>
+                {isDiwaliMode ? '🪔 Connected' : 'Connected'}
               </span>
             </div>
             <p className="text-[11px] text-slate-500 font-medium">

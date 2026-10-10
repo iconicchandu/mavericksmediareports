@@ -9,6 +9,26 @@ import FileUpload from "./components/FileUpload"
 import Dashboard from "./components/Dashboard"
 import SevenDayReportPanel from "./components/SevenDayReportPanel"
 import CelebrationEffect from "./components/CelebrationEffect"
+import {
+  DiyaLamp,
+  HangingFairyLights,
+  DiwaliLantern,
+  DiwaliBottomDiyas,
+  DiwaliSkycrackers,
+  DiwaliSparkleParticles,
+} from "./components/DiwaliDecorations"
+import {
+  DivineBowArrow,
+  DussehraToran,
+  ShamiGoldLeaves,
+  DussehraBottomCrests,
+} from "./components/DussehraDecorations"
+import {
+  isDussehraMode,
+  isDiwaliMode,
+  isFestivalMode,
+  isSkycrackersEnabled,
+} from "./config/themeConfig"
 import { detectBatchContextMonth, detectDateFromFileName } from "./services/dateParser"
 import type { ProcessedData } from "./types"
 
@@ -19,14 +39,15 @@ interface UploadedFile {
 
 // ─── Motivational quotes pool ───────────────────────────────────────────────
 const QUOTES = [
+  { text: "May the divine arrow of truth pierce through every obstacle and lead you to victory.", author: "Shubh Vijayadashami" },
+  { text: "Celebrate the triumph of righteousness, wisdom, and data-driven excellence.", author: "Dussehra Edition" },
+  { text: "May the divine lights of Diwali illuminate your data and lead you to prosperity.", author: "Shubh Deepavali" },
   { text: "Success is not final; failure is not fatal. Keep going.", author: "Winston Churchill" },
   { text: "Data is the new oil — refine it and you'll find gold.", author: "Clive Humby" },
   { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
   { text: "Every campaign tells a story. Make yours worth reading.", author: "MM Media" },
   { text: "Work hard in silence. Let your revenue make the noise.", author: "MM Media" },
   { text: "Small daily improvements lead to staggering long-term results.", author: "Robin Sharma" },
-  { text: "Your reports don't just show numbers — they show impact.", author: "MM Media" },
-  { text: "Excellence is not a destination; it is a continuous journey.", author: "Brian Tracy" },
 ]
 
 // ─── DateTime widget ─────────────────────────────────────────────────────────
@@ -71,7 +92,7 @@ const CompactClockNavbar: React.FC = () => {
 }
 
 // ─── Executive Briefing & Quote Rotation Card ───────────────────────────────
-const QuoteRotatorCard: React.FC = () => {
+const QuoteRotatorCard: React.FC<{ isDiwaliMode?: boolean }> = ({ isDiwaliMode }) => {
   const [index, setIndex] = useState(0)
   const [greeting, setGreeting] = useState("")
 
@@ -89,14 +110,18 @@ const QuoteRotatorCard: React.FC = () => {
   }, [])
 
   return (
-    <div className="w-full max-w-lg bg-white/75 backdrop-blur-xl rounded-2xl border border-slate-200/80 shadow-[0_4px_20px_rgba(15,23,42,0.03)] p-4 relative overflow-hidden transition-all duration-300">
+    <div className={`w-full max-w-lg backdrop-blur-xl rounded-2xl border p-4 relative overflow-hidden transition-all duration-300 ${
+      isDiwaliMode
+        ? 'bg-amber-50/40 border-amber-200/80 shadow-[0_4px_25px_rgba(245,158,11,0.08)]'
+        : 'bg-white/75 border-slate-200/80 shadow-[0_4px_20px_rgba(15,23,42,0.03)]'
+    }`}>
       <div className="relative z-10 space-y-2">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-black text-indigo-700 uppercase tracking-widest leading-none">
-              {greeting}, Team
+            <span className={`w-1.5 h-1.5 rounded-full ${isDiwaliMode ? 'bg-amber-500' : 'bg-emerald-500'} animate-pulse`} />
+            <span className={`text-[10px] font-black uppercase tracking-widest leading-none ${isDiwaliMode ? 'text-amber-800' : 'text-indigo-700'}`}>
+              {isDiwaliMode ? `🪔 ${greeting}, Team • Shubh Deepavali` : `${greeting}, Team`}
             </span>
           </div>
           <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">
@@ -120,7 +145,7 @@ const QuoteRotatorCard: React.FC = () => {
                   key={i}
                   onClick={() => setIndex(i)}
                   aria-label={`Go to quote ${i + 1}`}
-                  className={`h-1 rounded-full transition-all duration-300 ${i === index ? 'bg-indigo-600 w-3.5' : 'bg-slate-300 w-1 hover:bg-slate-400'}`}
+                  className={`h-1 rounded-full transition-all duration-300 ${i === index ? (isDiwaliMode ? 'bg-amber-500 w-3.5' : 'bg-indigo-600 w-3.5') : 'bg-slate-300 w-1 hover:bg-slate-400'}`}
                 />
               ))}
             </div>
@@ -132,7 +157,7 @@ const QuoteRotatorCard: React.FC = () => {
 }
 
 // ─── Ambient Canvas Lighting & Micro-Grid ──────────────────────────────────
-const PremiumBackgroundGrid: React.FC = () => {
+const PremiumBackgroundGrid: React.FC<{ isDiwaliMode?: boolean; isDussehraMode?: boolean }> = ({ isDiwaliMode, isDussehraMode }) => {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
       {/* Blueprint grid */}
@@ -140,15 +165,17 @@ const PremiumBackgroundGrid: React.FC = () => {
         className="absolute inset-0"
         style={{
           backgroundImage: `
-            linear-gradient(to right, rgba(99, 102, 241, 0.04) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(99, 102, 241, 0.04) 1px, transparent 1px)
+            linear-gradient(to right, ${isDussehraMode ? 'rgba(234, 88, 12, 0.05)' : isDiwaliMode ? 'rgba(245, 158, 11, 0.05)' : 'rgba(99, 102, 241, 0.04)'} 1px, transparent 1px),
+            linear-gradient(to bottom, ${isDussehraMode ? 'rgba(234, 88, 12, 0.05)' : isDiwaliMode ? 'rgba(245, 158, 11, 0.05)' : 'rgba(99, 102, 241, 0.04)'} 1px, transparent 1px)
           `,
           backgroundSize: '36px 36px',
         }}
       />
       {/* Soft ambient aura glows */}
-      <div className="absolute -top-32 left-1/4 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 right-1/4 w-[500px] h-[500px] bg-violet-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className={`absolute -top-32 left-1/4 w-[500px] h-[500px] ${isDussehraMode ? 'bg-orange-500/12' : isDiwaliMode ? 'bg-amber-500/10' : 'bg-indigo-500/5'} rounded-full blur-3xl pointer-events-none`} />
+      <div className={`absolute -bottom-32 right-1/4 w-[500px] h-[500px] ${isDussehraMode ? 'bg-amber-500/12' : isDiwaliMode ? 'bg-orange-500/10' : 'bg-violet-500/5'} rounded-full blur-3xl pointer-events-none`} />
+      {isDiwaliMode && <DiwaliSparkleParticles />}
+      {isDussehraMode && <ShamiGoldLeaves />}
     </div>
   )
 }
@@ -212,7 +239,7 @@ function App() {
 
   return (
     <div
-      className="app-bg relative w-full"
+      className={`app-bg relative w-full ${isDussehraMode ? 'dussehra-mode' : isDiwaliMode ? 'diwali-mode' : ''}`}
       style={{
         height: combinedData ? "auto" : "100vh",
         maxHeight: combinedData ? undefined : "100vh",
@@ -222,34 +249,65 @@ function App() {
         overflow: combinedData ? "visible" : "hidden"
       }}
     >
-      <PremiumBackgroundGrid />
+      <PremiumBackgroundGrid isDiwaliMode={isDiwaliMode} isDussehraMode={isDussehraMode} />
 
       {/* ── Header (Navbar) ── */}
       <header
         className="relative z-10 flex-shrink-0 animate-blur-in"
         style={{
-          background: combinedData ? "rgba(255, 255, 255, 0.75)" : "transparent",
+          background: combinedData
+            ? isDussehraMode
+              ? "rgba(255, 251, 245, 0.9)"
+              : isDiwaliMode
+              ? "rgba(255, 253, 245, 0.88)"
+              : "rgba(255, 255, 255, 0.75)"
+            : "transparent",
           backdropFilter: combinedData ? "blur(20px)" : "none",
-          borderBottom: combinedData ? "1px solid rgba(226, 232, 240, 0.6)" : "none"
+          borderBottom: combinedData
+            ? isDussehraMode
+              ? "1px solid rgba(234, 88, 12, 0.3)"
+              : isDiwaliMode
+              ? "1px solid rgba(245, 158, 11, 0.3)"
+              : "1px solid rgba(226, 232, 240, 0.6)"
+            : "none"
         }}
       >
+
         <div className="max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 relative">
 
-            {/* Left: Brand Identity */}
+            {/* Left: Brand Identity with Festive Motif */}
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center shadow-xs overflow-hidden bg-slate-900 border border-slate-800">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-xs overflow-hidden ${
+                isDussehraMode
+                  ? 'bg-gradient-to-tr from-amber-600 via-orange-600 to-red-600 border border-orange-400/80 shadow-[0_0_12px_rgba(234,88,12,0.35)]'
+                  : isDiwaliMode
+                  ? 'bg-gradient-to-tr from-amber-600 to-orange-600 border border-amber-400/80 shadow-[0_0_12px_rgba(245,158,11,0.3)]'
+                  : 'bg-slate-900 border border-slate-800'
+              }`}>
                 <img src="/logo.png" width={22} alt="MM Media" className="object-contain" />
               </div>
               <div>
                 <h1 className="text-[13px] font-black leading-tight text-slate-900 tracking-tight flex items-center gap-1.5">
                   MM Media
-                  <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200/60">
-                    Pro
+                  <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded-md ${
+                    isDussehraMode
+                      ? 'bg-orange-100 text-orange-950 border border-orange-300'
+                      : isDiwaliMode
+                      ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                      : 'bg-indigo-50 text-indigo-700 border border-indigo-200/60'
+                  }`}>
+                    {isDussehraMode ? 'Dussehra Pro' : isDiwaliMode ? 'Diwali Pro' : 'Pro'}
                   </span>
+                  {isDussehraMode && <DivineBowArrow size={24} glow={false} />}
+                  {isDiwaliMode && <DiyaLamp size={22} glow={false} />}
                 </h1>
                 <p className="text-[9px] font-bold -mt-0.5 tracking-wider uppercase text-slate-400">
-                  Report Intelligence Portal
+                  {isDussehraMode
+                    ? 'Vijayadashami • Victory Intelligence Portal'
+                    : isDiwaliMode
+                    ? 'Festival of Lights • Intelligence Portal'
+                    : 'Report Intelligence Portal'}
                 </p>
               </div>
             </div>
@@ -259,24 +317,24 @@ function App() {
               <CompactClockNavbar />
             </div>
 
-            {/* Right: User Actions */}
+            {/* Right: User Actions with Diwali Toggle */}
             <div className="flex items-center gap-2">
+
               {combinedData && reportView === 'seven-day' && (
-                <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-indigo-600 text-white shadow-xs">
+                <div className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold text-white shadow-xs ${
+                  isDiwaliMode
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-600 border border-amber-300'
+                    : 'bg-indigo-600'
+                }`}>
                   <Calendar className="w-3.5 h-3.5" />
                   <span>7-Day Report</span>
                 </div>
               )}
 
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-emerald-50 border border-emerald-200/70 text-emerald-700 shadow-2xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live Engine
-              </div>
-
               {combinedData && (
                 <button
                   onClick={handleReset}
-                  className="px-4 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 bg-slate-900 hover:bg-indigo-600 text-white active:scale-95"
+                  className="px-4 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 bg-slate-900 hover:bg-amber-600 text-white active:scale-95"
                 >
                   <RefreshCw className="w-3.5 h-3.5" /> 
                   <span>New Upload</span>
@@ -286,6 +344,21 @@ function App() {
           </div>
         </div>
       </header>
+
+      {/* Hanging Dussehra Toran (Marigold & Mango Leaf Bandhanwar - High z-index z-[100]) */}
+      {isDussehraMode && <DussehraToran />}
+
+      {/* Hanging Diwali Fairy Lights & Star Lanterns (High z-index z-[100] above all header blurs) */}
+      {isDiwaliMode && (
+        <>
+          <HangingFairyLights />
+          <DiwaliLantern side="left" />
+          <DiwaliLantern side="right" />
+        </>
+      )}
+
+      {/* Aerial Skycracker Fireworks Blasting at Random Times & Places */}
+      {isSkycrackersEnabled && <DiwaliSkycrackers />}
 
       {/* ── Main Content ── */}
       <main className="relative z-10 flex-1 flex flex-col min-h-0 justify-center">
@@ -298,21 +371,45 @@ function App() {
               {/* ── LEFT: Report Intelligence Overview & Telemetry ── */}
               <div className="lg:col-span-7 flex flex-col justify-center space-y-4">
                 
-                {/* Eyebrow Status Badge */}
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black bg-indigo-50/90 border border-indigo-200/70 text-indigo-800 tracking-wider uppercase shadow-2xs w-fit animate-blur-in">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Campaign Intelligence Hub</span>
-                  <span className="text-slate-300">|</span>
-                  <span className="text-indigo-600 font-extrabold">v2.4 Sandbox</span>
-                </div>
+                {/* Eyebrow Status Badge with Festival Themes */}
+                {isDussehraMode ? (
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black bg-gradient-to-r from-orange-500/15 via-amber-500/20 to-yellow-500/15 border border-orange-400/80 text-orange-950 tracking-wider uppercase shadow-2xs w-fit animate-blur-in">
+                    <span className="text-sm">🏹</span>
+                    <span className="font-extrabold text-orange-900">Shubh Vijayadashami • Victory of Dharma & Truth</span>
+                    <span className="text-amber-600 font-extrabold">✨</span>
+                  </div>
+                ) : isDiwaliMode ? (
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-yellow-500/15 border border-amber-300/80 text-amber-900 tracking-wider uppercase shadow-2xs w-fit animate-blur-in">
+                    <span className="text-sm">🪔</span>
+                    <span className="font-extrabold text-amber-800">Shubh Deepavali • Festival of Lights</span>
+                    <span className="text-amber-500 font-extrabold">✨</span>
+                  </div>
+                ) : (
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black bg-indigo-50/90 border border-indigo-200/70 text-indigo-800 tracking-wider uppercase shadow-2xs w-fit animate-blur-in">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Campaign Intelligence Hub</span>
+                    <span className="text-slate-300">|</span>
+                    <span className="text-indigo-600 font-extrabold">v2.4 Sandbox</span>
+                  </div>
+                )}
 
-                {/* Hero Title */}
-                <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] xl:text-[3rem] font-black text-slate-900 tracking-tight leading-[1.12]">
-                  Process & Analyze<br />
-                  <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
-                    Campaign Reports.
-                  </span>
-                </h2>
+                {/* Hero Title with optional glowing Motif */}
+                <div className="flex items-center gap-3">
+                  <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] xl:text-[3rem] font-black text-slate-900 tracking-tight leading-[1.12]">
+                    Process & Analyze<br />
+                    <span className={
+                      isDussehraMode
+                        ? "bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 bg-clip-text text-transparent"
+                        : isDiwaliMode
+                        ? "bg-gradient-to-r from-amber-500 via-orange-500 to-amber-700 bg-clip-text text-transparent"
+                        : "bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent"
+                    }>
+                      Campaign Reports.
+                    </span>
+                  </h2>
+                  {isDussehraMode && <DivineBowArrow size={54} className="hidden sm:inline-flex self-end mb-2" />}
+                  {isDiwaliMode && <DiyaLamp size={50} className="hidden sm:inline-flex self-end mb-2" />}
+                </div>
 
                 {/* Hero Subtitle */}
                 <p className="text-xs sm:text-[14px] text-slate-500 font-medium leading-relaxed max-w-lg">
@@ -321,7 +418,11 @@ function App() {
 
                 {/* Report Capability Matrix */}
                 <div className="grid grid-cols-2 gap-2.5 max-w-lg pt-1">
-                  <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/75 border border-slate-200/80 shadow-2xs backdrop-blur-sm hover:border-indigo-200 transition-colors">
+                  <div className={`flex items-center gap-2.5 p-2.5 rounded-xl border shadow-2xs backdrop-blur-sm transition-colors ${
+                    isDiwaliMode
+                      ? 'bg-white/80 border-amber-200/70 hover:border-amber-300'
+                      : 'bg-white/75 border-slate-200/80 hover:border-indigo-200'
+                  }`}>
                     <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
                       <ShieldCheck className="w-4 h-4" />
                     </div>
@@ -331,7 +432,11 @@ function App() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/75 border border-slate-200/80 shadow-2xs backdrop-blur-sm hover:border-indigo-200 transition-colors">
+                  <div className={`flex items-center gap-2.5 p-2.5 rounded-xl border shadow-2xs backdrop-blur-sm transition-colors ${
+                    isDiwaliMode
+                      ? 'bg-white/80 border-amber-200/70 hover:border-amber-300'
+                      : 'bg-white/75 border-slate-200/80 hover:border-indigo-200'
+                  }`}>
                     <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 flex-shrink-0">
                       <Calendar className="w-4 h-4" />
                     </div>
@@ -341,7 +446,11 @@ function App() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/75 border border-slate-200/80 shadow-2xs backdrop-blur-sm hover:border-indigo-200 transition-colors">
+                  <div className={`flex items-center gap-2.5 p-2.5 rounded-xl border shadow-2xs backdrop-blur-sm transition-colors ${
+                    isDiwaliMode
+                      ? 'bg-white/80 border-amber-200/70 hover:border-amber-300'
+                      : 'bg-white/75 border-slate-200/80 hover:border-indigo-200'
+                  }`}>
                     <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
                       <Zap className="w-4 h-4" />
                     </div>
@@ -351,7 +460,11 @@ function App() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/75 border border-slate-200/80 shadow-2xs backdrop-blur-sm hover:border-indigo-200 transition-colors">
+                  <div className={`flex items-center gap-2.5 p-2.5 rounded-xl border shadow-2xs backdrop-blur-sm transition-colors ${
+                    isDiwaliMode
+                      ? 'bg-white/80 border-amber-200/70 hover:border-amber-300'
+                      : 'bg-white/75 border-slate-200/80 hover:border-indigo-200'
+                  }`}>
                     <div className="w-7 h-7 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center text-violet-600 flex-shrink-0">
                       <TrendingUp className="w-4 h-4" />
                     </div>
@@ -364,7 +477,7 @@ function App() {
 
                 {/* Executive Briefing & Quote Rotation Card */}
                 <div className="pt-1">
-                  <QuoteRotatorCard />
+                  <QuoteRotatorCard isDiwaliMode={isDiwaliMode} />
                 </div>
               </div>
 
@@ -387,6 +500,7 @@ function App() {
                 data={combinedData}
                 uploadedFiles={uploadedFiles}
                 onReset={handleReset}
+                isDiwaliMode={isDiwaliMode || isDussehraMode}
               />
             ) : (
               <Dashboard
@@ -400,6 +514,12 @@ function App() {
           </div>
         )}
       </main>
+
+      {/* Triumphant Bottom Crests in Dussehra Mode */}
+      {isDussehraMode && <DussehraBottomCrests />}
+
+      {/* Glowing Traditional Clay Diyas Resting at the Bottom in Diwali Mode */}
+      {isDiwaliMode && <DiwaliBottomDiyas />}
 
       <CelebrationEffect isActive={showCelebration} onComplete={() => setShowCelebration(false)} />
 
