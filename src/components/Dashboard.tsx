@@ -1652,14 +1652,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
         <div className="flex gap-2.5 relative z-10">
           <button
             onClick={exportFilteredData}
-            className="flex items-center px-3 py-3 rounded-xl text-xs font-black transition-all bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white shadow-lg shadow-indigo-500/20 border border-indigo-400/25 active:scale-95"
+            className="flex items-center px-4 py-2 rounded-full text-xs font-black transition-all bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white shadow-lg shadow-indigo-500/20 border border-indigo-400/25 active:scale-95"
           >
             <Download className="h-4 w-4 mr-2" />
             Export Data
           </button>
           <button
             onClick={onReset}
-            className="flex items-center px-3 py-3 rounded-xl text-xs font-black transition-all bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/20 text-white active:scale-95"
+            className="flex items-center px-4 py-2 rounded-full text-xs font-black transition-all bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/20 text-white active:scale-95"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             New Upload

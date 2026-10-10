@@ -1477,3 +1477,55 @@ body {
 .animate-line-fill {
   animation: lineFill 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ════════════════════════════════════
+   REPORT VIEWER MODERN SUITE
+   ════════════════════════════════════ */
+.report-panel {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 
+    0 4px 6px -1px rgba(15, 23, 42, 0.03),
+    0 20px 45px -10px rgba(15, 23, 42, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.7) inset;
+}
+
+.report-dropzone {
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.5) 100%);
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 1rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  cursor: pointer;
+}
+
+.report-dropzone:hover {
+  border-color: #6366f1;
+  background: linear-gradient(180deg, rgba(238, 242, 255, 0.6) 0%, rgba(245, 243, 255, 0.35) 100%);
+  box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.15);
+}
+
+.report-dropzone--active {
+  border-color: #4f46e5;
+  border-style: solid;
+  background: rgba(238, 242, 255, 0.85);
+  transform: scale(0.995);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 6s ease-in-out infinite;
+}
