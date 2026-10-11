@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react"
 import {
   Heart, ShieldCheck, Zap,
-  RefreshCw, TrendingUp, Calendar
+  RefreshCw, TrendingUp, Calendar, BarChart3
 } from "lucide-react"
 import FileUpload from "./components/FileUpload"
 import Dashboard from "./components/Dashboard"
@@ -110,11 +110,10 @@ const QuoteRotatorCard: React.FC<{ isDiwaliMode?: boolean }> = ({ isDiwaliMode }
   }, [])
 
   return (
-    <div className={`w-full max-w-lg backdrop-blur-xl rounded-2xl border p-4 relative overflow-hidden transition-all duration-300 ${
-      isDiwaliMode
-        ? 'bg-amber-50/40 border-amber-200/80 shadow-[0_4px_25px_rgba(245,158,11,0.08)]'
-        : 'bg-white/75 border-slate-200/80 shadow-[0_4px_20px_rgba(15,23,42,0.03)]'
-    }`}>
+    <div className={`w-full max-w-lg backdrop-blur-xl rounded-2xl border p-4 relative overflow-hidden transition-all duration-300 ${isDiwaliMode
+      ? 'bg-amber-50/40 border-amber-200/80 shadow-[0_4px_25px_rgba(245,158,11,0.08)]'
+      : 'bg-white/75 border-slate-200/80 shadow-[0_4px_20px_rgba(15,23,42,0.03)]'
+      }`}>
       <div className="relative z-10 space-y-2">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -188,7 +187,7 @@ function App() {
   const [showCelebration, setShowCelebration] = useState(false)
   const [hasTriggeredCelebration, setHasTriggeredCelebration] = useState(false)
   const [isSevenDayMode, setIsSevenDayMode] = useState<boolean>(false)
-  const [reportView, setReportView] = useState<'standard' | 'seven-day'>('seven-day')
+  const [reportView, setReportView] = useState<'standard' | 'seven-day'>('standard')
 
   const handleFilesUploaded = (files: UploadedFile[]) => {
     setUploadedFiles(files)
@@ -208,16 +207,8 @@ function App() {
     })
     setCombinedData(combined)
 
-    // Check if multiple dates are detected across files
-    const fNames = files.map(f => f.name)
-    const ctxMonth = detectBatchContextMonth(fNames)
-    const uniqueDates = new Set(fNames.map(fn => detectDateFromFileName(fn, ctxMonth).label))
-    
-    if (isSevenDayMode || uniqueDates.size > 1) {
-      setReportView('seven-day')
-    } else {
-      setReportView('standard')
-    }
+    // Open first in standard view like single day, with Advance Analysis tab available
+    setReportView('standard')
   }
 
   const handleReset = () => {
@@ -225,7 +216,33 @@ function App() {
     setCombinedData(null)
     setSearchQuery("")
     setHasTriggeredCelebration(false)
+    setReportView('standard')
   }
+
+  // Detect unique dates for multi-day analysis
+  const detectedDateLabels = React.useMemo(() => {
+    if (uploadedFiles.length === 0) return []
+    const fNames = uploadedFiles.map(f => f.name)
+    const ctxMonth = detectBatchContextMonth(fNames)
+    const dateMap = new Map<string, { label: string; sortKey: number }>()
+    fNames.forEach(fn => {
+      const dInfo = detectDateFromFileName(fn, ctxMonth)
+      if (!dateMap.has(dInfo.key)) {
+        dateMap.set(dInfo.key, { label: dInfo.label, sortKey: dInfo.sortKey })
+      }
+    })
+    return Array.from(dateMap.values())
+      .sort((a, b) => a.sortKey - b.sortKey)
+      .map(d => d.label)
+  }, [uploadedFiles])
+
+  // Detailed multi-date analysis is available ONLY when multiple dates are actually detected
+  const isDetailAnalysisAvailable = detectedDateLabels.length > 1
+
+  const totalRevenue = React.useMemo(() => {
+    if (!combinedData) return 0
+    return combinedData.records.reduce((sum, r) => sum + r.revenue, 0)
+  }, [combinedData])
 
   React.useEffect(() => {
     if (combinedData && !hasTriggeredCelebration) {
@@ -259,16 +276,16 @@ function App() {
             ? isDussehraMode
               ? "rgba(255, 251, 245, 0.9)"
               : isDiwaliMode
-              ? "rgba(255, 253, 245, 0.88)"
-              : "rgba(255, 255, 255, 0.75)"
+                ? "rgba(255, 253, 245, 0.88)"
+                : "rgba(255, 255, 255, 0.75)"
             : "transparent",
           backdropFilter: combinedData ? "blur(20px)" : "none",
           borderBottom: combinedData
             ? isDussehraMode
               ? "1px solid rgba(234, 88, 12, 0.3)"
               : isDiwaliMode
-              ? "1px solid rgba(245, 158, 11, 0.3)"
-              : "1px solid rgba(226, 232, 240, 0.6)"
+                ? "1px solid rgba(245, 158, 11, 0.3)"
+                : "1px solid rgba(226, 232, 240, 0.6)"
             : "none"
         }}
       >
@@ -278,25 +295,23 @@ function App() {
 
             {/* Left: Brand Identity with Festive Motif */}
             <div className="flex items-center gap-2.5">
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-xs overflow-hidden ${
-                isDussehraMode
-                  ? 'bg-gradient-to-tr from-amber-600 via-orange-600 to-red-600 border border-orange-400/80 shadow-[0_0_12px_rgba(234,88,12,0.35)]'
-                  : isDiwaliMode
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-xs overflow-hidden ${isDussehraMode
+                ? 'bg-gradient-to-tr from-amber-600 via-orange-600 to-red-600 border border-orange-400/80 shadow-[0_0_12px_rgba(234,88,12,0.35)]'
+                : isDiwaliMode
                   ? 'bg-gradient-to-tr from-amber-600 to-orange-600 border border-amber-400/80 shadow-[0_0_12px_rgba(245,158,11,0.3)]'
                   : 'bg-slate-900 border border-slate-800'
-              }`}>
+                }`}>
                 <img src="/logo.png" width={22} alt="MM Media" className="object-contain" />
               </div>
               <div>
-                <h1 className="text-[13px] font-black leading-tight text-slate-900 tracking-tight flex items-center gap-1.5">
+                <h1 className="text-[13px] font-black leading-tight text-slate-900 tracking-tight flex items-center gap-1.5 mb-1">
                   MM Media
-                  <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded-md ${
-                    isDussehraMode
-                      ? 'bg-orange-100 text-orange-950 border border-orange-300'
-                      : isDiwaliMode
+                  <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded-md ${isDussehraMode
+                    ? 'bg-orange-100 text-orange-950 border border-orange-300'
+                    : isDiwaliMode
                       ? 'bg-amber-100 text-amber-900 border border-amber-300'
                       : 'bg-indigo-50 text-indigo-700 border border-indigo-200/60'
-                  }`}>
+                    }`}>
                     {isDussehraMode ? 'Dussehra Pro' : isDiwaliMode ? 'Diwali Pro' : 'Pro'}
                   </span>
                   {isDussehraMode && <DivineBowArrow size={24} glow={false} />}
@@ -306,8 +321,8 @@ function App() {
                   {isDussehraMode
                     ? 'Vijayadashami • Victory Intelligence Portal'
                     : isDiwaliMode
-                    ? 'Festival of Lights • Intelligence Portal'
-                    : 'Report Intelligence Portal'}
+                      ? 'Festival of Lights • Intelligence Portal'
+                      : 'Report Intelligence Portal'}
                 </p>
               </div>
             </div>
@@ -320,23 +335,12 @@ function App() {
             {/* Right: User Actions with Diwali Toggle */}
             <div className="flex items-center gap-2">
 
-              {combinedData && reportView === 'seven-day' && (
-                <div className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold text-white shadow-xs ${
-                  isDiwaliMode
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-600 border border-amber-300'
-                    : 'bg-indigo-600'
-                }`}>
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>7-Day Report</span>
-                </div>
-              )}
-
               {combinedData && (
                 <button
                   onClick={handleReset}
                   className="px-4 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 bg-slate-900 hover:bg-amber-600 text-white active:scale-95"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" /> 
+                  <RefreshCw className="w-3.5 h-3.5" />
                   <span>New Upload</span>
                 </button>
               )}
@@ -365,27 +369,27 @@ function App() {
 
         {!combinedData ? (
           /* ═══ LANDING PAGE — 100vh No-Scroll Studio Layout ═══ */
-          <div className="max-w-[1340px] w-full mx-auto px-4 sm:px-6 lg:px-8 flex-1 min-h-0 flex items-center justify-center py-2 sm:py-3">
-            <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-10 items-center justify-between">
+          <div className="max-w-[1340px] w-full mx-auto px-4 sm:px-6 lg:px-8 flex-1 min-h-0 flex items-center justify-center py-3 sm:py-4 lg:py-6">
+            <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-12 items-center justify-between">
 
               {/* ── LEFT: Report Intelligence Overview & Telemetry ── */}
-              <div className="lg:col-span-7 flex flex-col justify-center space-y-4">
-                
+              <div className="lg:col-span-7 flex flex-col justify-center space-y-5 sm:space-y-6 lg:space-y-6 xl:space-y-7">
+
                 {/* Eyebrow Status Badge with Festival Themes */}
                 {isDussehraMode ? (
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black bg-gradient-to-r from-orange-500/15 via-amber-500/20 to-yellow-500/15 border border-orange-400/80 text-orange-950 tracking-wider uppercase shadow-2xs w-fit animate-blur-in">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[10px] font-black bg-gradient-to-r from-orange-500/15 via-amber-500/20 to-yellow-500/15 border border-orange-400/80 text-orange-950 tracking-wider uppercase shadow-2xs w-fit animate-blur-in">
                     <span className="text-sm">🏹</span>
                     <span className="font-extrabold text-orange-900">Shubh Vijayadashami • Victory of Dharma & Truth</span>
                     <span className="text-amber-600 font-extrabold">✨</span>
                   </div>
                 ) : isDiwaliMode ? (
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-yellow-500/15 border border-amber-300/80 text-amber-900 tracking-wider uppercase shadow-2xs w-fit animate-blur-in">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-yellow-500/15 border border-amber-300/80 text-amber-900 tracking-wider uppercase shadow-2xs w-fit animate-blur-in">
                     <span className="text-sm">🪔</span>
                     <span className="font-extrabold text-amber-800">Shubh Deepavali • Festival of Lights</span>
                     <span className="text-amber-500 font-extrabold">✨</span>
                   </div>
                 ) : (
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black bg-indigo-50/90 border border-indigo-200/70 text-indigo-800 tracking-wider uppercase shadow-2xs w-fit animate-blur-in">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[10px] font-black bg-indigo-50/90 border border-indigo-200/70 text-indigo-800 tracking-wider uppercase shadow-2xs w-fit animate-blur-in">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     <span>Campaign Intelligence Hub</span>
                     <span className="text-slate-300">|</span>
@@ -393,90 +397,87 @@ function App() {
                   </div>
                 )}
 
-                {/* Hero Title with optional glowing Motif */}
-                <div className="flex items-center gap-3">
-                  <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] xl:text-[3rem] font-black text-slate-900 tracking-tight leading-[1.12]">
-                    Process & Analyze<br />
-                    <span className={
-                      isDussehraMode
-                        ? "bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 bg-clip-text text-transparent"
-                        : isDiwaliMode
-                        ? "bg-gradient-to-r from-amber-500 via-orange-500 to-amber-700 bg-clip-text text-transparent"
-                        : "bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent"
-                    }>
-                      Campaign Reports.
-                    </span>
-                  </h2>
-                  {isDussehraMode && <DivineBowArrow size={54} className="hidden sm:inline-flex self-end mb-2" />}
-                  {isDiwaliMode && <DiyaLamp size={50} className="hidden sm:inline-flex self-end mb-2" />}
+                {/* Hero Title & Subtitle */}
+                <div>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] xl:text-[3rem] font-black text-slate-900 tracking-tight leading-[1.12]">
+                      Process & Analyze<br />
+                      <span className={
+                        isDussehraMode
+                          ? "bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 bg-clip-text text-transparent"
+                          : isDiwaliMode
+                            ? "bg-gradient-to-r from-amber-500 via-orange-500 to-amber-700 bg-clip-text text-transparent"
+                            : "bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent"
+                      }>
+                        Campaign Reports.
+                      </span>
+                    </h2>
+                    {isDussehraMode && <DivineBowArrow size={54} className="hidden sm:inline-flex self-end mb-2" />}
+                    {isDiwaliMode && <DiyaLamp size={50} className="hidden sm:inline-flex self-end mb-2" />}
+                  </div>
+
+                  <p className="text-xs sm:text-[13.5px] lg:text-[14px] text-slate-500 font-medium leading-relaxed max-w-lg mt-2.5 sm:mt-3">
+                    Parse SUBID metrics, track publisher ET performance across multi-date batches, and generate deep advertiser revenue breakdowns in real-time.
+                  </p>
                 </div>
 
-                {/* Hero Subtitle */}
-                <p className="text-xs sm:text-[14px] text-slate-500 font-medium leading-relaxed max-w-lg">
-                  Parse SUBID metrics, track publisher ET performance across 7-day batches, and generate deep advertiser revenue breakdowns in real-time.
-                </p>
-
                 {/* Report Capability Matrix */}
-                <div className="grid grid-cols-2 gap-2.5 max-w-lg pt-1">
-                  <div className={`flex items-center gap-2.5 p-2.5 rounded-xl border shadow-2xs backdrop-blur-sm transition-colors ${
-                    isDiwaliMode
-                      ? 'bg-white/80 border-amber-200/70 hover:border-amber-300'
-                      : 'bg-white/75 border-slate-200/80 hover:border-indigo-200'
-                  }`}>
-                    <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
+                <div className="grid grid-cols-2 gap-3 sm:gap-3.5 max-w-lg">
+                  <div className={`flex items-center gap-3 p-3 sm:p-3.5 rounded-xl border shadow-2xs backdrop-blur-sm transition-colors ${isDiwaliMode
+                    ? 'bg-white/80 border-amber-200/70 hover:border-amber-300'
+                    : 'bg-white/75 border-slate-200/80 hover:border-indigo-200'
+                    }`}>
+                    <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
                       <ShieldCheck className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-[11px] font-black text-slate-800 leading-tight">100% Local Sandbox</div>
+                      <div className="text-[11.5px] font-black text-slate-800 leading-tight">100% Local Sandbox</div>
                       <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5 truncate">Zero Server Storage</div>
                     </div>
                   </div>
 
-                  <div className={`flex items-center gap-2.5 p-2.5 rounded-xl border shadow-2xs backdrop-blur-sm transition-colors ${
-                    isDiwaliMode
-                      ? 'bg-white/80 border-amber-200/70 hover:border-amber-300'
-                      : 'bg-white/75 border-slate-200/80 hover:border-indigo-200'
-                  }`}>
-                    <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 flex-shrink-0">
+                  <div className={`flex items-center gap-3 p-3 sm:p-3.5 rounded-xl border shadow-2xs backdrop-blur-sm transition-colors ${isDiwaliMode
+                    ? 'bg-white/80 border-amber-200/70 hover:border-amber-300'
+                    : 'bg-white/75 border-slate-200/80 hover:border-indigo-200'
+                    }`}>
+                    <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 flex-shrink-0">
                       <Calendar className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-[11px] font-black text-slate-800 leading-tight">7-Day ET Matrix</div>
+                      <div className="text-[11.5px] font-black text-slate-800 leading-tight">Detailed ET Matrix</div>
                       <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5 truncate">Cross-Date Revenue Table</div>
                     </div>
                   </div>
 
-                  <div className={`flex items-center gap-2.5 p-2.5 rounded-xl border shadow-2xs backdrop-blur-sm transition-colors ${
-                    isDiwaliMode
-                      ? 'bg-white/80 border-amber-200/70 hover:border-amber-300'
-                      : 'bg-white/75 border-slate-200/80 hover:border-indigo-200'
-                  }`}>
-                    <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
+                  <div className={`flex items-center gap-3 p-3 sm:p-3.5 rounded-xl border shadow-2xs backdrop-blur-sm transition-colors ${isDiwaliMode
+                    ? 'bg-white/80 border-amber-200/70 hover:border-amber-300'
+                    : 'bg-white/75 border-slate-200/80 hover:border-indigo-200'
+                    }`}>
+                    <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
                       <Zap className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-[11px] font-black text-slate-800 leading-tight">Instant Compile</div>
+                      <div className="text-[11.5px] font-black text-slate-800 leading-tight">Instant Compile</div>
                       <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5 truncate">Real-Time In-Memory Engine</div>
                     </div>
                   </div>
 
-                  <div className={`flex items-center gap-2.5 p-2.5 rounded-xl border shadow-2xs backdrop-blur-sm transition-colors ${
-                    isDiwaliMode
-                      ? 'bg-white/80 border-amber-200/70 hover:border-amber-300'
-                      : 'bg-white/75 border-slate-200/80 hover:border-indigo-200'
-                  }`}>
-                    <div className="w-7 h-7 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center text-violet-600 flex-shrink-0">
+                  <div className={`flex items-center gap-3 p-3 sm:p-3.5 rounded-xl border shadow-2xs backdrop-blur-sm transition-colors ${isDiwaliMode
+                    ? 'bg-white/80 border-amber-200/70 hover:border-amber-300'
+                    : 'bg-white/75 border-slate-200/80 hover:border-indigo-200'
+                    }`}>
+                    <div className="w-8 h-8 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center text-violet-600 flex-shrink-0">
                       <TrendingUp className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-[11px] font-black text-slate-800 leading-tight">Revenue Attribution</div>
+                      <div className="text-[11.5px] font-black text-slate-800 leading-tight">Revenue Attribution</div>
                       <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5 truncate">12+ Advertiser Splits</div>
                     </div>
                   </div>
                 </div>
 
                 {/* Executive Briefing & Quote Rotation Card */}
-                <div className="pt-1">
+                <div>
                   <QuoteRotatorCard isDiwaliMode={isDiwaliMode} />
                 </div>
               </div>
@@ -495,10 +496,98 @@ function App() {
         ) : (
           /* ═══ REPORT VIEWER / DASHBOARD VIEW ═══ */
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full animate-fade-in opacity-0" style={{ animationDelay: '0.05s' }}>
+            {/* Top View Selector Bar (Standard View vs Detail Analysis Multi-Date Report) */}
+            {isDetailAnalysisAvailable && (
+              <div className="mb-6">
+                <div className={`p-2.5 sm:p-3 rounded-2xl backdrop-blur-xl border transition-all shadow-sm flex flex-col md:flex-row items-center justify-between gap-3.5 ${isDiwaliMode
+                  ? 'bg-gradient-to-r from-amber-50/90 via-white/95 to-orange-50/90 border-amber-300/80 shadow-[0_4px_25px_rgba(245,158,11,0.08)]'
+                  : isDussehraMode
+                    ? 'bg-gradient-to-r from-orange-50/90 via-white/95 to-amber-50/90 border-orange-300/80 shadow-[0_4px_25px_rgba(234,88,12,0.08)]'
+                    : 'bg-white/90 border-slate-200/90 shadow-[0_4px_20px_rgba(15,23,42,0.04)]'
+                  }`}>
+                  {/* Tab Switcher Buttons */}
+                  <div className="flex items-center p-1 rounded-xl bg-slate-100/90 border border-slate-200/70 w-full md:w-auto shadow-inner">
+                    {/* Tab 1: Standard View */}
+                    <button
+                      onClick={() => setReportView('standard')}
+                      className={`flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 sm:px-5 py-2 rounded-lg text-xs font-black transition-all duration-200 cursor-pointer ${reportView === 'standard'
+                        ? isDiwaliMode
+                          ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/25 scale-[1.02]'
+                          : isDussehraMode
+                            ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md shadow-orange-500/25 scale-[1.02]'
+                            : 'bg-slate-900 text-white shadow-md shadow-slate-900/20 scale-[1.02]'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                        }`}
+                    >
+                      <BarChart3 className="w-4 h-4" />
+                      <span className="tracking-tight">Standard View</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${reportView === 'standard'
+                        ? 'bg-white/20 text-white'
+                        : 'bg-slate-200 text-slate-600'
+                        }`}>
+                        Single Day
+                      </span>
+                    </button>
+
+                    {/* Tab 2: Detail Analysis */}
+                    <button
+                      onClick={() => setReportView('seven-day')}
+                      className={`flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 sm:px-5 py-2 rounded-lg text-xs font-black transition-all duration-200 cursor-pointer ${reportView === 'seven-day'
+                        ? isDiwaliMode
+                          ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-md shadow-amber-500/25 scale-[1.02]'
+                          : isDussehraMode
+                            ? 'bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 text-white shadow-md shadow-orange-500/25 scale-[1.02]'
+                            : 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/25 scale-[1.02]'
+                        : 'text-slate-600 hover:text-indigo-600 hover:bg-white/60'
+                        }`}
+                    >
+                      <Calendar className="w-4 h-4" />
+                      <span className="tracking-tight">Detail Analysis</span>
+                      <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider ${reportView === 'seven-day'
+                        ? 'bg-white/25 text-white'
+                        : isDiwaliMode
+                          ? 'bg-amber-100 text-amber-800 border border-amber-300/80'
+                          : 'bg-indigo-50 text-indigo-700 border border-indigo-200/80'
+                        }`}>
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        {detectedDateLabels.length}-Date Matrix
+                      </span>
+                    </button>
+                  </div>
+
+                  {/* Metadata & Quick Info Pills */}
+                  <div className="flex flex-wrap items-center justify-end gap-2 text-xs w-full md:w-auto">
+                    {detectedDateLabels.length > 0 && (
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/80 border border-slate-200/80 text-slate-700 font-bold shadow-2xs">
+                        <Calendar className="w-3.5 h-3.5 text-indigo-600" />
+                        <span className="text-[11px]">
+                          {detectedDateLabels.length > 1
+                            ? `${detectedDateLabels[0]} – ${detectedDateLabels[detectedDateLabels.length - 1]}`
+                            : detectedDateLabels[0]}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-black">
+                          ({detectedDateLabels.length} {detectedDateLabels.length === 1 ? 'Date' : 'Dates'})
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/80 border border-slate-200/80 text-slate-700 font-bold shadow-2xs">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <span className="text-[11px] font-black text-slate-900">
+                        ${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-semibold">Total Rev</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {reportView === 'seven-day' ? (
               <SevenDayReportPanel
                 data={combinedData}
                 uploadedFiles={uploadedFiles}
+                onSwitchToStandardView={() => setReportView('standard')}
                 onReset={handleReset}
                 isDiwaliMode={isDiwaliMode || isDussehraMode}
               />
@@ -509,6 +598,7 @@ function App() {
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
                 onReset={handleReset}
+                onSwitchToDetailAnalysis={isDetailAnalysisAvailable ? () => setReportView('seven-day') : undefined}
               />
             )}
           </div>

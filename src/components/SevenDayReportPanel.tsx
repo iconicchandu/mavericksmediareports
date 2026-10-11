@@ -21,6 +21,7 @@ import {
   ChevronDown,
   Check,
   X,
+  BarChart3,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -464,6 +465,7 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
 const SevenDayReportPanel: React.FC<SevenDayReportPanelProps> = ({
   data,
   uploadedFiles,
+  onSwitchToStandardView,
   onReset,
   isDiwaliMode = defaultDiwaliMode,
 }) => {
@@ -1090,7 +1092,7 @@ const SevenDayReportPanel: React.FC<SevenDayReportPanelProps> = ({
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-tight flex items-center gap-2">
-                <span>7-Day Multi-Date Report Panel</span>
+                <span>Detailed Multi-Date Analysis Panel</span>
                 {isDiwaliMode && <DiyaLamp size={26} glow={false} />}
               </h2>
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/70 shadow-2xs">
@@ -1111,6 +1113,17 @@ const SevenDayReportPanel: React.FC<SevenDayReportPanelProps> = ({
 
         {/* Action Controls */}
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          {onSwitchToStandardView && (
+            <button
+              onClick={onSwitchToStandardView}
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 shadow-2xs transition-all hover:border-slate-400 active:scale-95 cursor-pointer"
+              title="Switch back to Standard Single Day View"
+            >
+              <BarChart3 className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Standard View</span>
+            </button>
+          )}
+
           <button
             onClick={handleExportCSV}
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 shadow-2xs transition-all hover:border-slate-300 active:scale-95"

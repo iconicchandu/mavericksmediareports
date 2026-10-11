@@ -16,6 +16,8 @@ interface DashboardProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onReset: () => void;
+  onSwitchToDetailAnalysis?: () => void;
+  onSwitchToAdvanceAnalysis?: () => void;
 }
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'];
@@ -126,7 +128,7 @@ const CampaignCustomTooltip: React.FC<CampaignCustomTooltipProps> = ({ active, p
   return null;
 };
 
-const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery, onSearchChange, onReset }) => {
+const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery, onSearchChange, onReset, onSwitchToDetailAnalysis, onSwitchToAdvanceAnalysis }) => {
   const [selectedCampaign, setSelectedCampaign] = useState('');
   const [selectedET, setSelectedET] = useState('');
   const [campaignPopup, setCampaignPopup] = useState<{
@@ -1651,17 +1653,27 @@ const Dashboard: React.FC<DashboardProps> = ({ data, uploadedFiles, searchQuery,
             {uploadedFiles.length} file{uploadedFiles.length > 1 ? 's' : ''} processed • {data.records.length} records analyzed
           </p>
         </div>
-        <div className="flex gap-2.5 relative z-10">
+        <div className="flex flex-wrap gap-2.5 relative z-10">
+          {(onSwitchToDetailAnalysis || onSwitchToAdvanceAnalysis) && (
+            <button
+              onClick={onSwitchToDetailAnalysis || onSwitchToAdvanceAnalysis}
+              className="flex items-center px-4 py-2 rounded-full text-xs font-black transition-all bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-purple-500/25 border border-purple-400/30 active:scale-95 cursor-pointer"
+              title="Open Detailed Multi-Date Matrix Analysis"
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              Detail Analysis
+            </button>
+          )}
           <button
             onClick={exportFilteredData}
-            className="flex items-center px-4 py-2 rounded-full text-xs font-black transition-all bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white shadow-lg shadow-indigo-500/20 border border-indigo-400/25 active:scale-95"
+            className="flex items-center px-4 py-2 rounded-full text-xs font-black transition-all bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white shadow-lg shadow-indigo-500/20 border border-indigo-400/25 active:scale-95 cursor-pointer"
           >
             <Download className="h-4 w-4 mr-2" />
             Export Data
           </button>
           <button
             onClick={onReset}
-            className="flex items-center px-4 py-2 rounded-full text-xs font-black transition-all bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/20 text-white active:scale-95"
+            className="flex items-center px-4 py-2 rounded-full text-xs font-black transition-all bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/20 text-white active:scale-95 cursor-pointer"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             New Upload

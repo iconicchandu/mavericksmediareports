@@ -31,8 +31,8 @@ interface FileUploadProps {
 }
 
 // ─── Main Component ─────────────────────────────────────────────────────────────
-const FileUpload: React.FC<FileUploadProps> = ({ 
-  onFilesUploaded, 
+const FileUpload: React.FC<FileUploadProps> = ({
+  onFilesUploaded,
   onQueueChange,
   isSevenDayMode,
   onToggleSevenDayMode,
@@ -84,10 +84,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
     });
   }, [fileDateInfoList]);
 
-  // Auto-enable 7-day mode if user drops files from multiple dates
+  // Auto-enable multi-date mode if user drops files from multiple dates
   React.useEffect(() => {
     if (uniqueDetectedDates.length > 1 && !isSevenDayMode) {
       onToggleSevenDayMode(true);
+    } else if (uniqueDetectedDates.length <= 1 && isSevenDayMode) {
+      onToggleSevenDayMode(false);
     }
   }, [uniqueDetectedDates, isSevenDayMode, onToggleSevenDayMode]);
 
@@ -276,8 +278,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
       : `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 
   return (
-    <div className="w-full sm:w-[475px] lg:w-[485px] xl:w-[500px] report-panel rounded-2xl p-4 sm:p-5 space-y-3.5 text-slate-800 transition-all duration-300 relative">
-      
+    <div className="w-full sm:w-[485px] lg:w-[500px] xl:w-[520px] report-panel rounded-2xl p-4.5 sm:p-5.5 lg:p-6 space-y-4 sm:space-y-4.5 text-slate-800 transition-all duration-300 relative">
+
       {/* ── Dussehra Auspicious Marigold & Mango Leaves Crest (Top-Right of Upload Card) ── */}
       {isDussehraMode && (
         <div className="absolute -top-7 -right-3.5 sm:-right-4.5 z-20 pointer-events-none select-none transition-transform duration-300 hover:scale-110 drop-shadow-[0_8px_20px_rgba(245,158,11,0.5)]">
@@ -298,9 +300,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
       )}
 
       {/* ── Console Header ── */}
-      <div className={`flex items-center justify-between pb-2 border-b border-slate-100 ${
-        isDussehraMode ? 'pr-12 sm:pr-14' : isDiwaliMode ? 'px-8 sm:px-10' : ''
-      }`}>
+      <div className={`flex items-center justify-between pb-3 border-b border-slate-100 ${isDussehraMode ? 'pr-12 sm:pr-14' : isDiwaliMode ? 'px-8 sm:px-10' : ''
+        }`}>
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-50 to-indigo-100/80 border border-indigo-200/60 flex items-center justify-center text-indigo-600 shadow-2xs">
             <FileSpreadsheet className="w-4 h-4" />
@@ -327,23 +328,21 @@ const FileUpload: React.FC<FileUploadProps> = ({
       </div>
 
       {/* ── 7-Day Multi-Date Toggle Switch ── */}
-      <div className={`p-2.5 rounded-xl border transition-all duration-300 flex items-center justify-between ${
-        isSevenDayMode 
-          ? 'bg-gradient-to-r from-indigo-50/90 via-violet-50/70 to-indigo-50/90 border-indigo-200/80 shadow-2xs' 
-          : 'bg-slate-50/80 border-slate-200/60'
-      }`}>
+      <div className={`p-3 sm:p-3.5 rounded-xl border transition-all duration-300 flex items-center justify-between ${isSevenDayMode
+        ? 'bg-gradient-to-r from-indigo-50/90 via-violet-50/70 to-indigo-50/90 border-indigo-200/80 shadow-2xs'
+        : 'bg-slate-50/80 border-slate-200/60'
+        }`}>
         <div className="flex items-center gap-2.5">
-          <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
-            isSevenDayMode 
-              ? 'bg-indigo-600 text-white shadow-2xs' 
-              : 'bg-slate-200/80 text-slate-500'
-          }`}>
+          <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${isSevenDayMode
+            ? 'bg-indigo-600 text-white shadow-2xs'
+            : 'bg-slate-200/80 text-slate-500'
+            }`}>
             <Calendar className="w-3.5 h-3.5" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] font-black text-slate-800 leading-tight">
-                7-Day Multi-Date Report Mode
+                Multi-Date Detailed Report Mode
               </span>
               {isSevenDayMode && (
                 <span className="px-1.5 py-0.2 rounded-md bg-indigo-600 text-white text-[8px] font-black uppercase tracking-wider animate-pulse">
@@ -352,7 +351,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
               )}
             </div>
             <span className="text-[9px] text-slate-500 font-semibold block mt-0.5">
-              Detects dates from file names & generates ET date matrix
+              Detects dates from file names & generates detailed cross-date matrix
             </span>
           </div>
         </div>
@@ -360,15 +359,13 @@ const FileUpload: React.FC<FileUploadProps> = ({
         <button
           type="button"
           onClick={() => onToggleSevenDayMode(!isSevenDayMode)}
-          aria-label="Toggle 7 Days Report Mode"
-          className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-            isSevenDayMode ? 'bg-indigo-600' : 'bg-slate-300'
-          }`}
+          aria-label="Toggle Detailed Multi-Date Report Mode"
+          className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isSevenDayMode ? 'bg-indigo-600' : 'bg-slate-300'
+            }`}
         >
           <span
-            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-              isSevenDayMode ? 'translate-x-4' : 'translate-x-0'
-            }`}
+            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${isSevenDayMode ? 'translate-x-4' : 'translate-x-0'
+              }`}
           />
         </button>
       </div>
@@ -388,12 +385,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
       {/* ── Upload Zone OR File List + Action ── */}
       {selectedFiles.length === 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-3.5 sm:space-y-4">
           {/* Dropzone container */}
           <div
-            className={`report-dropzone h-[180px] sm:h-[195px] flex flex-col items-center justify-center text-center p-4 transition-all duration-300 relative group ${
-              dragActive ? 'report-dropzone--active' : ''
-            }`}
+            className={`report-dropzone h-[185px] sm:h-[195px] flex flex-col items-center justify-center text-center p-4.5 sm:p-5 transition-all duration-300 relative group ${dragActive ? 'report-dropzone--active' : ''
+              }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
@@ -407,9 +403,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               title="Click or drag CSV files to import"
             />
-            
+
             {/* Visual Icon Badge */}
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 group-hover:shadow-indigo-500/35 transition-all duration-300 mb-2">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 group-hover:shadow-indigo-500/35 transition-all duration-300 mb-2.5">
               <UploadCloud className="w-5 h-5" />
             </div>
 
@@ -417,19 +413,19 @@ const FileUpload: React.FC<FileUploadProps> = ({
               Drag & Drop Campaign CSVs
             </div>
 
-            <div className="text-[11px] text-slate-500 font-semibold mt-0.5">
+            <div className="text-[11px] text-slate-500 font-semibold mt-1">
               or <span className="text-indigo-600 font-bold group-hover:underline">browse from device</span>
               <span className="text-slate-400 font-normal ml-1">(unlimited files)</span>
             </div>
 
-            <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[9px] font-bold bg-white/90 text-slate-500 border border-slate-200/80 uppercase tracking-wider shadow-2xs">
+            <div className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-0.5 rounded-full text-[9px] font-bold bg-white/90 text-slate-500 border border-slate-200/80 uppercase tracking-wider shadow-2xs">
               <span className="text-slate-400">Auto-Detects:</span>
               <span className="font-extrabold text-slate-700">Dates (e.g. 4 OCT, 3RD) • SUBID • REV</span>
             </div>
           </div>
 
           {/* Feature Specs */}
-          <div className="grid grid-cols-3 gap-1.5 py-1">
+          <div className="grid grid-cols-3 gap-2 py-1.5">
             <div className="flex items-center justify-center gap-2 px-1">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
               <div className="text-left">
@@ -454,8 +450,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
           </div>
 
           {/* Usage tip note */}
-          <p className="text-[9px] text-slate-400 font-medium text-center leading-normal bg-slate-50/80 rounded-xl py-1.5 px-3 border border-slate-100/70">
-            🔒 In-memory processing. Drop files for multiple dates (e.g. 3RD, 4 OCT, 9 OCT) to view the 7-day ET matrix.
+          <p className="text-[9.5px] text-slate-400 font-medium text-center leading-normal bg-slate-50/80 rounded-xl py-2 px-3.5 border border-slate-100/70">
+            🔒 In-memory processing. Drop files for multiple dates to view detailed analysis.
           </p>
         </div>
       ) : (
@@ -485,7 +481,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                     className="hidden"
                   />
                 </label>
-                <button 
+                <button
                   onClick={() => setSelectedFiles([])}
                   className="text-[10px] font-bold text-slate-400 hover:text-red-500 transition-colors"
                 >
@@ -515,8 +511,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
           {/* Files List — Constrained height with internal scrollbar for unlimited files */}
           <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
             {sortedFileDateInfoList.map((item, idx) => (
-              <div 
-                key={`${item.file.name}-${idx}`} 
+              <div
+                key={`${item.file.name}-${idx}`}
                 className="flex items-center justify-between p-2 bg-slate-50/90 hover:bg-slate-100/80 border border-slate-100 rounded-xl transition-all duration-200"
               >
                 <div className="flex items-center gap-2 truncate flex-1 min-w-0 mr-2">
@@ -557,7 +553,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 <span>{uploadProgress}%</span>
               </div>
               <div className="h-1.5 bg-slate-100 w-full rounded-full overflow-hidden relative">
-                <div 
+                <div
                   className="h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 />
@@ -579,8 +575,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
             ) : (
               <>
                 <span>
-                  {isSevenDayMode || uniqueDetectedDates.length > 1
-                    ? 'Generate 7-Day ET Revenue Matrix'
+                  {uniqueDetectedDates.length > 1
+                    ? 'Compile Detailed Multi-Date Matrix'
                     : 'Compile & Open Report Viewer'}
                 </span>
                 <ArrowUpRight className="w-4 h-4" />
