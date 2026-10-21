@@ -11,9 +11,9 @@
 
 export const THEME_CONFIG = {
   /** Set to true to turn on Dussehra (Vijayadashami) theme */
-  isDussehraThemeEnabled: true,
+  isDussehraThemeEnabled: false,
   /** Set to true to turn on Diwali theme */
-  isDiwaliThemeEnabled: false,
+  isDiwaliThemeEnabled: true,
   /** Enable aerial skycrackers bursting at random intervals */
   enableSkycrackers: true,
 };
